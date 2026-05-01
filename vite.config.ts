@@ -12,7 +12,7 @@ export default defineConfig({
         name: 'Vision Trainer',
         short_name: 'VisionTrainer',
         description: 'Local-first perceptual learning platform for contrast sensitivity training.',
-        theme_color: '#101820',
+        theme_color: '#0c0c1d',
         background_color: '#101820',
         display: 'standalone',
         orientation: 'landscape',

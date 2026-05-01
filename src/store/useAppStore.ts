@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { applyTheme } from '../theme';
 import type {
   AssessmentResult,
   CalibrationProfile,
@@ -11,6 +12,7 @@ import type {
   ParadigmId,
   SessionLog,
   SessionType,
+  TabId,
   ThresholdEstimate,
   TrialRecord,
   UserProfile
@@ -35,6 +37,7 @@ import { createSessionLog } from '../session/sessionPlanner';
 
 type AppState = {
   ready: boolean;
+  currentTab: TabId;
   calibration: CalibrationProfile;
   profile: UserProfile;
   gamification: GamificationState;
@@ -52,6 +55,9 @@ type AppState = {
   updateDichopticSettings: (settings: DichopticSettings) => Promise<void>;
   setAudioMuted: (muted: boolean) => Promise<void>;
   setGoalType: (goal: GoalType) => Promise<void>;
+  setCurrentTab: (tab: TabId) => void;
+  setTheme: (theme: 'dark' | 'light') => Promise<void>;
+  setMonocularMode: (enabled: boolean, eye?: 'left' | 'right') => Promise<void>;
   refreshDashboard: () => Promise<void>;
 };
 
@@ -60,7 +66,10 @@ const defaultProfile: UserProfile = {
   createdAt: new Date().toISOString(),
   displayName: 'Local trainee',
   diagnosisType: 'unspecified',
-  targetCadencePerWeek: 3
+  targetCadencePerWeek: 3,
+  theme: 'dark',
+  monocularMode: false,
+  monocularEye: 'right',
 };
 
 const defaultGamification: GamificationState = {
@@ -84,6 +93,7 @@ const defaultDichopticSettings: DichopticSettings = {
 
 export const useAppStore = create<AppState>((set, get) => ({
   ready: false,
+  currentTab: 'home' as TabId,
   calibration: DEFAULT_CALIBRATION,
   profile: defaultProfile,
   gamification: defaultGamification,
@@ -109,6 +119,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const dashboard = await loadDashboardData();
     const syncedGamification = await syncBadges(gamification, dashboard);
     set({ calibration, profile, dashboard, gamification: syncedGamification, dichopticSettings, ready: true });
+    applyTheme(profile.theme ?? 'dark');
   },
 
   updateCalibration: async (profile) => {
@@ -189,6 +200,27 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setGoalType: async (goal) => {
     const profile = { ...get().profile, diagnosisType: goal };
+    await saveProfile(profile);
+    set({ profile });
+  },
+
+  setCurrentTab: (tab) => {
+    set({ currentTab: tab });
+  },
+
+  setTheme: async (theme) => {
+    applyTheme(theme);
+    const profile = { ...get().profile, theme };
+    await saveProfile(profile);
+    set({ profile });
+  },
+
+  setMonocularMode: async (enabled, eye) => {
+    const profile = {
+      ...get().profile,
+      monocularMode: enabled,
+      ...(eye ? { monocularEye: eye } : {}),
+    };
     await saveProfile(profile);
     set({ profile });
   },
