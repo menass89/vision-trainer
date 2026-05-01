@@ -1,0 +1,8 @@
+/Users/nassimlecornet/Projects/vision-trainer/src-tauri/target/release/deps/serde_with_macros-3c7dd9092baaa1e7.d: /Users/nassimlecornet/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.18.0/src/lib.rs /Users/nassimlecornet/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.18.0/src/apply.rs /Users/nassimlecornet/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.18.0/src/lazy_bool.rs /Users/nassimlecornet/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.18.0/src/utils.rs
+
+/Users/nassimlecornet/Projects/vision-trainer/src-tauri/target/release/deps/libserde_with_macros-3c7dd9092baaa1e7.dylib: /Users/nassimlecornet/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.18.0/src/lib.rs /Users/nassimlecornet/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.18.0/src/apply.rs /Users/nassimlecornet/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.18.0/src/lazy_bool.rs /Users/nassimlecornet/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.18.0/src/utils.rs
+
+/Users/nassimlecornet/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.18.0/src/lib.rs:
+/Users/nassimlecornet/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.18.0/src/apply.rs:
+/Users/nassimlecornet/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.18.0/src/lazy_bool.rs:
+/Users/nassimlecornet/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.18.0/src/utils.rs:
