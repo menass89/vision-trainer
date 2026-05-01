@@ -7,6 +7,7 @@ import type {
   EyeMode,
   GamificationAward,
   GamificationState,
+  GoalType,
   ParadigmId,
   SessionLog,
   SessionType,
@@ -16,6 +17,7 @@ import type {
 } from '../types';
 import { createBrowserCalibration, DEFAULT_CALIBRATION } from '../core/displayCalibration';
 import {
+  getDb,
   getLatestCalibration,
   getDichopticSettings,
   getGamification,
@@ -49,6 +51,7 @@ type AppState = {
   recordAssessment: (assessment: AssessmentResult) => Promise<void>;
   updateDichopticSettings: (settings: DichopticSettings) => Promise<void>;
   setAudioMuted: (muted: boolean) => Promise<void>;
+  setGoalType: (goal: GoalType) => Promise<void>;
   refreshDashboard: () => Promise<void>;
 };
 
@@ -94,7 +97,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   initialize: async () => {
-    await saveProfile(defaultProfile);
+    const db = await getDb();
+    const profile = (await db.get('profiles', defaultProfile.id)) ?? defaultProfile;
+    await saveProfile(profile);
     const calibration = (await getLatestCalibration()) ?? createBrowserCalibration();
     await saveCalibration(calibration);
     const gamification = (await getGamification()) ?? defaultGamification;
@@ -103,7 +108,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     await saveDichopticSettings(dichopticSettings);
     const dashboard = await loadDashboardData();
     const syncedGamification = await syncBadges(gamification, dashboard);
-    set({ calibration, dashboard, gamification: syncedGamification, dichopticSettings, ready: true });
+    set({ calibration, profile, dashboard, gamification: syncedGamification, dichopticSettings, ready: true });
   },
 
   updateCalibration: async (profile) => {
@@ -180,6 +185,12 @@ export const useAppStore = create<AppState>((set, get) => ({
     const updated = { ...get().gamification, audioMuted: muted, updatedAt: new Date().toISOString() };
     await saveGamification(updated);
     set({ gamification: updated });
+  },
+
+  setGoalType: async (goal) => {
+    const profile = { ...get().profile, diagnosisType: goal };
+    await saveProfile(profile);
+    set({ profile });
   },
 
   refreshDashboard: async () => {

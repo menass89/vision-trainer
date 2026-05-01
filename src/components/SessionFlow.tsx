@@ -1,15 +1,15 @@
-import { Activity, Glasses, PlayCircle } from 'lucide-react';
+import { Activity, PlayCircle } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { AssessmentResult, EyeMode, GamificationAward, ThresholdEstimate, TrialRecord } from '../types';
-import { planDichopticSession, planSession, type PlannedBlock } from '../session/sessionPlanner';
+import { planSession, type PlannedBlock } from '../session/sessionPlanner';
 import { useAppStore } from '../store/useAppStore';
 import { eyeModeLabel, oppositeEyeLabel } from '../utils/labels';
 import { Assessment } from './Assessment';
 import { ContrastTask } from './ContrastTask';
-import { DichopticSetup } from './DichopticSetup';
 
 export function SessionFlow() {
   const calibration = useAppStore((state) => state.calibration);
+  const profile = useAppStore((state) => state.profile);
   const gamification = useAppStore((state) => state.gamification);
   const dichopticSettings = useAppStore((state) => state.dichopticSettings);
   const activeSession = useAppStore((state) => state.activeSession);
@@ -19,7 +19,6 @@ export function SessionFlow() {
   const recordTrial = useAppStore((state) => state.recordTrial);
   const recordThreshold = useAppStore((state) => state.recordThreshold);
   const recordAssessment = useAppStore((state) => state.recordAssessment);
-  const updateDichopticSettings = useAppStore((state) => state.updateDichopticSettings);
   const [blocks, setBlocks] = useState<PlannedBlock[]>([]);
   const [selectedEyeMode, setSelectedEyeMode] = useState<EyeMode>('both');
   const [assessmentActive, setAssessmentActive] = useState(false);
@@ -31,24 +30,9 @@ export function SessionFlow() {
   );
 
   const start = async () => {
-    const plannedBlocks = planSession(completedSessions, dashboard.thresholds);
+    const goalType = profile.diagnosisType === 'unspecified' ? undefined : profile.diagnosisType;
+    const plannedBlocks = planSession(completedSessions, dashboard.thresholds, goalType);
     await startSession([...new Set(plannedBlocks.map((block) => block.paradigm))], selectedEyeMode, 'guided');
-    setBlocks(plannedBlocks);
-    setCompletionMessage(null);
-  };
-
-  const startDichoptic = async () => {
-    const ratio = contrastRatioForDichopticSession(completedSessions);
-    const settings = {
-      ...dichopticSettings,
-      dominantContrast: ratio.dominant,
-      nonDominantContrast: ratio.nonDominant,
-      setupCompleted: true,
-      updatedAt: new Date().toISOString()
-    };
-    await updateDichopticSettings(settings);
-    const plannedBlocks = planDichopticSession(completedSessions);
-    await startSession([...new Set(plannedBlocks.map((block) => block.paradigm))], 'both', 'dichoptic');
     setBlocks(plannedBlocks);
     setCompletionMessage(null);
   };
@@ -85,7 +69,6 @@ export function SessionFlow() {
   }
 
   if (!activeSession) {
-    const dichopticUnlocked = completedSessions >= 5;
     return (
       <section className="panel session-panel" aria-labelledby="session-heading">
         <div className="section-heading">
@@ -136,25 +119,10 @@ export function SessionFlow() {
             <Activity size={16} />
             Run Full Assessment
           </button>
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={() => void startDichoptic()}
-            disabled={!dichopticUnlocked || !dichopticSettings.setupCompleted}
-            title={!dichopticUnlocked ? 'Unlocks after 5 completed sessions' : undefined}
-          >
-            <Glasses size={16} />
-            Dichoptic Training
-          </button>
         </div>
         <p className="session-note">
           This 15-minute test measures your vision profile precisely. Run it before starting training and every 10 sessions to track improvement.
         </p>
-        {dichopticUnlocked ? (
-          <DichopticSetup settings={dichopticSettings} onChange={updateDichopticSettings} />
-        ) : (
-          <p className="session-note">Dichoptic training unlocks after 5 completed sessions.</p>
-        )}
       </section>
     );
   }
@@ -177,10 +145,4 @@ function nextRecommendedDate(): string {
   const date = new Date();
   date.setDate(date.getDate() + 2);
   return new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'short', day: 'numeric' }).format(date);
-}
-
-function contrastRatioForDichopticSession(completedSessions: number): { dominant: number; nonDominant: number } {
-  const step = Math.max(0, completedSessions - 5);
-  const dominant = Math.max(0.5, 0.8 - step * 0.05);
-  return { dominant, nonDominant: 1 - dominant };
 }

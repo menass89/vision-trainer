@@ -60,7 +60,7 @@ export function createContrastTrial(
       orientationDeg: condition.orientationDeg,
       contrast,
       phaseRad: Math.random() * Math.PI * 2,
-      durationMs: 60,
+      durationMs: condition.durationMs ?? 160,
       backgroundLuminanceCdM2: 40
     }
   };

@@ -41,8 +41,12 @@ export function pixelsPerCycle(spatialFrequencyCpd: number, profile: Calibration
   return pixelsPerDegree(profile) / spatialFrequencyCpd;
 }
 
-export function sigmaPixels(spatialFrequencyCpd: number, profile: CalibrationProfile): number {
-  return pixelsPerCycle(spatialFrequencyCpd, profile);
+export function sigmaPixels(
+  _spatialFrequencyCpd: number,
+  profile: CalibrationProfile,
+  gaborSizeDeg = 4
+): number {
+  return (gaborSizeDeg / 2) * pixelsPerDegree(profile);
 }
 
 export async function estimateRefreshRate(sampleFrames = 90): Promise<number> {

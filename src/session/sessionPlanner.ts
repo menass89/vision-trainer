@@ -1,7 +1,8 @@
-import type { EyeMode, ParadigmId, SessionLog, SessionType, ThresholdEstimate } from '../types';
+import type { EyeMode, GoalType, ParadigmId, SessionLog, SessionType, ThresholdEstimate } from '../types';
 import { conditionKey } from '../core/displayCalibration';
+import { planProgramSession } from '../programs/programPlanner';
 import { type ContrastCondition } from '../tasks/contrastDetection';
-import { PARADIGM_LIBRARY, getParadigmModule } from '../tasks/paradigmRegistry';
+import { getParadigmModule } from '../tasks/paradigmRegistry';
 
 export type PlannedBlock = {
   id: string;
@@ -34,44 +35,23 @@ export function createSessionLog(
   };
 }
 
-export function planSession(sessionsCompleted: number, thresholds: ThresholdEstimate[]): PlannedBlock[] {
-  const availableParadigms = paradigmsForSession(sessionsCompleted + 1);
-  const conditionPool = availableParadigms.flatMap((paradigm) => {
-    const module = getParadigmModule(paradigm);
-    const trainedSessions = sessionsOnParadigm(thresholds, paradigm);
-    const frequencyCount = Math.min(module.conditions.length, Math.max(1, trainedSessions + 1));
-    return module.conditions.slice(0, frequencyCount);
-  });
+export function planSession(
+  sessionsCompleted: number,
+  thresholds: ThresholdEstimate[],
+  goalType?: GoalType
+): PlannedBlock[] {
+  if (goalType) {
+    return planProgramSession(goalType, sessionsCompleted + 1, thresholds);
+  }
+
   const warmUp = getParadigmModule('contrast-detection').conditions[0];
   const blocks: PlannedBlock[] = [
     createBlock('Warm-up', { ...warmUp, trialsPerBlock: 10 }, 'warm-up')
   ];
-
-  let previousKey = blockConditionKey(blocks[0].condition);
-  for (const label of ['Training A', 'Training B', 'Training C']) {
-    const condition = selectDeficitCondition(thresholds, conditionPool, previousKey);
-    blocks.push(createBlock(label, { ...condition, trialsPerBlock: 32 }, 'training'));
-    previousKey = blockConditionKey(condition);
-  }
-
-  const assessmentCondition = selectDeficitCondition(thresholds, conditionPool, previousKey);
-  blocks.push(createBlock('Cool-down assessment', { ...assessmentCondition, trialsPerBlock: 16 }, 'assessment'));
-
+  const deficitCondition = selectDeficitCondition(thresholds, getParadigmModule('contrast-detection').conditions);
+  blocks.push(createBlock('Training A', { ...deficitCondition, trialsPerBlock: 40 }, 'training'));
+  blocks.push(createBlock('Assessment', { ...deficitCondition, trialsPerBlock: 16 }, 'assessment'));
   return blocks;
-}
-
-export function planDichopticSession(sessionsCompleted: number): PlannedBlock[] {
-  const baseCondition = {
-    ...getParadigmModule('dichoptic-contrast').conditions[Math.min(3, Math.max(0, sessionsCompleted - 5) % 4)],
-    trialsPerBlock: 28
-  };
-  const warmUp = { ...getParadigmModule('contrast-detection').conditions[0], trialsPerBlock: 8 };
-  return [
-    createBlock('Warm-up', warmUp, 'warm-up'),
-    createBlock('Two-eye Training A', baseCondition, 'training'),
-    createBlock('Two-eye Training B', { ...baseCondition, orientationDeg: 90 }, 'training'),
-    createBlock('Balance Check', { ...baseCondition, trialsPerBlock: 14 }, 'assessment')
-  ];
 }
 
 function createBlock(
@@ -88,32 +68,9 @@ function createBlock(
   };
 }
 
-function paradigmsForSession(sessionNumber: number): ParadigmId[] {
-  const milestones: Array<[number, ParadigmId]> = [
-    [1, 'contrast-detection'],
-    [6, 'lateral-masking'],
-    [11, 'spatial-masking'],
-    [16, 'backward-masking'],
-    [21, 'pedestal-discrimination']
-  ];
-  return milestones
-    .filter(([firstSession]) => sessionNumber >= firstSession)
-    .map(([, paradigm]) => paradigm);
-}
-
-function sessionsOnParadigm(thresholds: ThresholdEstimate[], paradigm: ParadigmId): number {
-  const sessionIds = new Set(
-    thresholds
-      .filter((threshold) => threshold.paradigm === paradigm)
-      .map((threshold) => threshold.sessionId)
-  );
-  return sessionIds.size;
-}
-
 function selectDeficitCondition(
   thresholds: ThresholdEstimate[],
-  conditions: ContrastCondition[],
-  previousKey?: string
+  conditions: ContrastCondition[]
 ): ContrastCondition {
   const latestByCondition = new Map<string, ThresholdEstimate>();
   for (const threshold of thresholds) {
@@ -123,7 +80,7 @@ function selectDeficitCondition(
   const ranked = [...conditions].sort((a, b) => {
     return deficitScore(b, latestByCondition) - deficitScore(a, latestByCondition);
   });
-  return ranked.find((condition) => blockConditionKey(condition) !== previousKey) ?? ranked[0];
+  return ranked[0];
 }
 
 function deficitScore(
@@ -156,11 +113,4 @@ function populationNormContrast(spatialFrequencyCpd: number, paradigm: ParadigmI
     'dichoptic-contrast': 1.5
   };
   return (baselineNorms.get(spatialFrequencyCpd) ?? 0.03) * paradigmMultiplier[paradigm];
-}
-
-export function activeParadigmsForSession(sessionsCompleted: number): ParadigmId[] {
-  const active = new Set(paradigmsForSession(sessionsCompleted + 1));
-  return PARADIGM_LIBRARY
-    .filter((module) => active.has(module.id))
-    .map((module) => module.id);
 }

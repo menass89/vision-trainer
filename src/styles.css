@@ -780,3 +780,58 @@ button {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+.goal-selection {
+  max-width: 720px;
+  margin: 2rem auto;
+  text-align: center;
+}
+
+.goal-subtitle {
+  color: var(--text-secondary, #999);
+  margin-bottom: 1.5rem;
+}
+
+.goal-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.goal-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem 1rem;
+  background: var(--surface-elevated, #1a1a2e);
+  border: 2px solid var(--border, #333);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+  color: inherit;
+  font: inherit;
+}
+
+.goal-card:hover {
+  border-color: var(--accent, #6366f1);
+  transform: translateY(-2px);
+}
+
+.goal-card h3 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.goal-card p {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #999);
+  margin: 0;
+  line-height: 1.4;
+}
+
+@media (max-width: 600px) {
+  .goal-cards {
+    grid-template-columns: 1fr;
+  }
+}

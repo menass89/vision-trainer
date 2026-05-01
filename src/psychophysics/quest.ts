@@ -19,7 +19,7 @@ export type QuestEstimate = {
 const DEFAULT_PARAMS: QuestParameters = {
   tGuess: -1,
   tGuessSd: 0.6,
-  pThreshold: 0.82,
+  pThreshold: 0.79,
   beta: 3.5,
   delta: 0.03,
   gamma: 0.5,

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Brain, WifiOff } from 'lucide-react';
 import { CalibrationPanel } from './components/CalibrationPanel';
 import { GamificationBar } from './components/GamificationBar';
+import { GoalSelection } from './components/GoalSelection';
 import { ModuleStatus } from './components/ModuleStatus';
 import { ProgressDashboard } from './components/ProgressDashboard';
 import { SessionFlow } from './components/SessionFlow';
@@ -13,9 +14,11 @@ export default function App() {
   const calibration = useAppStore((state) => state.calibration);
   const dashboard = useAppStore((state) => state.dashboard);
   const gamification = useAppStore((state) => state.gamification);
+  const profile = useAppStore((state) => state.profile);
   const initialize = useAppStore((state) => state.initialize);
   const updateCalibration = useAppStore((state) => state.updateCalibration);
   const setAudioMuted = useAppStore((state) => state.setAudioMuted);
+  const setGoalType = useAppStore((state) => state.setGoalType);
 
   useEffect(() => {
     void initialize();
@@ -26,6 +29,23 @@ export default function App() {
       <main className="loading-screen">
         <Brain size={32} />
         <span>Loading local training profile</span>
+      </main>
+    );
+  }
+
+  if (profile.diagnosisType === 'unspecified') {
+    return (
+      <main className="app-shell">
+        <header className="app-header">
+          <div className="brand-lockup">
+            <Brain size={28} />
+            <div>
+              <h1>Vision Trainer</h1>
+              <span>Open perceptual learning platform</span>
+            </div>
+          </div>
+        </header>
+        <GoalSelection onSelect={(goal) => void setGoalType(goal)} />
       </main>
     );
   }
