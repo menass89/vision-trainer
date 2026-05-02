@@ -185,3 +185,5 @@ export type AssessmentResult = {
   points: AssessmentPoint[];
   estimatedAcuityChange: string;
 };
+
+export type TimePhase = 'dawn' | 'afternoon' | 'night';
