@@ -157,12 +157,9 @@ a:focus-visible {
 }
 
 .panel { overflow: hidden; }
-.home-screen, .science-tab, .settings-screen { display: grid; gap: 28px; }
+.settings-screen { display: grid; gap: 28px; }
 
-.home-greeting,
-.goal-selection__heading,
-.science-tab__heading,
-.settings-screen__heading {
+.goal-selection__heading {
   margin: 0;
   color: var(--text-primary);
   font-family: 'DM Serif Display', Georgia, serif;
@@ -172,9 +169,7 @@ a:focus-visible {
   letter-spacing: -0.01em;
 }
 
-.home-subtitle,
-.goal-selection__subtitle,
-.science-tab__intro {
+.goal-selection__subtitle {
   margin: -8px 0 8px;
   color: var(--text-secondary);
   font-size: 15px;
@@ -408,7 +403,6 @@ a:focus-visible {
 }
 
 .eye-picker__btn--active { color: var(--text-primary); background: var(--gradient-primary); }
-.science-tab__heading, .settings-screen__heading { font-size: clamp(32px, 7vw, 46px); }
 .science-cards { display: grid; gap: 16px; }
 .science-card { padding: 22px; border-left: 3px solid var(--accent-primary-dim); }
 .science-card__title { margin: 0 0 8px; color: var(--text-primary); font-size: 17px; line-height: 1.25; }
@@ -425,7 +419,6 @@ a:focus-visible {
   text-decoration: none;
 }
 
-.science-tab__subheading { margin: 10px 0 -2px; color: var(--text-primary); font-size: 18px; }
 .settings-screen { gap: 14px; }
 .settings-group { display: grid; padding: 4px 16px; }
 
@@ -465,33 +458,6 @@ a:focus-visible {
   text-align: center;
 }
 
-.session-ready__hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
-.session-ready__hero svg {
-  color: var(--accent-primary);
-  opacity: 0.7;
-}
-
-.session-ready__hero h2 {
-  margin: 0;
-  color: var(--text-primary);
-  font-family: 'DM Serif Display', Georgia, serif;
-  font-size: 36px;
-  font-weight: 400;
-  line-height: 1.1;
-  letter-spacing: -0.01em;
-}
-
-.session-ready__hero p {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 16px;
-}
 
 .session-ready__eye {
   display: grid;
