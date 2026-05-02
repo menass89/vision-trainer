@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import type { AssessmentResult, EyeMode, GamificationAward, ThresholdEstimate, TrialRecord } from '../types';
 import { planSession, type PlannedBlock } from '../session/sessionPlanner';
 import { useAppStore } from '../store/useAppStore';
-import { SceneHeader } from './SceneHeader';
+import { SkyScene } from './SkyScene';
 import { AnimatedEye } from './AnimatedEye';
 import { eyeModeLabel, oppositeEyeLabel } from '../utils/labels';
 import { Assessment } from './Assessment';
@@ -75,7 +75,7 @@ export function SessionFlow() {
   if (!activeSession) {
     return (
       <section className="session-ready" aria-labelledby="session-heading">
-        <SceneHeader phase={timePhase} title="" />
+        <SkyScene phase={timePhase} className="session-ready__sky" />
         <div className="session-ready__body">
           <AnimatedEye phase={timePhase} />
           <h2 id="session-heading" className="session-ready__heading">Ready to Train</h2>
