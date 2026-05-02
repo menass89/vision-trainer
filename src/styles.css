@@ -1053,4 +1053,90 @@ a:focus-visible {
 
 .eye-glow--night { animation: glowCycleDark 20s ease-in-out infinite; }
 .eye-glow--dawn { animation: glowCycleLight 20s ease-in-out infinite; }
+
+/* ── Home Immersive ── */
+.home-immersive {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 80px);
+  margin: -1.5rem;
+  padding-bottom: 80px;
+}
+
+.home-immersive__sky {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.home-immersive__content {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20vh 24px 24px;
+}
+
+.home-immersive__greeting {
+  margin: 0;
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: clamp(32px, 8vw, 44px);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.home-immersive__subtitle {
+  margin: -12px 0 0;
+  font-size: 15px;
+  opacity: 0.7;
+}
+
+.home-session-card {
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+}
+
+.home-session-card__meta {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.home-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.home-stat {
+  display: grid;
+  gap: 4px;
+  padding: 16px 12px;
+  text-align: center;
+  background: var(--bg-surface);
+  border-radius: 16px;
+  backdrop-filter: var(--glass-blur);
+}
+
+.home-stat__value {
+  color: var(--accent-primary);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.home-stat__label {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (max-width: 639px) {
+  .home-immersive { margin: -1rem; }
+  .home-immersive__content { padding: 18vh 16px 16px; }
+}
 .eye-glow--afternoon { animation: glowCycleLight 20s ease-in-out infinite; }

@@ -74,6 +74,7 @@ export default function App() {
             profile={profile}
             dashboard={dashboard}
             gamification={gamification}
+            timePhase={timePhase}
             onStartSession={() => setCurrentTab('train')}
           />
         </div>
