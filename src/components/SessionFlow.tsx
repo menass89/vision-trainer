@@ -3,6 +3,8 @@ import { useMemo, useState } from 'react';
 import type { AssessmentResult, EyeMode, GamificationAward, ThresholdEstimate, TrialRecord } from '../types';
 import { planSession, type PlannedBlock } from '../session/sessionPlanner';
 import { useAppStore } from '../store/useAppStore';
+import { SceneHeader } from './SceneHeader';
+import { AnimatedEye } from './AnimatedEye';
 import { eyeModeLabel, oppositeEyeLabel } from '../utils/labels';
 import { Assessment } from './Assessment';
 import { ContrastTask } from './ContrastTask';
@@ -23,6 +25,8 @@ export function SessionFlow() {
   const [selectedEyeMode, setSelectedEyeMode] = useState<EyeMode>('both');
   const [assessmentActive, setAssessmentActive] = useState(false);
   const [completionMessage, setCompletionMessage] = useState<string | null>(null);
+
+  const timePhase = useAppStore((state) => state.timePhase);
 
   const completedSessions = useMemo(
     () => dashboard.sessions.filter((session) => session.status === 'completed').length,
@@ -70,59 +74,44 @@ export function SessionFlow() {
 
   if (!activeSession) {
     return (
-      <section className="panel session-panel" aria-labelledby="session-heading">
-        <div className="section-heading">
-          <Activity size={20} />
-          <div>
-            <h2 id="session-heading">Session Flow Manager</h2>
-            <span>Warm-up, training, assessment</span>
+      <section className="session-ready" aria-labelledby="session-heading">
+        <SceneHeader phase={timePhase} title="" />
+        <div className="session-ready__body">
+          <AnimatedEye phase={timePhase} />
+          <h2 id="session-heading" className="session-ready__heading">Ready to Train</h2>
+          <p className="session-ready__meta">Session {completedSessions + 1} · ~25 min</p>
+
+          <div className="eye-selector" aria-label="Eye mode">
+            {(['both', 'left', 'right'] as EyeMode[]).map((eyeMode) => (
+              <button
+                key={eyeMode}
+                type="button"
+                className={selectedEyeMode === eyeMode ? 'selected' : ''}
+                onClick={() => setSelectedEyeMode(eyeMode)}
+              >
+                {eyeModeLabel(eyeMode)}
+              </button>
+            ))}
           </div>
-        </div>
-        <div className="eye-selector" aria-label="Eye mode">
-          {(['both', 'left', 'right'] as EyeMode[]).map((eyeMode) => (
-            <button
-              key={eyeMode}
-              type="button"
-              className={selectedEyeMode === eyeMode ? 'selected' : ''}
-              onClick={() => setSelectedEyeMode(eyeMode)}
-            >
-              {eyeModeLabel(eyeMode)}
-            </button>
-          ))}
-        </div>
-        {selectedEyeMode !== 'both' ? (
-          <p className="session-note">
-            Cover your {oppositeEyeLabel(selectedEyeMode)} eye with your hand or an eye patch, then press Start.
-          </p>
-        ) : null}
-        <div className="session-summary">
-          <div>
-            <span>Completed sessions</span>
-            <strong>{completedSessions}</strong>
-          </div>
-          <div>
-            <span>Stored trials</span>
-            <strong>{dashboard.trials.length}</strong>
-          </div>
-          <div>
-            <span>Measurements taken</span>
-            <strong>{dashboard.thresholds.length}</strong>
-          </div>
-        </div>
-        {completionMessage ? <p className="completion-message">{completionMessage}</p> : null}
-        <button type="button" className="primary-button wide" onClick={() => void start()}>
-          <PlayCircle size={18} />
-          Start Guided Session
-        </button>
-        <div className="button-row session-actions">
-          <button type="button" className="secondary-button" onClick={() => setAssessmentActive(true)}>
+
+          {selectedEyeMode !== 'both' && (
+            <p className="session-note">
+              Cover your {oppositeEyeLabel(selectedEyeMode)} eye, then press Start.
+            </p>
+          )}
+
+          {completionMessage && <p className="completion-message">{completionMessage}</p>}
+
+          <button type="button" className="start-btn wide" onClick={() => void start()}>
+            <PlayCircle size={20} />
+            Begin Session
+          </button>
+
+          <button type="button" className="session-ready__assess" onClick={() => setAssessmentActive(true)}>
             <Activity size={16} />
             Run Full Assessment
           </button>
         </div>
-        <p className="session-note">
-          This 15-minute test measures your vision profile precisely. Run it before starting training and every 10 sessions to track improvement.
-        </p>
       </section>
     );
   }
