@@ -22,7 +22,6 @@ export default function App() {
   const initialize = useAppStore((s) => s.initialize);
   const setCurrentTab = useAppStore((s) => s.setCurrentTab);
   const setGoalType = useAppStore((s) => s.setGoalType);
-  const setTheme = useAppStore((s) => s.setTheme);
   const setMonocularMode = useAppStore((s) => s.setMonocularMode);
   const updateCalibration = useAppStore((s) => s.updateCalibration);
 
@@ -92,7 +91,6 @@ export default function App() {
             profile={profile}
             calibration={calibration}
             onUpdateCalibration={updateCalibration}
-            onChangeTheme={(theme) => setTheme(theme)}
             onChangeGoal={(goal) => void setGoalType(goal)}
             onResetProgress={() => {}}
           />
