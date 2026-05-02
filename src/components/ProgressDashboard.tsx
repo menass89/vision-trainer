@@ -1,6 +1,6 @@
-import type { DashboardSnapshot, EyeMode } from '../types';
-import { buildBeforeAfterCsf, buildLatestCsf, improvementPercent, type CsfPoint } from '../progress/csf';
-import { detailLevelLabel, eyeModeLabel } from '../utils/labels';
+import type { DashboardSnapshot } from '../types';
+import { buildBeforeAfterCsf, improvementPercent, type CsfPoint } from '../progress/csf';
+import { detailLevelLabel } from '../utils/labels';
 import { useAppStore } from '../store/useAppStore';
 import { SceneHeader } from './SceneHeader';
 
@@ -10,7 +10,6 @@ type ProgressDashboardProps = {
 
 export function ProgressDashboard({ dashboard }: ProgressDashboardProps) {
   const timePhase = useAppStore((s) => s.timePhase);
-  const latest = buildLatestCsf(dashboard.thresholds);
   const series = buildBeforeAfterCsf(dashboard.thresholds);
   const improvement = improvementPercent(dashboard.thresholds);
   const correctRate =
@@ -128,18 +127,6 @@ function CsfChart({ series, compact = false }: { series: { label: string; points
       </svg>
     </div>
   );
-}
-
-function buildPerEyeSeries(dashboard: DashboardSnapshot): Array<{ eyeMode: EyeMode; series: { label: string; points: CsfPoint[] }[] }> {
-  const sessionEyeMode = new Map(dashboard.sessions.map((session) => [session.id, session.eyeMode ?? 'both']));
-  const modes: EyeMode[] = ['both', 'left', 'right'];
-  return modes.flatMap((eyeMode) => {
-    const thresholds = dashboard.thresholds.filter((threshold) => (sessionEyeMode.get(threshold.sessionId) ?? 'both') === eyeMode);
-    if (thresholds.length === 0) {
-      return [];
-    }
-    return [{ eyeMode, series: buildBeforeAfterCsf(thresholds) }];
-  });
 }
 
 function sessionStreak(sessions: DashboardSnapshot['sessions']): number {
