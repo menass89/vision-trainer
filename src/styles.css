@@ -448,21 +448,16 @@ a:focus-visible {
 .calibration-panel, .dashboard-panel, .task-panel { padding: 20px; }
 
 .session-ready {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  gap: 0;
   min-height: calc(100vh - 80px);
-  margin: -1.5rem;
-  padding-top: 20px;
-  padding-bottom: 100px;
+  margin: 0 -1.5rem;
+  background: var(--scene-body);
 }
 
-.session-ready__sky {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
+.session-ready .scene-header {
+  margin: 0;
+  width: 100%;
 }
 
 
@@ -637,17 +632,6 @@ a:focus-visible {
   font-weight: 500;
   transition: background 350ms cubic-bezier(0.22, 1, 0.36, 1),
               color 350ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.session-ready .eye-selector button {
-  background: rgba(255, 255, 255, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.session-ready .eye-selector button.selected {
-  border-color: transparent;
 }
 
 .eye-selector button.selected,
@@ -1131,44 +1115,31 @@ a:focus-visible {
 @media (max-width: 639px) {
   .home-immersive { margin: -1rem; }
   .home-immersive__content { padding: 18vh 16px 16px; }
-  .session-ready { margin: -1rem; }
-  .session-ready__body { padding: 0 16px; }
+  .session-ready { margin: 0 -1rem; }
 }
 
 .session-ready__body {
-  position: relative;
-  z-index: 4;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 0 24px;
+  gap: 16px;
+  padding: 24px 20px;
   text-align: center;
+  background: var(--scene-body);
 }
 
 .session-ready__heading {
-  margin: 4px 0 0;
+  margin: 0;
   font-family: 'DM Serif Display', Georgia, serif;
   font-size: 32px;
   font-weight: 400;
   line-height: 1.1;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
 }
 
 .session-ready__meta {
   margin: 0;
   color: var(--text-secondary);
   font-size: 15px;
-}
-
-.session-ready .eye-selector {
-  margin-top: 4px;
-}
-
-.session-ready .start-btn {
-  margin-top: 4px;
-  width: 100%;
-  max-width: 320px;
 }
 .eye-glow--afternoon { animation: glowCycleLight 20s ease-in-out infinite; }
 
