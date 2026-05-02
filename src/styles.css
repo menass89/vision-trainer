@@ -1004,3 +1004,53 @@ a:focus-visible {
   }
 }
 .sun--afternoon { top: 8%; }
+
+/* ── Animated Eye ── */
+.eye-wrap {
+  position: relative;
+  z-index: 1;
+  width: 140px;
+  height: 65px;
+  margin-bottom: 28px;
+}
+
+.eye-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.eye-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: -1;
+  width: 170px;
+  height: 90px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  filter: blur(35px);
+  opacity: 0.4;
+}
+
+@keyframes glowCycleDark {
+  0%, 17.5%   { background: rgba(75, 130, 200, 0.15); }
+  18.4%, 37.5% { background: rgba(75, 155, 75, 0.15); }
+  38.4%, 57.5% { background: rgba(180, 140, 50, 0.15); }
+  58.4%, 77.5% { background: rgba(125, 90, 175, 0.15); }
+  78.4%, 97.5% { background: rgba(60, 150, 135, 0.15); }
+  98.4%, 100%  { background: rgba(75, 130, 200, 0.15); }
+}
+
+@keyframes glowCycleLight {
+  0%, 17.5%   { background: rgba(75, 130, 200, 0.1); }
+  18.4%, 37.5% { background: rgba(75, 155, 75, 0.1); }
+  38.4%, 57.5% { background: rgba(180, 140, 50, 0.1); }
+  58.4%, 77.5% { background: rgba(125, 90, 175, 0.1); }
+  78.4%, 97.5% { background: rgba(60, 150, 135, 0.1); }
+  98.4%, 100%  { background: rgba(75, 130, 200, 0.1); }
+}
+
+.eye-glow--night { animation: glowCycleDark 20s ease-in-out infinite; }
+.eye-glow--dawn { animation: glowCycleLight 20s ease-in-out infinite; }
+.eye-glow--afternoon { animation: glowCycleLight 20s ease-in-out infinite; }
