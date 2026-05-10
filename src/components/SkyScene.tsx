@@ -19,7 +19,11 @@ export function SkyScene({ phase, className = '' }: SkySceneProps) {
   }[phase];
 
   return (
-    <div className={`sky-scene sky-scene--${phase} ${className}`} style={{ background: skyGradient }}>
+    <div
+      className={`sky-scene sky-scene--${phase} ${className}`}
+      style={{ background: skyGradient }}
+      aria-hidden="true"
+    >
       {phase === 'night' && (
         <>
           <div className="star" style={{ top: '15%', left: '20%' }} />

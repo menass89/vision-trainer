@@ -96,7 +96,7 @@ function sessionStreak(sessions: DashboardSnapshot['sessions']): number {
   return streak;
 }
 
-type DayStatus = 'done' | 'today' | 'future';
+type DayStatus = 'done' | 'today' | 'missed' | 'future';
 type WeekDay = { label: string; status: DayStatus };
 
 function buildWeekDays(sessions: DashboardSnapshot['sessions']): WeekDay[] {
@@ -115,7 +115,14 @@ function buildWeekDays(sessions: DashboardSnapshot['sessions']): WeekDay[] {
     d.setDate(monday.getDate() + i);
     const dateStr = localDateKey(d);
     const todayStr = localDateKey(today);
-    const status: DayStatus = dateStr === todayStr ? 'today' : completedDates.has(dateStr) ? 'done' : 'future';
+    const status: DayStatus =
+      dateStr === todayStr
+        ? 'today'
+        : completedDates.has(dateStr)
+          ? 'done'
+          : dateStr < todayStr
+            ? 'missed'
+            : 'future';
     return { label, status };
   });
 }

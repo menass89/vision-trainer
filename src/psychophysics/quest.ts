@@ -46,6 +46,15 @@ export class QuestStaircase {
     if (!(tGuessSd > 0)) {
       throw new Error('Invalid QUEST params: require tGuessSd > 0.');
     }
+    if (!(beta > 0)) {
+      throw new Error('Invalid QUEST params: require beta > 0.');
+    }
+    if (!(gamma >= 0 && gamma < 1)) {
+      throw new Error('Invalid QUEST params: require 0 <= gamma < 1.');
+    }
+    if (!(delta >= 0 && delta < 1)) {
+      throw new Error('Invalid QUEST params: require 0 <= delta < 1.');
+    }
     if (!(grain > 0)) {
       throw new Error('Invalid QUEST params: require grain > 0.');
     }
@@ -65,6 +74,11 @@ export class QuestStaircase {
 
     const gridMin = Math.max(tGuess - range / 2, CLAMP_MIN);
     const gridMax = Math.min(tGuess + range / 2, CLAMP_MAX);
+    if (gridMin > gridMax) {
+      throw new Error(
+        'Invalid QUEST params: guessed threshold range does not overlap supported intensity bounds.'
+      );
+    }
     this.grid = [];
     this.posterior = [];
     for (let x = gridMin; x <= gridMax; x += grain) {

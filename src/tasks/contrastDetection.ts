@@ -85,7 +85,7 @@ export function buildTrialRecord(
       plan.condition.spatialFrequencyCpd,
       plan.condition.orientationDeg,
       plan.condition.paradigm,
-      plan.condition.durationMs,
+      plan.stimulus.durationMs,
       plan.stimulus.gaborSizeDeg
     ),
     trialIndex: plan.trialIndex,

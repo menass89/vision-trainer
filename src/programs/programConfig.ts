@@ -149,7 +149,14 @@ export function getProgramConfig(goalType: GoalType): ProgramConfig {
   return config;
 }
 
+function assertValidSessionNumber(sessionNumber: number): void {
+  if (!Number.isFinite(sessionNumber) || !Number.isInteger(sessionNumber) || sessionNumber < 1) {
+    throw new Error(`Invalid session number: ${sessionNumber}`);
+  }
+}
+
 export function getPhaseForSession(config: ProgramConfig, sessionNumber: number): ProgramPhase {
+  assertValidSessionNumber(sessionNumber);
   if (config.phases.length === 0) {
     throw new Error(`Program ${config.goalType} has no phases`);
   }
@@ -165,6 +172,7 @@ export function getPhaseForSession(config: ProgramConfig, sessionNumber: number)
 }
 
 export function computeDurationMs(config: ProgramConfig, sessionNumber: number): number {
+  assertValidSessionNumber(sessionNumber);
   const reductions = Math.floor(Math.max(0, sessionNumber - 2) / 3);
   return Math.max(config.durationFloorMs, config.durationStartMs - reductions * config.durationStepMs);
 }

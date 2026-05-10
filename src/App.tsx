@@ -70,8 +70,8 @@ export default function App() {
     if (currentTab === 'train' && tab !== 'train') {
       try {
         await abandonSession();
-      } catch {
-        return;
+      } catch (err) {
+        console.error('Failed to abandon session', err);
       }
     }
     setCurrentTab(tab);

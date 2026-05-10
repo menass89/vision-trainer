@@ -190,6 +190,7 @@ a:focus-visible {
 
 .streak-dot--done { background: var(--gradient-primary); box-shadow: var(--shadow-streak-done); }
 .streak-dot--today { background: var(--gradient-secondary); box-shadow: var(--shadow-streak-today); }
+.streak-dot--missed,
 .streak-dot--future { color: var(--text-muted); background: var(--bg-streak-future); border-color: var(--border-streak-future); }
 
 .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }

@@ -140,6 +140,14 @@ function selectDeficitCondition(
     }
   }
 
+  const expectedContrast = (condition: ContrastCondition): number =>
+    (new Map<number, number>([
+      [1.5, 0.018],
+      [3, 0.012],
+      [6, 0.016],
+      [12, 0.04]
+    ]).get(condition.spatialFrequencyCpd) ?? 0.03);
+
   let worst: ContrastCondition | null = null;
   let worstScore = -Infinity;
   for (const condition of conditions) {
@@ -158,7 +166,9 @@ function selectDeficitCondition(
     );
     const legacyKey = conditionKey(condition.spatialFrequencyCpd, condition.orientationDeg, condition.paradigm);
     const threshold = latestByKey.get(key) ?? latestByKey.get(durationLegacyKey) ?? latestByKey.get(legacyKey);
-    const score = threshold ? threshold.thresholdContrast : 1;
+    const expected = expectedContrast(condition);
+    const observed = threshold?.thresholdContrast ?? expected * 2;
+    const score = observed / expected;
     if (score > worstScore) {
       worstScore = score;
       worst = condition;
