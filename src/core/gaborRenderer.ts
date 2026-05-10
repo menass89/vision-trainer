@@ -149,6 +149,9 @@ export class GaborRenderer {
   private readonly gl: WebGL2RenderingContext;
   private readonly program: WebGLProgram;
   private readonly uniforms: Record<string, WebGLUniformLocation>;
+  private vao: WebGLVertexArrayObject | null = null;
+  private buffer: WebGLBuffer | null = null;
+  private disposed = false;
 
   constructor(private readonly canvas: HTMLCanvasElement) {
     const gl = canvas.getContext('webgl2', { antialias: false, depth: false, stencil: false });
@@ -249,14 +252,33 @@ export class GaborRenderer {
 
   private createFullScreenTriangle(): void {
     const gl = this.gl;
-    const vao = gl.createVertexArray();
-    const buffer = gl.createBuffer();
+    this.vao = gl.createVertexArray();
+    this.buffer = gl.createBuffer();
     const position = gl.getAttribLocation(this.program, 'a_position');
-    gl.bindVertexArray(vao);
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bindVertexArray(this.vao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     gl.enableVertexAttribArray(position);
     gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+  }
+
+  dispose(): void {
+    if (this.disposed) {
+      return;
+    }
+    this.disposed = true;
+    const gl = this.gl;
+    if (this.vao) {
+      gl.deleteVertexArray(this.vao);
+      this.vao = null;
+    }
+    if (this.buffer) {
+      gl.deleteBuffer(this.buffer);
+      this.buffer = null;
+    }
+    gl.deleteProgram(this.program);
+    const loseContext = gl.getExtension('WEBGL_lose_context');
+    loseContext?.loseContext();
   }
 }
 

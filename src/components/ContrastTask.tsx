@@ -33,6 +33,7 @@ export function ContrastTask({ session, blocks, calibration, audioMuted, onTrial
   const responseStartedAt = useRef(0);
   const runningRef = useRef(false);
   const submittingRef = useRef(false);
+  const savedThresholdsRef = useRef<Map<string, ThresholdEstimate>>(new Map());
   const [saveError, setSaveError] = useState<string | null>(null);
   const [blockIndex, setBlockIndex] = useState(0);
   const [trialIndex, setTrialIndex] = useState(0);
@@ -191,32 +192,35 @@ export function ContrastTask({ session, blocks, calibration, audioMuted, onTrial
     if (!block) {
       return;
     }
-    const estimate = staircaseRef.current.estimate();
-    const resolvedDurationMs = plan?.stimulus.durationMs ?? block.condition.durationMs ?? 160;
-    const resolvedGaborSizeDeg = plan?.stimulus.gaborSizeDeg ?? block.condition.gaborSizeDeg ?? 4;
-    const threshold: ThresholdEstimate = {
-      id: `threshold-${uuid()}`,
-      sessionId: session.id,
-      blockId: block.id,
-      conditionKey: conditionKey(
-        block.condition.spatialFrequencyCpd,
-        block.condition.orientationDeg,
-        block.paradigm,
-        resolvedDurationMs,
-        resolvedGaborSizeDeg
-      ),
-      paradigm: block.paradigm,
-      spatialFrequencyCpd: block.condition.spatialFrequencyCpd,
-      orientationDeg: block.condition.orientationDeg,
-      thresholdContrast: contrastFromLog10(estimate.thresholdLog10),
-      thresholdLog10: estimate.thresholdLog10,
-      ciLow: contrastFromLog10(estimate.ciLowLog10),
-      ciHigh: contrastFromLog10(estimate.ciHighLog10),
-      trialCount: staircaseRef.current.trialCount(),
-      lapseRate: staircaseRef.current.lapseRate(),
-      createdAt: new Date().toISOString()
-    };
-    await onThreshold(threshold);
+    if (!savedThresholdsRef.current.has(block.id)) {
+      const estimate = staircaseRef.current.estimate();
+      const resolvedDurationMs = plan?.stimulus.durationMs ?? block.condition.durationMs ?? 160;
+      const resolvedGaborSizeDeg = plan?.stimulus.gaborSizeDeg ?? block.condition.gaborSizeDeg ?? 4;
+      const threshold: ThresholdEstimate = {
+        id: `threshold-${uuid()}`,
+        sessionId: session.id,
+        blockId: block.id,
+        conditionKey: conditionKey(
+          block.condition.spatialFrequencyCpd,
+          block.condition.orientationDeg,
+          block.paradigm,
+          resolvedDurationMs,
+          resolvedGaborSizeDeg
+        ),
+        paradigm: block.paradigm,
+        spatialFrequencyCpd: block.condition.spatialFrequencyCpd,
+        orientationDeg: block.condition.orientationDeg,
+        thresholdContrast: contrastFromLog10(estimate.thresholdLog10),
+        thresholdLog10: estimate.thresholdLog10,
+        ciLow: contrastFromLog10(estimate.ciLowLog10),
+        ciHigh: contrastFromLog10(estimate.ciHighLog10),
+        trialCount: staircaseRef.current.trialCount(),
+        lapseRate: staircaseRef.current.lapseRate(),
+        createdAt: new Date().toISOString()
+      };
+      await onThreshold(threshold);
+      savedThresholdsRef.current.set(block.id, threshold);
+    }
 
     if (blockIndex + 1 >= blocks.length) {
       setPhase('complete');

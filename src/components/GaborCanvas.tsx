@@ -27,10 +27,13 @@ export const GaborCanvas = forwardRef<GaborCanvasHandle, GaborCanvasProps>(({ ca
     abortRef.current = controller;
 
     setError(null);
+    rendererRef.current?.dispose();
+    rendererRef.current = null;
     try {
       rendererRef.current = new GaborRenderer(canvas);
       rendererRef.current.clear(calibration);
     } catch (cause) {
+      rendererRef.current = null;
       setError(cause instanceof Error ? cause.message : 'Unable to initialize stimulus renderer');
     }
 
@@ -49,6 +52,8 @@ export const GaborCanvas = forwardRef<GaborCanvasHandle, GaborCanvasProps>(({ ca
       abortRef.current = null;
       observer.disconnect();
       window.removeEventListener('resize', resize);
+      rendererRef.current?.dispose();
+      rendererRef.current = null;
     };
   }, [calibration]);
 

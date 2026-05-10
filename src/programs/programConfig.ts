@@ -146,7 +146,17 @@ export function getProgramConfig(goalType: GoalType): ProgramConfig {
   if (!config) {
     throw new Error(`Unknown goal type: ${goalType}`);
   }
-  return config;
+  return {
+    ...config,
+    spatialFrequencies: [...config.spatialFrequencies],
+    orientations: [...config.orientations],
+    phases: config.phases.map((phase) => ({
+      ...phase,
+      sessionRange: [...phase.sessionRange] as [number, number],
+      paradigms: [...phase.paradigms],
+      paradigmWeights: { ...phase.paradigmWeights }
+    }))
+  };
 }
 
 function assertValidSessionNumber(sessionNumber: number): void {
