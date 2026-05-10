@@ -43,6 +43,10 @@ export function createContrastTrial(
   const intensityLog10 = catchTrial ? -0.2 : staircase.nextIntensity();
   const contrast = contrastFromLog10(intensityLog10);
   const targetInterval: TrialInterval = Math.random() < 0.5 ? 1 : 2;
+  const durationMs =
+    typeof condition.durationMs === 'number' && Number.isFinite(condition.durationMs) && condition.durationMs > 0
+      ? condition.durationMs
+      : 160;
   return {
     blockId,
     condition,
@@ -55,8 +59,8 @@ export function createContrastTrial(
       orientationDeg: condition.orientationDeg,
       contrast,
       phaseRad: Math.random() * Math.PI * 2,
-      durationMs: condition.durationMs ?? 160,
-      gaborSizeDeg: condition.gaborSizeDeg,
+      durationMs,
+      gaborSizeDeg: condition.gaborSizeDeg ?? 4,
       backgroundLuminanceCdM2: 40
     }
   };

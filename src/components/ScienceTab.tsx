@@ -9,11 +9,11 @@ const SECTIONS = [
   },
   {
     title: 'How the Exercises Work',
-    body: 'You\'ll see faint striped patterns appear on screen and choose which side they\'re on. Some have distracting patterns around them to make it harder. This trains your brain to filter out visual noise and focus on what matters — the same skill you use when reading small text or spotting a ball in flight.',
+    body: 'You\'ll see faint striped patterns appear on screen and choose which side they\'re on. Some have distracting patterns around them to make it harder. The aim is to train your brain to filter out visual noise — a process related to the perceptual skills used when reading small text. Whether this transfers to other tasks (like sports) depends on the individual and the training context.',
   },
   {
     title: 'It Gets Harder as You Improve',
-    body: 'The app tracks every answer and automatically adjusts difficulty. Get a few right? The next one is a little harder. Struggling? It eases off. You\'re always training at the edge of what you can see — that\'s where improvement happens fastest.',
+    body: 'The app tracks every answer and automatically adjusts difficulty. Get a few right? The next one is a little harder. Struggling? It eases off. The intent is to keep training near your perceptual threshold, which research suggests is where perceptual learning is most efficient.',
   },
   {
     title: 'What Changes in Practice',
@@ -52,7 +52,7 @@ export function ScienceTab() {
       <SceneHeader phase={timePhase} title="The Science" />
 
       <p className="science-screen__intro">
-        Built on peer-reviewed perceptual learning research. In clinical studies, participants improved by one or more lines on standard eye charts — results vary by condition and individual.
+        Built on peer-reviewed perceptual learning research. In specific clinical cohorts (notably amblyopia and presbyopia trials cited below), participants gained one or more lines on standard eye charts. This app is not a medical device and has not itself been clinically validated; individual results are expected to vary.
       </p>
 
       <div className="science-cards">
