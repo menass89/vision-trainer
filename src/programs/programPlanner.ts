@@ -48,7 +48,13 @@ export function planProgramSession(
         availableConditions = paradigmConditions;
       }
       const condition = selectDeficitCondition(thresholds, availableConditions);
-      blocks.push(createPlannedBlock(`Training ${String.fromCharCode(65 + blockIndex)}`, condition, 'training'));
+      blocks.push(
+        createPlannedBlock(
+          `Training ${String.fromCharCode(65 + blockIndex)}`,
+          { ...condition, trialsPerBlock: config.trialsPerBlock },
+          'training'
+        )
+      );
       availableConditions = availableConditions.filter((candidate) => candidate !== condition);
       blockIndex += 1;
     }

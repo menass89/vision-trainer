@@ -47,7 +47,7 @@ export function createContrastTrial(
   const gaborSizeDeg = resolvePositiveNumber(condition.gaborSizeDeg, 4);
   return {
     blockId,
-    condition,
+    condition: { ...condition, durationMs, gaborSizeDeg },
     trialIndex,
     targetInterval,
     intensityLog10,

@@ -28,7 +28,7 @@ export function createLateralMaskingTrial(
 
   return {
     blockId,
-    condition,
+    condition: { ...condition, durationMs, gaborSizeDeg },
     trialIndex,
     targetInterval,
     intensityLog10,

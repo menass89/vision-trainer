@@ -26,19 +26,21 @@ export function createPedestalDiscriminationTrial(
   const intensityLog10 = catchTrial ? -0.7 : staircase.nextIntensity();
   const increment = contrastFromLog10(intensityLog10) * 0.2;
   const targetInterval: TrialInterval = Math.random() < 0.5 ? 1 : 2;
+  const durationMs = resolvePositiveNumber(condition.durationMs, 80);
+  const gaborSizeDeg = resolvePositiveNumber(condition.gaborSizeDeg, 4);
   const comparisonStimulus: GaborStimulus = {
     spatialFrequencyCpd: condition.spatialFrequencyCpd,
     orientationDeg: condition.orientationDeg,
     contrast: PEDESTAL_CONTRAST,
     phaseRad: Math.random() * Math.PI * 2,
-    durationMs: resolvePositiveNumber(condition.durationMs, 80),
-    gaborSizeDeg: resolvePositiveNumber(condition.gaborSizeDeg, 4),
+    durationMs,
+    gaborSizeDeg,
     backgroundLuminanceCdM2: 40
   };
 
   return {
     blockId,
-    condition,
+    condition: { ...condition, durationMs, gaborSizeDeg },
     trialIndex,
     targetInterval,
     intensityLog10,

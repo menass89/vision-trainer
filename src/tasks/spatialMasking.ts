@@ -23,10 +23,12 @@ export function createSpatialMaskingTrial(
   const catchTrial = Math.random() < 0.05;
   const intensityLog10 = catchTrial ? -0.2 : staircase.nextIntensity();
   const targetInterval: TrialInterval = Math.random() < 0.5 ? 1 : 2;
+  const durationMs = resolvePositiveNumber(condition.durationMs, 70);
+  const gaborSizeDeg = resolvePositiveNumber(condition.gaborSizeDeg, 4);
 
   return {
     blockId,
-    condition,
+    condition: { ...condition, durationMs, gaborSizeDeg },
     trialIndex,
     targetInterval,
     intensityLog10,
@@ -36,8 +38,8 @@ export function createSpatialMaskingTrial(
       orientationDeg: condition.orientationDeg,
       contrast: contrastFromLog10(intensityLog10),
       phaseRad: Math.random() * Math.PI * 2,
-      durationMs: resolvePositiveNumber(condition.durationMs, 70),
-      gaborSizeDeg: resolvePositiveNumber(condition.gaborSizeDeg, 4),
+      durationMs,
+      gaborSizeDeg,
       backgroundLuminanceCdM2: 40,
       mask: {
         enabled: true,

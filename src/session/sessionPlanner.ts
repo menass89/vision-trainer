@@ -87,6 +87,11 @@ function selectDeficitCondition(
     }
   }
 
+  const unseen = conditions.filter((condition) => deficitScore(condition, latestByCondition) < 0);
+  if (unseen.length > 0) {
+    return unseen[Math.floor(Math.random() * unseen.length)];
+  }
+
   const ranked = [...conditions].sort((a, b) => {
     return deficitScore(b, latestByCondition) - deficitScore(a, latestByCondition);
   });

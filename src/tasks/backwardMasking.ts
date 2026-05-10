@@ -27,19 +27,20 @@ export function createBackwardMaskingTrial(
   const intensityLog10 = catchTrial || trialIndex === 0 ? Math.log10(STARTING_ISI_MS / 1000) : staircase.nextIntensity();
   const isiMs = Math.max(MIN_ISI_MS, Math.round(Math.pow(10, intensityLog10) * 1000));
   const targetInterval: TrialInterval = Math.random() < 0.5 ? 1 : 2;
+  const gaborSizeDeg = resolvePositiveNumber(condition.gaborSizeDeg, 4);
   const baseStimulus: GaborStimulus = {
     spatialFrequencyCpd: condition.spatialFrequencyCpd,
     orientationDeg: condition.orientationDeg,
     contrast: 0.18,
     phaseRad: Math.random() * Math.PI * 2,
     durationMs: 50,
-    gaborSizeDeg: resolvePositiveNumber(condition.gaborSizeDeg, 4),
+    gaborSizeDeg,
     backgroundLuminanceCdM2: 40
   };
 
   return {
     blockId,
-    condition,
+    condition: { ...condition, gaborSizeDeg },
     trialIndex,
     targetInterval,
     intensityLog10,
