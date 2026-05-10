@@ -40,6 +40,7 @@ export function SettingsScreen({
           <button
             type="button"
             className="setting-row__action"
+            aria-label={`Training Program: ${goalLabel}`}
             onClick={() => {
               const goals: GoalType[] = ['myopia', 'presbyopia', 'sports-vision'];
               const idx = goals.indexOf(profile.diagnosisType as GoalType);

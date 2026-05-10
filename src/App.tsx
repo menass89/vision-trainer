@@ -19,6 +19,7 @@ export default function App() {
   const dashboard = useAppStore((s) => s.dashboard);
   const gamification = useAppStore((s) => s.gamification);
   const currentTab = useAppStore((s) => s.currentTab);
+  const activeSession = useAppStore((s) => s.activeSession);
   const initialize = useAppStore((s) => s.initialize);
   const setCurrentTab = useAppStore((s) => s.setCurrentTab);
   const setGoalType = useAppStore((s) => s.setGoalType);
@@ -116,7 +117,11 @@ export default function App() {
           </div>
         )}
       </section>
-      <TabBar currentTab={currentTab} onTabChange={onTabChange} />
+      <TabBar
+        currentTab={currentTab}
+        onTabChange={onTabChange}
+        hidden={currentTab === 'train' && activeSession !== null}
+      />
     </main>
   );
 }

@@ -4,6 +4,7 @@ import type { TabId } from '../types';
 type TabBarProps = {
   currentTab: TabId;
   onTabChange: (tab: TabId) => void;
+  hidden?: boolean;
 };
 
 const TABS: Array<{ id: TabId; icon: typeof Home; label: string }> = [
@@ -14,7 +15,9 @@ const TABS: Array<{ id: TabId; icon: typeof Home; label: string }> = [
   { id: 'settings', icon: Settings, label: 'Settings' },
 ];
 
-export function TabBar({ currentTab, onTabChange }: TabBarProps) {
+export function TabBar({ currentTab, onTabChange, hidden = false }: TabBarProps) {
+  if (hidden) return null;
+
   return (
     <nav className="tab-bar" aria-label="Main navigation">
       {TABS.map(({ id, icon: Icon, label }) => (

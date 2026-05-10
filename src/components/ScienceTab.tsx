@@ -5,7 +5,7 @@ import { SceneHeader } from './SceneHeader';
 const SECTIONS = [
   {
     title: 'Your Brain Can Learn to See Better',
-    body: 'Vision isn\'t just about your eyes — most of the work happens in your brain. With the right kind of practice, your brain gets better at picking up faint details it used to miss. Scientists call this "perceptual learning." It works at any age, even if your eyesight has been the same for years.',
+    body: 'Vision isn\'t just about your eyes — most of the work happens in your brain. With the right kind of practice, your brain gets better at picking up faint details it used to miss. Scientists call this "perceptual learning." Studies have shown gains across a range of ages, including in adults whose eyesight had been stable for years.',
   },
   {
     title: 'How the Exercises Work',
@@ -17,7 +17,7 @@ const SECTIONS = [
   },
   {
     title: 'What Changes in Practice',
-    body: 'People in clinical studies read one or more extra lines on the eye chart after 30 sessions. They also reported clearer everyday vision — sharper reading, better night driving, faster reaction times. These aren\'t temporary effects. The brain changes stick.',
+    body: 'In published trials, participants with conditions like amblyopia or age-related farsightedness gained one or more lines on the eye chart after roughly 30 sessions. Some also reported clearer everyday vision — sharper reading, easier night driving — though outcomes vary. Studies suggest these gains can persist after training ends.',
   },
 ];
 
@@ -52,7 +52,7 @@ export function ScienceTab() {
       <SceneHeader phase={timePhase} title="The Science" />
 
       <p className="science-screen__intro">
-        Built on peer-reviewed neuroscience. No gimmicks — just well-studied brain training that actually improves vision.
+        Built on peer-reviewed perceptual learning research. In clinical studies, participants improved by one or more lines on standard eye charts — results vary by condition and individual.
       </p>
 
       <div className="science-cards">

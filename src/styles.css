@@ -7,6 +7,14 @@
   -webkit-font-smoothing: antialiased;
 }
 
+.phase-overlay,
+.phase-overlay *,
+.fixation {
+  text-rendering: auto;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
 [data-theme="dark"] { color-scheme: dark; }
 [data-theme="light"] { color-scheme: light; }
 * { box-sizing: border-box; }
