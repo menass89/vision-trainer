@@ -116,10 +116,10 @@ function buildWeekDays(sessions: DashboardSnapshot['sessions']): WeekDay[] {
     const dateStr = localDateKey(d);
     const todayStr = localDateKey(today);
     const status: DayStatus =
-      dateStr === todayStr
-        ? 'today'
-        : completedDates.has(dateStr)
-          ? 'done'
+      completedDates.has(dateStr)
+        ? 'done'
+        : dateStr === todayStr
+          ? 'today'
           : dateStr < todayStr
             ? 'missed'
             : 'future';

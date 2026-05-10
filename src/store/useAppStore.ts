@@ -68,7 +68,6 @@ const defaultProfile: UserProfile = {
   displayName: 'Local trainee',
   diagnosisType: 'unspecified',
   targetCadencePerWeek: 3,
-  theme: 'dark',
   monocularMode: false,
   monocularEye: 'right',
 };
@@ -111,10 +110,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   initialize: async () => {
     const db = await getDb();
     const storedProfile = await db.get('profiles', defaultProfile.id);
-    const profile = {
-      ...defaultProfile,
-      ...storedProfile,
-      theme: storedProfile?.theme ?? defaultProfile.theme,
+    const profile: UserProfile = {
+      id: storedProfile?.id ?? defaultProfile.id,
+      createdAt: storedProfile?.createdAt ?? defaultProfile.createdAt,
+      displayName: storedProfile?.displayName ?? defaultProfile.displayName,
+      diagnosisType: storedProfile?.diagnosisType ?? defaultProfile.diagnosisType,
+      targetCadencePerWeek: storedProfile?.targetCadencePerWeek ?? defaultProfile.targetCadencePerWeek,
       monocularMode: storedProfile?.monocularMode ?? defaultProfile.monocularMode,
       monocularEye: storedProfile?.monocularEye ?? defaultProfile.monocularEye
     };

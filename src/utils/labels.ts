@@ -52,8 +52,7 @@ export function paradigmLabel(paradigm: ParadigmId): string {
     'lateral-masking': 'Side pattern training',
     'spatial-masking': 'Clutter training',
     'backward-masking': 'Brief pattern training',
-    'pedestal-discrimination': 'Contrast comparison',
-    'dichoptic-contrast': 'Two-eye contrast training'
+    'pedestal-discrimination': 'Contrast comparison'
   };
   return labels[paradigm];
 }

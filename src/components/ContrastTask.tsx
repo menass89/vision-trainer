@@ -1,6 +1,6 @@
 import { Play, Target } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { CalibrationProfile, DichopticSettings, GaborStimulus, GamificationAward, SessionLog, ThresholdEstimate, TrialInterval, TrialRecord } from '../types';
+import type { CalibrationProfile, GaborStimulus, GamificationAward, SessionLog, ThresholdEstimate, TrialInterval, TrialRecord } from '../types';
 import { conditionKey } from '../core/displayCalibration';
 import { uuid } from '../core/uuid';
 import { contrastFromLog10, QuestStaircase } from '../psychophysics/quest';
@@ -19,7 +19,6 @@ type ContrastTaskProps = {
   blocks: PlannedBlock[];
   calibration: CalibrationProfile;
   audioMuted: boolean;
-  dichopticSettings?: DichopticSettings;
   onTrial: (trial: TrialRecord) => Promise<GamificationAward | void>;
   onThreshold: (threshold: ThresholdEstimate) => Promise<void>;
   onComplete: () => Promise<void>;
@@ -28,7 +27,7 @@ type ContrastTaskProps = {
 const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
 const interTrialIntervalMs = 1200;
 
-export function ContrastTask({ session, blocks, calibration, audioMuted, dichopticSettings, onTrial, onThreshold, onComplete }: ContrastTaskProps) {
+export function ContrastTask({ session, blocks, calibration, audioMuted, onTrial, onThreshold, onComplete }: ContrastTaskProps) {
   const stageRef = useRef<GaborCanvasHandle | null>(null);
   const staircaseRef = useRef(new QuestStaircase());
   const responseStartedAt = useRef(0);
@@ -79,10 +78,7 @@ export function ContrastTask({ session, blocks, calibration, audioMuted, dichopt
     runningRef.current = true;
     setFeedback(null);
 
-    const nextPlan = applyDichopticSettings(
-      paradigmModule.createTrial(staircaseRef.current, block.condition, block.id, trialNumber),
-      dichopticSettings
-    );
+    const nextPlan = paradigmModule.createTrial(staircaseRef.current, block.condition, block.id, trialNumber);
     setPlan(nextPlan);
     setPhase('fixation');
     stageRef.current?.clear();
@@ -301,24 +297,4 @@ function describeCurrentValue(plan: ContrastTrialPlan | null): string {
     return `+${(increment * 100).toFixed(1)}%`;
   }
   return `${(plan.stimulus.contrast * 100).toFixed(1)}%`;
-}
-
-function applyDichopticSettings(plan: ContrastTrialPlan, settings?: DichopticSettings): ContrastTrialPlan {
-  if (plan.condition.paradigm !== 'dichoptic-contrast' || !settings) {
-    return plan;
-  }
-  const nonDominantMode = settings.redFilterEye === settings.dominantEye ? 'cyan-only' : 'red-only';
-  const dominantMode = nonDominantMode === 'cyan-only' ? 'red-only' : 'cyan-only';
-  return {
-    ...plan,
-    stimulus: {
-      ...plan.stimulus,
-      contrast: Math.max(0.005, plan.stimulus.contrast * settings.nonDominantContrast),
-      dichopticMode: nonDominantMode,
-      dichopticPartner: {
-        mode: dominantMode,
-        contrast: settings.dominantContrast
-      }
-    }
-  };
 }

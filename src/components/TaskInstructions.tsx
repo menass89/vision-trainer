@@ -19,8 +19,7 @@ const paradigmCopy: Record<ParadigmId, string> = {
   'lateral-masking': 'The target appears with aligned side patterns that train pattern grouping.',
   'spatial-masking': 'The target appears inside nearby mixed patterns, training clutter resistance.',
   'backward-masking': 'The target is followed by a brief noisy mask. The gap gets shorter as temporal processing improves.',
-  'pedestal-discrimination': 'Both intervals contain a visible pattern. Choose the interval with the slightly stronger contrast.',
-  'dichoptic-contrast': 'Wear red-cyan glasses. The faint pattern is shown to the weaker eye while the other eye sees a balancing pattern.'
+  'pedestal-discrimination': 'Both intervals contain a visible pattern. Choose the interval with the slightly stronger contrast.'
 };
 
 export function TaskInstructions({ block, onDismiss }: TaskInstructionsProps) {

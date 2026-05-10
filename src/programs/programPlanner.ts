@@ -91,7 +91,10 @@ function distributeTrials(
     throw new Error('Program phase has no positive paradigm weights');
   }
 
-  const totalBlocks = Math.max(1, Math.floor(totalTrials / blockSize));
+  const totalBlocks = Math.floor(totalTrials / blockSize);
+  if (totalBlocks <= 0) {
+    return [];
+  }
   const sorted = [...entries].sort((a, b) => b[1] - a[1]);
   const allocations = new Map<ParadigmId, number>();
   let remainingBlocks = totalBlocks;
@@ -126,6 +129,19 @@ function distributeTrials(
     .filter(([, trials]) => trials > 0);
 }
 
+const PARADIGM_BASELINES = new Map<ParadigmId, Map<number, number>>([
+  ['contrast-detection', new Map([[1.5, 0.018], [3, 0.012], [6, 0.016], [12, 0.04]])],
+  ['lateral-masking', new Map([[1.5, 0.024], [3, 0.018], [6, 0.022], [12, 0.05]])],
+  ['spatial-masking', new Map([[1.5, 0.024], [3, 0.018], [6, 0.022], [12, 0.05]])],
+  ['backward-masking', new Map([[1.5, 0.030], [3, 0.024], [6, 0.030], [12, 0.06]])],
+  ['pedestal-discrimination', new Map([[1.5, 0.022], [3, 0.016], [6, 0.020], [12, 0.045]])]
+]);
+
+const expectedContrast = (condition: ContrastCondition): number => {
+  const paradigmMap = PARADIGM_BASELINES.get(condition.paradigm);
+  return paradigmMap?.get(condition.spatialFrequencyCpd) ?? 0.03;
+};
+
 function selectDeficitCondition(
   thresholds: ThresholdEstimate[],
   conditions: ContrastCondition[]
@@ -139,14 +155,6 @@ function selectDeficitCondition(
       latestByKey.set(threshold.conditionKey, threshold);
     }
   }
-
-  const expectedContrast = (condition: ContrastCondition): number =>
-    (new Map<number, number>([
-      [1.5, 0.018],
-      [3, 0.012],
-      [6, 0.016],
-      [12, 0.04]
-    ]).get(condition.spatialFrequencyCpd) ?? 0.03);
 
   let worst: ContrastCondition | null = null;
   let worstScore = -Infinity;

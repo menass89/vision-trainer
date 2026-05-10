@@ -12,7 +12,6 @@ export function SessionFlow() {
   const calibration = useAppStore((state) => state.calibration);
   const profile = useAppStore((state) => state.profile);
   const gamification = useAppStore((state) => state.gamification);
-  const dichopticSettings = useAppStore((state) => state.dichopticSettings);
   const activeSession = useAppStore((state) => state.activeSession);
   const dashboard = useAppStore((state) => state.dashboard);
   const startSession = useAppStore((state) => state.startSession);
@@ -128,7 +127,6 @@ export function SessionFlow() {
       blocks={blocks}
       calibration={calibration}
       audioMuted={gamification.audioMuted}
-      dichopticSettings={dichopticSettings}
       onTrial={onTrial}
       onThreshold={onThreshold}
       onComplete={onComplete}

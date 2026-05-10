@@ -9,7 +9,9 @@
 
 .phase-overlay,
 .phase-overlay *,
-.fixation {
+.fixation,
+.interval-label,
+.inline-feedback {
   text-rendering: auto;
   -webkit-font-smoothing: auto;
   -moz-osx-font-smoothing: auto;

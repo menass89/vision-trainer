@@ -15,8 +15,7 @@ export type ParadigmId =
   | 'lateral-masking'
   | 'spatial-masking'
   | 'backward-masking'
-  | 'pedestal-discrimination'
-  | 'dichoptic-contrast';
+  | 'pedestal-discrimination';
 
 export type CalibrationProfile = {
   id: string;
@@ -119,7 +118,6 @@ export type UserProfile = {
   displayName: string;
   diagnosisType: GoalType | 'unspecified';
   targetCadencePerWeek: number;
-  theme: 'dark' | 'light';
   monocularMode: boolean;
   monocularEye: 'left' | 'right';
 };

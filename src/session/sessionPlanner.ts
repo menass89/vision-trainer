@@ -45,11 +45,15 @@ export function planSession(
     return planProgramSession(goalType, sessionsCompleted + 1, thresholds);
   }
 
-  const warmUp = getParadigmModule('contrast-detection').conditions[0];
+  const contrastConditions = getParadigmModule('contrast-detection').conditions;
+  if (contrastConditions.length === 0) {
+    throw new Error('contrast-detection module has no configured conditions');
+  }
+  const warmUp = contrastConditions[0];
   const blocks: PlannedBlock[] = [
     createBlock('Warm-up', { ...warmUp, trialsPerBlock: 10 }, 'warm-up')
   ];
-  const deficitCondition = selectDeficitCondition(thresholds, getParadigmModule('contrast-detection').conditions);
+  const deficitCondition = selectDeficitCondition(thresholds, contrastConditions);
   blocks.push(createBlock('Training A', { ...deficitCondition, trialsPerBlock: 40 }, 'training'));
   blocks.push(createBlock('Assessment', { ...deficitCondition, trialsPerBlock: 16 }, 'assessment'));
   return blocks;
@@ -75,7 +79,10 @@ function selectDeficitCondition(
 ): ContrastCondition {
   const latestByCondition = new Map<string, ThresholdEstimate>();
   for (const threshold of thresholds) {
-    latestByCondition.set(threshold.conditionKey, threshold);
+    const current = latestByCondition.get(threshold.conditionKey);
+    if (!current || threshold.createdAt > current.createdAt) {
+      latestByCondition.set(threshold.conditionKey, threshold);
+    }
   }
 
   const ranked = [...conditions].sort((a, b) => {
@@ -132,8 +139,7 @@ function populationNormContrast(spatialFrequencyCpd: number, paradigm: ParadigmI
     'lateral-masking': 1.25,
     'spatial-masking': 1.7,
     'backward-masking': 8,
-    'pedestal-discrimination': 0.6,
-    'dichoptic-contrast': 1.5
+    'pedestal-discrimination': 0.6
   };
   return (baselineNorms.get(spatialFrequencyCpd) ?? 0.03) * paradigmMultiplier[paradigm];
 }

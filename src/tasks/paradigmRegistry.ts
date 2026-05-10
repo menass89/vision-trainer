@@ -27,11 +27,6 @@ import {
   createPedestalDiscriminationTrial,
   PEDESTAL_DISCRIMINATION_CONDITIONS
 } from './pedestalDiscrimination';
-import {
-  buildTrialRecord as buildDichopticTrialRecord,
-  createDichopticContrastTrial,
-  DICHOPTIC_CONTRAST_CONDITIONS
-} from './dichopticContrast';
 
 export type ParadigmModule = {
   id: ParadigmId;
@@ -92,14 +87,6 @@ export const PARADIGM_LIBRARY: ParadigmModule[] = [
     conditions: PEDESTAL_DISCRIMINATION_CONDITIONS,
     createTrial: createPedestalDiscriminationTrial,
     buildTrialRecord: buildPedestalDiscriminationTrialRecord
-  },
-  {
-    id: 'dichoptic-contrast',
-    label: 'Two-eye Contrast Training',
-    status: 'active',
-    conditions: DICHOPTIC_CONTRAST_CONDITIONS,
-    createTrial: createDichopticContrastTrial,
-    buildTrialRecord: buildDichopticTrialRecord
   }
 ];
 
