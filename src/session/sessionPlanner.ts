@@ -101,9 +101,11 @@ function deficitScore(
     latestByCondition.get(blockConditionKey(condition))
     ?? latestByCondition.get(durationOnlyKey(condition))
     ?? latestByCondition.get(legacyBlockConditionKey(condition));
+  if (!threshold) {
+    return -1;
+  }
   const expected = populationNormContrast(condition.spatialFrequencyCpd, condition.paradigm);
-  const observed = threshold?.thresholdContrast ?? expected * 2;
-  return observed / expected;
+  return threshold.thresholdContrast / expected;
 }
 
 function blockConditionKey(condition: ContrastCondition): string {

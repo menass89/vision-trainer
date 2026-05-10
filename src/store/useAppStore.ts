@@ -135,7 +135,11 @@ export const useAppStore = create<AppState>((set, get) => ({
       monocularMode: storedProfile?.monocularMode ?? defaultProfile.monocularMode,
       monocularEye: storedProfile?.monocularEye ?? defaultProfile.monocularEye
     };
-    await saveProfile(profile);
+    await queueProfileWrite(
+      () => get().profile,
+      (next) => set({ profile: next }),
+      () => profile
+    );
     const calibration = (await getLatestCalibration()) ?? createBrowserCalibration();
     await saveCalibration(calibration);
     const gamification = (await getGamification()) ?? defaultGamification;
@@ -146,7 +150,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const syncedGamification = await syncBadges(gamification, dashboard);
     const phase = getTimePhase();
     applyPhase(phase);
-    set({ calibration, profile, dashboard, gamification: syncedGamification, dichopticSettings, ready: true, timePhase: phase });
+    set({ calibration, dashboard, gamification: syncedGamification, dichopticSettings, ready: true, timePhase: phase });
   },
 
   updateCalibration: async (profile) => {

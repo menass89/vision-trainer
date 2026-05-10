@@ -31,7 +31,7 @@ export function createBackwardMaskingTrial(
     orientationDeg: condition.orientationDeg,
     contrast: 0.18,
     phaseRad: Math.random() * Math.PI * 2,
-    durationMs: 50,
+    durationMs: condition.durationMs ?? 50,
     gaborSizeDeg: condition.gaborSizeDeg,
     backgroundLuminanceCdM2: 40
   };
