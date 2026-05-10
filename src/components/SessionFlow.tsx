@@ -39,8 +39,13 @@ export function SessionFlow() {
     const goalType = profile.diagnosisType === 'unspecified' ? undefined : profile.diagnosisType;
     const plannedBlocks = planSession(completedSessions, dashboard.thresholds, goalType);
     setBlocks(plannedBlocks);
-    await startSession([...new Set(plannedBlocks.map((block) => block.paradigm))], selectedEyeMode, 'guided');
-    setCompletionMessage(null);
+    try {
+      await startSession([...new Set(plannedBlocks.map((block) => block.paradigm))], selectedEyeMode, 'guided');
+      setCompletionMessage(null);
+    } catch {
+      setBlocks([]);
+      setCompletionMessage('Unable to start the session. Please try again.');
+    }
   };
 
   const onTrial = async (trial: TrialRecord): Promise<GamificationAward> => {
@@ -83,13 +88,14 @@ export function SessionFlow() {
           <h2 id="session-heading" className="session-ready__heading">Ready to Train</h2>
           <p className="session-ready__meta">Session {completedSessions + 1} · ~25 min</p>
 
-          <div className="eye-selector" aria-label="Eye mode">
+          <div className="eye-selector" role="group" aria-label="Eye mode">
             {(['both', 'left', 'right'] as EyeMode[]).map((eyeMode) => (
               <button
                 key={eyeMode}
                 type="button"
                 className={selectedEyeMode === eyeMode ? 'selected' : ''}
                 onClick={() => setSelectedEyeMode(eyeMode)}
+                aria-pressed={selectedEyeMode === eyeMode}
               >
                 {eyeModeLabel(eyeMode)}
               </button>

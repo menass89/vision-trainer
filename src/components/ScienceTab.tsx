@@ -70,7 +70,13 @@ export function ScienceTab() {
           <article key={study.url} className="science-card glass-card">
             <h4 className="science-card__title">{study.label}</h4>
             <p className="science-card__body">{study.summary}</p>
-            <a href={study.url} target="_blank" rel="noopener noreferrer" className="science-card__link">
+            <a
+              href={study.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="science-card__link"
+              aria-label={`Read the study: ${study.label}`}
+            >
               <ExternalLink size={14} />
               Read the study
             </a>

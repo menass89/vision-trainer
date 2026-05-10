@@ -133,7 +133,10 @@ function selectDeficitCondition(
 
   const latestByKey = new Map<string, ThresholdEstimate>();
   for (const threshold of thresholds) {
-    latestByKey.set(threshold.conditionKey, threshold);
+    const current = latestByKey.get(threshold.conditionKey);
+    if (!current || threshold.createdAt > current.createdAt) {
+      latestByKey.set(threshold.conditionKey, threshold);
+    }
   }
 
   let worst: ContrastCondition | null = null;

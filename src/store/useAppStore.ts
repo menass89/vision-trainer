@@ -160,8 +160,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       ...activeSession,
       status: 'abandoned'
     };
-    set({ activeSession: null });
     await saveSession(abandoned);
+    set({ activeSession: null });
     await get().refreshDashboard();
   },
 

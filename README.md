@@ -29,7 +29,7 @@ npm run cap:open     # Open Xcode workspace
 
 ## Architecture
 
-```
+```text
 src/
 ├── App.tsx                  # Root layout + tab router
 ├── main.tsx                 # Entry + PWA registration

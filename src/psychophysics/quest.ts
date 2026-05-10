@@ -30,10 +30,21 @@ const DEFAULT_PARAMS: QuestParameters = {
 export class QuestStaircase {
   private readonly grid: number[];
   private readonly posterior: number[];
+  private readonly thresholdScale: number;
   private trialCountValue = 0;
   private lapseCount = 0;
 
   constructor(private readonly params: QuestParameters = DEFAULT_PARAMS) {
+    const dynamicRange = 1 - this.params.gamma - this.params.delta;
+    if (!(dynamicRange > 0)) {
+      throw new Error('Invalid QUEST params: require gamma + delta < 1.');
+    }
+    if (this.params.pThreshold <= this.params.gamma || this.params.pThreshold >= 1 - this.params.delta) {
+      throw new Error('Invalid QUEST params: require gamma < pThreshold < 1 - delta.');
+    }
+    const thresholdProbability = (this.params.pThreshold - this.params.gamma) / dynamicRange;
+    this.thresholdScale = -Math.log(1 - thresholdProbability);
+
     const half = this.params.range / 2;
     this.grid = [];
     this.posterior = [];
@@ -82,13 +93,8 @@ export class QuestStaircase {
 
   private psychometricProbability(intensityLog10: number, thresholdLog10: number): number {
     const slope = Math.pow(10, this.params.beta * (intensityLog10 - thresholdLog10));
-    const thresholdProbability = Math.max(
-      0.001,
-      Math.min(0.999, (this.params.pThreshold - this.params.gamma) / (1 - this.params.gamma - this.params.delta))
-    );
-    const thresholdScale = -Math.log(1 - thresholdProbability);
-    const Weibull = 1 - Math.exp(-thresholdScale * slope);
-    return this.params.gamma + (1 - this.params.gamma - this.params.delta) * Weibull;
+    const weibull = 1 - Math.exp(-this.thresholdScale * slope);
+    return this.params.gamma + (1 - this.params.gamma - this.params.delta) * weibull;
   }
 
   private quantile(target: number): number {

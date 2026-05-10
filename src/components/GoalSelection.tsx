@@ -55,6 +55,7 @@ export function GoalSelection({ onSelect }: GoalSelectionProps) {
       <input
         type="text"
         className="name-input glass-card"
+        aria-label="First name"
         placeholder="Your name"
         value={name}
         onChange={(e) => setName(e.target.value)}
@@ -103,6 +104,7 @@ export function GoalSelection({ onSelect }: GoalSelectionProps) {
               type="button"
               className={`eye-picker__btn ${monocularEye === 'left' ? 'eye-picker__btn--active' : ''}`}
               onClick={() => setMonocularEye('left')}
+              aria-pressed={monocularEye === 'left'}
             >
               Left Eye
             </button>
@@ -110,6 +112,7 @@ export function GoalSelection({ onSelect }: GoalSelectionProps) {
               type="button"
               className={`eye-picker__btn ${monocularEye === 'right' ? 'eye-picker__btn--active' : ''}`}
               onClick={() => setMonocularEye('right')}
+              aria-pressed={monocularEye === 'right'}
             >
               Right Eye
             </button>

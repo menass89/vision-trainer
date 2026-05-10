@@ -87,5 +87,5 @@ export function conditionKey(
   durationMs?: number
 ): string {
   const baseKey = `${paradigm}:${spatialFrequencyCpd.toFixed(1)}cpd:${orientationDeg}deg`;
-  return durationMs ? `${baseKey}:${durationMs}ms` : baseKey;
+  return durationMs === undefined ? baseKey : `${baseKey}:${durationMs}ms`;
 }

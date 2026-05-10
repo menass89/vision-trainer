@@ -136,6 +136,7 @@ export function phaseToTheme(phase: TimePhase): Theme {
 }
 
 export function applyPhase(phase: TimePhase): void {
+  if (typeof document === 'undefined') return;
   const tokens = phaseTokens[phase];
   const root = document.documentElement;
   for (const [key, value] of Object.entries(tokens)) {
