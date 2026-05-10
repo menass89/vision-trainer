@@ -28,7 +28,7 @@ const DEFAULT_PARAMS: QuestParameters = {
 };
 
 const CLAMP_MIN = -3;
-const CLAMP_MAX = -0.05;
+const CLAMP_MAX = Math.log10(0.9);
 
 export class QuestStaircase {
   private readonly grid: number[];
@@ -37,7 +37,10 @@ export class QuestStaircase {
   private trialCountValue = 0;
   private lapseCount = 0;
 
-  constructor(private readonly params: QuestParameters = DEFAULT_PARAMS) {
+  private readonly params: QuestParameters;
+
+  constructor(params: QuestParameters = DEFAULT_PARAMS) {
+    this.params = Object.freeze({ ...params });
     const { tGuess, tGuessSd, pThreshold, beta, delta, gamma, grain, range } = this.params;
 
     if (![tGuess, tGuessSd, pThreshold, beta, delta, gamma, grain, range].every(Number.isFinite)) {

@@ -9,10 +9,10 @@ import {
 const PEDESTAL_CONTRAST = 0.1;
 
 export const PEDESTAL_DISCRIMINATION_CONDITIONS: ContrastCondition[] = [
-  { paradigm: 'pedestal-discrimination', spatialFrequencyCpd: 1.5, orientationDeg: 0, trialsPerBlock: 40 },
-  { paradigm: 'pedestal-discrimination', spatialFrequencyCpd: 3, orientationDeg: 45, trialsPerBlock: 40 },
-  { paradigm: 'pedestal-discrimination', spatialFrequencyCpd: 6, orientationDeg: 90, trialsPerBlock: 40 },
-  { paradigm: 'pedestal-discrimination', spatialFrequencyCpd: 12, orientationDeg: 135, trialsPerBlock: 40 }
+  { paradigm: 'pedestal-discrimination', spatialFrequencyCpd: 1.5, orientationDeg: 0, gaborSizeDeg: 4, trialsPerBlock: 40 },
+  { paradigm: 'pedestal-discrimination', spatialFrequencyCpd: 3, orientationDeg: 45, gaborSizeDeg: 4, trialsPerBlock: 40 },
+  { paradigm: 'pedestal-discrimination', spatialFrequencyCpd: 6, orientationDeg: 90, gaborSizeDeg: 4, trialsPerBlock: 40 },
+  { paradigm: 'pedestal-discrimination', spatialFrequencyCpd: 12, orientationDeg: 135, gaborSizeDeg: 4, trialsPerBlock: 40 }
 ];
 
 export function createPedestalDiscriminationTrial(

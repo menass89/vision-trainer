@@ -369,6 +369,9 @@ function sessionStreak(sessions: DashboardSnapshot['sessions']): number {
   );
   let streak = 0;
   const cursor = new Date();
+  if (!completedDates.has(localDateKey(cursor))) {
+    cursor.setDate(cursor.getDate() - 1);
+  }
   while (completedDates.has(localDateKey(cursor))) {
     streak += 1;
     cursor.setDate(cursor.getDate() - 1);

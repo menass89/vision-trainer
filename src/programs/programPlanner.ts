@@ -42,9 +42,14 @@ export function planProgramSession(
     }
 
     const blockCount = Math.max(1, Math.round(trials / config.trialsPerBlock));
+    let availableConditions = paradigmConditions;
     for (let i = 0; i < blockCount; i += 1) {
-      const condition = selectDeficitCondition(thresholds, paradigmConditions);
+      if (availableConditions.length === 0) {
+        availableConditions = paradigmConditions;
+      }
+      const condition = selectDeficitCondition(thresholds, availableConditions);
       blocks.push(createPlannedBlock(`Training ${String.fromCharCode(65 + blockIndex)}`, condition, 'training'));
+      availableConditions = availableConditions.filter((candidate) => candidate !== condition);
       blockIndex += 1;
     }
   }

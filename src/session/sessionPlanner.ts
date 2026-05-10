@@ -28,7 +28,7 @@ export function createSessionLog(
     eyeMode,
     sessionType,
     calibrationId,
-    protocolVersion: 'mvp-0.1',
+    protocolVersion: 'mvp-0.2',
     plannedBlocks,
     completedTrials: 0,
     metadata: {

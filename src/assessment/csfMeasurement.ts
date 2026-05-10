@@ -118,5 +118,10 @@ function weibull(contrast: number, threshold: number, slope: number): number {
 }
 
 function shuffle<T>(items: T[]): T[] {
-  return [...items].sort(() => Math.random() - 0.5);
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }
