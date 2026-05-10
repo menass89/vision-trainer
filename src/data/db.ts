@@ -170,11 +170,14 @@ export async function loadDashboardData() {
 
 function migrateSessionLog(session: SessionLog): SessionLog {
   const blocks = session.plannedBlocks as unknown;
-  if (!Array.isArray(blocks) || blocks.length === 0 || typeof blocks[0] !== 'string') {
-    return session;
+  if (!Array.isArray(blocks)) {
+    return { ...session, plannedBlocks: [] };
   }
-  // Legacy: plannedBlocks was ParadigmId[]; drop it (no condition data to reconstruct).
-  return { ...session, plannedBlocks: [] };
+  if (blocks.length > 0 && typeof blocks[0] === 'string') {
+    // Legacy: plannedBlocks was ParadigmId[]; drop it (no condition data to reconstruct).
+    return { ...session, plannedBlocks: [] };
+  }
+  return session;
 }
 
 export async function exportJson(): Promise<string> {

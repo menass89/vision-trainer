@@ -22,6 +22,10 @@ export function createLateralMaskingTrial(
   const catchTrial = Math.random() < 0.05;
   const intensityLog10 = catchTrial ? -0.2 : staircase.nextIntensity();
   const targetInterval: TrialInterval = Math.random() < 0.5 ? 1 : 2;
+  const durationMs =
+    typeof condition.durationMs === 'number' && Number.isFinite(condition.durationMs) && condition.durationMs > 0
+      ? condition.durationMs
+      : 60;
 
   return {
     blockId,
@@ -35,8 +39,8 @@ export function createLateralMaskingTrial(
       orientationDeg: condition.orientationDeg,
       contrast: contrastFromLog10(intensityLog10),
       phaseRad: Math.random() * Math.PI * 2,
-      durationMs: condition.durationMs ?? 60,
-      gaborSizeDeg: condition.gaborSizeDeg,
+      durationMs,
+      gaborSizeDeg: condition.gaborSizeDeg ?? 4,
       backgroundLuminanceCdM2: 40,
       flanker: {
         enabled: true,
