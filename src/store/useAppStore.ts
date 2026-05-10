@@ -9,7 +9,7 @@ import type {
   GamificationAward,
   GamificationState,
   GoalType,
-  ParadigmId,
+  PlannedBlock,
   SessionLog,
   SessionType,
   TabId,
@@ -48,7 +48,7 @@ type AppState = {
   dashboard: DashboardSnapshot;
   initialize: () => Promise<void>;
   updateCalibration: (profile: CalibrationProfile) => Promise<void>;
-  startSession: (plannedBlocks?: ParadigmId[], eyeMode?: EyeMode, sessionType?: SessionType) => Promise<SessionLog>;
+  startSession: (plannedBlocks: PlannedBlock[], eyeMode?: EyeMode, sessionType?: SessionType) => Promise<SessionLog>;
   updateSession: (session: SessionLog) => Promise<void>;
   abandonSession: () => Promise<void>;
   completeSession: () => Promise<void>;
@@ -90,6 +90,22 @@ const defaultDichopticSettings: DichopticSettings = {
   setupCompleted: false,
   updatedAt: new Date().toISOString()
 };
+
+let profileWriteQueue: Promise<void> = Promise.resolve();
+
+function queueProfileWrite(
+  current: () => UserProfile,
+  apply: (profile: UserProfile) => void,
+  updater: (profile: UserProfile) => UserProfile
+): Promise<void> {
+  const next = profileWriteQueue.then(async () => {
+    const profile = updater(current());
+    await saveProfile(profile);
+    apply(profile);
+  });
+  profileWriteQueue = next.catch(() => undefined);
+  return next;
+}
 
 export const useAppStore = create<AppState>((set, get) => ({
   ready: false,
@@ -213,9 +229,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   setGoalType: async (goal, name) => {
-    const profile = { ...get().profile, diagnosisType: goal, ...(name ? { displayName: name } : {}) };
-    await saveProfile(profile);
-    set({ profile });
+    await queueProfileWrite(
+      () => get().profile,
+      (profile) => set({ profile }),
+      (profile) => ({ ...profile, diagnosisType: goal, ...(name ? { displayName: name } : {}) })
+    );
   },
 
   setCurrentTab: (tab) => {
@@ -228,13 +246,15 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   setMonocularMode: async (enabled, eye) => {
-    const profile = {
-      ...get().profile,
-      monocularMode: enabled,
-      ...(eye ? { monocularEye: eye } : {}),
-    };
-    await saveProfile(profile);
-    set({ profile });
+    await queueProfileWrite(
+      () => get().profile,
+      (profile) => set({ profile }),
+      (profile) => ({
+        ...profile,
+        monocularMode: enabled,
+        ...(eye ? { monocularEye: eye } : {}),
+      })
+    );
   },
 
   refreshDashboard: async () => {

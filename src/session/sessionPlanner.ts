@@ -1,21 +1,23 @@
-import type { EyeMode, GoalType, ParadigmId, SessionLog, SessionType, ThresholdEstimate } from '../types';
+import type {
+  ContrastCondition,
+  EyeMode,
+  GoalType,
+  ParadigmId,
+  PlannedBlock,
+  SessionLog,
+  SessionType,
+  ThresholdEstimate
+} from '../types';
 import { conditionKey } from '../core/displayCalibration';
 import { uuid } from '../core/uuid';
 import { planProgramSession } from '../programs/programPlanner';
-import { type ContrastCondition } from '../tasks/contrastDetection';
 import { getParadigmModule } from '../tasks/paradigmRegistry';
 
-export type PlannedBlock = {
-  id: string;
-  label: string;
-  paradigm: ParadigmId;
-  condition: ContrastCondition;
-  role: 'warm-up' | 'training' | 'assessment';
-};
+export type { PlannedBlock } from '../types';
 
 export function createSessionLog(
   calibrationId: string,
-  plannedBlocks: ParadigmId[] = [],
+  plannedBlocks: PlannedBlock[],
   eyeMode: EyeMode = 'both',
   sessionType: SessionType = 'guided'
 ): SessionLog {

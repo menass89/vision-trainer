@@ -1,4 +1,5 @@
 import { ChevronRight } from 'lucide-react';
+import { useState } from 'react';
 import type { CalibrationProfile, GoalType, UserProfile } from '../types';
 import { useAppStore } from '../store/useAppStore';
 import { SceneHeader } from './SceneHeader';
@@ -6,7 +7,7 @@ import { SceneHeader } from './SceneHeader';
 type SettingsScreenProps = {
   profile: UserProfile;
   calibration: CalibrationProfile;
-  onChangeGoal: (goal: GoalType) => void;
+  onChangeGoal: (goal: GoalType) => Promise<void>;
 };
 
 export function SettingsScreen({
@@ -15,6 +16,7 @@ export function SettingsScreen({
   onChangeGoal,
 }: SettingsScreenProps) {
   const timePhase = useAppStore((s) => s.timePhase);
+  const [isSaving, setIsSaving] = useState(false);
   const goalLabel = profile.diagnosisType === 'myopia' ? 'Myopia' :
     profile.diagnosisType === 'presbyopia' ? 'Presbyopia' :
     profile.diagnosisType === 'sports-vision' ? 'Sports Vision' : 'Not set';
@@ -41,10 +43,19 @@ export function SettingsScreen({
             type="button"
             className="setting-row__action"
             aria-label={`Training Program: ${goalLabel}`}
-            onClick={() => {
+            disabled={isSaving}
+            onClick={async () => {
+              if (isSaving) return;
+              setIsSaving(true);
               const goals: GoalType[] = ['myopia', 'presbyopia', 'sports-vision'];
               const idx = goals.indexOf(profile.diagnosisType as GoalType);
-              onChangeGoal(goals[(idx + 1) % goals.length]);
+              try {
+                await onChangeGoal(goals[(idx + 1) % goals.length]);
+              } catch (err) {
+                console.error('Failed to change training program', err);
+              } finally {
+                setIsSaving(false);
+              }
             }}
           >
             {goalLabel}

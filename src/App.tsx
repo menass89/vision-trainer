@@ -59,8 +59,8 @@ export default function App() {
       <main className="app-shell">
         <GoalSelection
           onSelect={async (goal: GoalType, monocular: boolean, eye: 'left' | 'right', name: string) => {
-            await setGoalType(goal, name);
             await setMonocularMode(monocular, eye);
+            await setGoalType(goal, name);
           }}
         />
       </main>
@@ -72,6 +72,9 @@ export default function App() {
       try {
         await abandonSession();
       } catch (err) {
+        // Intentional: navigate even if abandon failed so the user can't be trapped
+        // on the Train tab by a transient persistence error. Stale activeSession
+        // will be cleaned up on the next abandonSession or completeSession call.
         console.error('Failed to abandon session', err);
       }
     }
@@ -112,7 +115,7 @@ export default function App() {
             <SettingsScreen
               profile={profile}
               calibration={calibration}
-              onChangeGoal={(goal) => void setGoalType(goal)}
+              onChangeGoal={setGoalType}
             />
           </div>
         )}

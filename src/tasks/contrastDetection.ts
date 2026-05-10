@@ -1,16 +1,9 @@
-import type { GaborStimulus, Orientation, ParadigmId, TrialInterval, TrialRecord } from '../types';
+import type { ContrastCondition, GaborStimulus, TrialInterval, TrialRecord } from '../types';
 import { conditionKey } from '../core/displayCalibration';
 import { uuid } from '../core/uuid';
 import { contrastFromLog10, QuestStaircase } from '../psychophysics/quest';
 
-export type ContrastCondition = {
-  paradigm: ParadigmId;
-  spatialFrequencyCpd: number;
-  orientationDeg: Orientation;
-  trialsPerBlock: number;
-  durationMs?: number;
-  gaborSizeDeg?: number;
-};
+export type { ContrastCondition } from '../types';
 
 export const CONTRAST_DETECTION_CONDITIONS: ContrastCondition[] = [
   { paradigm: 'contrast-detection', spatialFrequencyCpd: 1.5, orientationDeg: 0, trialsPerBlock: 40 },

@@ -27,6 +27,16 @@ npm run cap:sync     # Build + sync to ios/
 npm run cap:open     # Open Xcode workspace
 ```
 
+## iOS Code Signing
+
+Capacitor iOS uses automatic code signing. Before building or archiving:
+
+1. Open `ios/App/App.xcworkspace` in Xcode.
+2. Select the `App` target -> **Signing & Capabilities**.
+3. Set your **Team** (Apple Developer account).
+
+This populates `DEVELOPMENT_TEAM` in `project.pbxproj` for your local build only -- it is not committed.
+
 ## Architecture
 
 ```text

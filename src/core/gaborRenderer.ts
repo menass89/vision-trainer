@@ -203,7 +203,7 @@ export class GaborRenderer {
   render(stimulus: GaborStimulus, profile: CalibrationProfile): void {
     const gl = this.gl;
     const lambdaPx = pixelsPerCycle(stimulus.spatialFrequencyCpd, profile);
-    const sigmaPx = sigmaPixels(stimulus.spatialFrequencyCpd, profile, stimulus.gaborSizeDeg);
+    const sigmaPx = sigmaPixels(profile, stimulus.gaborSizeDeg);
     const orientation = (stimulus.orientationDeg * Math.PI) / 180;
     const background = luminanceToLinearGray(stimulus.backgroundLuminanceCdM2, profile);
     const flanker = stimulus.flanker;

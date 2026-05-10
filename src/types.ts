@@ -62,6 +62,23 @@ export type GaborStimulus = {
   mask?: MaskConfig;
 };
 
+export type ContrastCondition = {
+  paradigm: ParadigmId;
+  spatialFrequencyCpd: number;
+  orientationDeg: Orientation;
+  trialsPerBlock: number;
+  durationMs?: number;
+  gaborSizeDeg?: number;
+};
+
+export type PlannedBlock = {
+  id: string;
+  label: string;
+  paradigm: ParadigmId;
+  condition: ContrastCondition;
+  role: 'warm-up' | 'training' | 'assessment';
+};
+
 export type TrialInterval = 1 | 2;
 
 export type TrialRecord = {
@@ -107,7 +124,7 @@ export type SessionLog = {
   sessionType: SessionType;
   calibrationId: string;
   protocolVersion: string;
-  plannedBlocks: ParadigmId[];
+  plannedBlocks: PlannedBlock[];
   completedTrials: number;
   metadata: Record<string, string | number | boolean>;
 };

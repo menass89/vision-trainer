@@ -43,7 +43,6 @@ export function pixelsPerCycle(spatialFrequencyCpd: number, profile: Calibration
 }
 
 export function sigmaPixels(
-  _spatialFrequencyCpd: number,
   profile: CalibrationProfile,
   gaborSizeDeg = 4
 ): number {

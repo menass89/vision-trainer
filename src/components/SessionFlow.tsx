@@ -38,7 +38,7 @@ export function SessionFlow() {
     const plannedBlocks = planSession(completedSessions, dashboard.thresholds, goalType);
     setBlocks(plannedBlocks);
     try {
-      await startSession([...new Set(plannedBlocks.map((block) => block.paradigm))], selectedEyeMode, 'guided');
+      await startSession(plannedBlocks, selectedEyeMode, 'guided');
       setCompletionMessage(null);
     } catch {
       setBlocks([]);
