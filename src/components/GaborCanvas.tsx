@@ -26,6 +26,7 @@ export const GaborCanvas = forwardRef<GaborCanvasHandle, GaborCanvasProps>(({ ca
     const controller = new AbortController();
     abortRef.current = controller;
 
+    setError(null);
     try {
       rendererRef.current = new GaborRenderer(canvas);
       rendererRef.current.clear(calibration);

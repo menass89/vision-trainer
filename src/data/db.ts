@@ -4,11 +4,20 @@ import type {
   CalibrationProfile,
   DichopticSettings,
   GamificationState,
+  ParadigmId,
   SessionLog,
   ThresholdEstimate,
   TrialRecord,
   UserProfile
 } from '../types';
+
+const VALID_PARADIGMS: ReadonlySet<ParadigmId> = new Set<ParadigmId>([
+  'contrast-detection',
+  'lateral-masking',
+  'spatial-masking',
+  'backward-masking',
+  'pedestal-discrimination'
+]);
 
 interface VisionTrainerDb extends DBSchema {
   profiles: {
@@ -189,9 +198,12 @@ function migrateSessionLog(session: SessionLog): SessionLog {
       typeof candidate.id === 'string' &&
       typeof candidate.label === 'string' &&
       typeof candidate.paradigm === 'string' &&
+      VALID_PARADIGMS.has(candidate.paradigm as ParadigmId) &&
       typeof candidate.role === 'string' &&
       condition !== null &&
       typeof condition === 'object' &&
+      typeof condition.paradigm === 'string' &&
+      VALID_PARADIGMS.has(condition.paradigm as ParadigmId) &&
       Number.isFinite(condition.spatialFrequencyCpd) &&
       Number.isFinite(condition.orientationDeg) &&
       Number.isFinite(condition.trialsPerBlock)

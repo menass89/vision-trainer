@@ -23,6 +23,10 @@ const paradigmCopy: Record<ParadigmId, string> = {
 };
 
 export function TaskInstructions({ block, onDismiss }: TaskInstructionsProps) {
+  const responseInstruction =
+    block.paradigm === 'pedestal-discrimination'
+      ? 'Press 1 if Interval 1 had the slightly stronger contrast, or press 2 if Interval 2 did.'
+      : 'Press 1 if the pattern appeared in Interval 1, or press 2 if it appeared in Interval 2.';
   return (
     <div className="instruction-card" role="status" aria-live="polite">
       <div className="section-heading compact">
@@ -36,7 +40,7 @@ export function TaskInstructions({ block, onDismiss }: TaskInstructionsProps) {
       <p>{paradigmCopy[block.paradigm]}</p>
       <ul>
         <li>You will see two intervals.</li>
-        <li>Press 1 if the pattern appeared in Interval 1, or press 2 if it appeared in Interval 2.</li>
+        <li>{responseInstruction}</li>
         <li>The pattern will get harder to see as you improve. This is normal.</li>
       </ul>
       <button type="button" className="primary-button wide" onClick={onDismiss}>

@@ -156,9 +156,21 @@ export const useAppStore = create<AppState>((set, get) => ({
     await saveDichopticSettings(dichopticSettings);
     const dashboard = await loadDashboardData();
     const syncedGamification = await syncBadges(gamification, dashboard);
+    const activeSession =
+      [...dashboard.sessions]
+        .filter((session) => session.status === 'in-progress')
+        .sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0] ?? null;
     const phase = getTimePhase();
     applyPhase(phase);
-    set({ calibration, dashboard, gamification: syncedGamification, dichopticSettings, ready: true, timePhase: phase });
+    set({
+      calibration,
+      dashboard,
+      gamification: syncedGamification,
+      dichopticSettings,
+      activeSession,
+      ready: true,
+      timePhase: phase
+    });
   },
 
   updateCalibration: async (profile) => {
