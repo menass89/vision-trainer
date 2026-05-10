@@ -14,6 +14,7 @@ type GaborCanvasProps = {
 export const GaborCanvas = forwardRef<GaborCanvasHandle, GaborCanvasProps>(({ calibration }, ref) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rendererRef = useRef<GaborRenderer | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -21,6 +22,9 @@ export const GaborCanvas = forwardRef<GaborCanvasHandle, GaborCanvasProps>(({ ca
     if (!canvas) {
       return;
     }
+
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     try {
       rendererRef.current = new GaborRenderer(canvas);
@@ -40,6 +44,8 @@ export const GaborCanvas = forwardRef<GaborCanvasHandle, GaborCanvasProps>(({ ca
     observer.observe(canvas);
     window.addEventListener('resize', resize);
     return () => {
+      controller.abort();
+      abortRef.current = null;
       observer.disconnect();
       window.removeEventListener('resize', resize);
     };
@@ -52,7 +58,7 @@ export const GaborCanvas = forwardRef<GaborCanvasHandle, GaborCanvasProps>(({ ca
         if (!rendererRef.current) {
           return { onset: performance.now(), offset: performance.now() };
         }
-        return presentStimulus(rendererRef.current, stimulus, calibration);
+        return presentStimulus(rendererRef.current, stimulus, calibration, abortRef.current?.signal);
       },
       clear: () => rendererRef.current?.clear(calibration)
     }),

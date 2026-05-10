@@ -273,21 +273,38 @@ function dichopticModeToUniform(mode: GaborStimulus['dichopticMode']): number {
 export async function presentStimulus(
   renderer: GaborRenderer,
   stimulus: GaborStimulus,
-  profile: CalibrationProfile
+  profile: CalibrationProfile,
+  signal?: AbortSignal
 ): Promise<{ onset: number; offset: number }> {
   return new Promise((resolve) => {
-    requestAnimationFrame((onset) => {
+    let frameId = requestAnimationFrame((onset) => {
+      if (signal?.aborted) {
+        resolve({ onset, offset: onset });
+        return;
+      }
       renderer.render(stimulus, profile);
       const end = onset + stimulus.durationMs;
       const tick = (now: number) => {
+        if (signal?.aborted) {
+          resolve({ onset, offset: now });
+          return;
+        }
         if (now >= end) {
           renderer.clear(profile);
           resolve({ onset, offset: now });
         } else {
-          requestAnimationFrame(tick);
+          frameId = requestAnimationFrame(tick);
         }
       };
-      requestAnimationFrame(tick);
+      frameId = requestAnimationFrame(tick);
     });
+    signal?.addEventListener(
+      'abort',
+      () => {
+        cancelAnimationFrame(frameId);
+        resolve({ onset: performance.now(), offset: performance.now() });
+      },
+      { once: true }
+    );
   });
 }

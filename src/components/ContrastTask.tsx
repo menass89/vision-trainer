@@ -58,18 +58,20 @@ export function ContrastTask({ session, blocks, calibration, audioMuted, onTrial
     runningRef.current = false;
   }, [blockIndex]);
 
+  const submitResponseRef = useRef<(response: TrialInterval) => Promise<void>>(async () => {});
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === '1') {
-        void submitResponse(1);
+        void submitResponseRef.current(1);
       }
       if (event.key === '2') {
-        void submitResponse(2);
+        void submitResponseRef.current(2);
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  });
+  }, []);
 
   const runTrial = async (trialNumber = trialIndex) => {
     if (!block || !paradigmModule || !instructionsDismissed || runningRef.current) {
@@ -157,6 +159,10 @@ export function ContrastTask({ session, blocks, calibration, audioMuted, onTrial
     setPhase('idle');
     void runTrial(nextTrialIndex);
   };
+
+  useEffect(() => {
+    submitResponseRef.current = submitResponse;
+  });
 
   const finishBlock = async () => {
     if (!block) {

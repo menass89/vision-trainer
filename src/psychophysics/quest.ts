@@ -29,6 +29,7 @@ const DEFAULT_PARAMS: QuestParameters = {
 
 const CLAMP_MIN = -3;
 const CLAMP_MAX = Math.log10(0.9);
+const MAX_GRID_POINTS = 10_000;
 
 export class QuestStaircase {
   private readonly grid: number[];
@@ -81,6 +82,10 @@ export class QuestStaircase {
       throw new Error(
         'Invalid QUEST params: guessed threshold range does not overlap supported intensity bounds.'
       );
+    }
+    const gridPointCount = Math.floor((gridMax - gridMin) / grain) + 1;
+    if (gridPointCount > MAX_GRID_POINTS) {
+      throw new Error('Invalid QUEST params: grid resolution is too fine for the supported range.');
     }
     this.grid = [];
     this.posterior = [];

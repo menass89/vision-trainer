@@ -1,5 +1,5 @@
 import { PlayCircle } from 'lucide-react';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { DashboardSnapshot, GamificationState, TimePhase, UserProfile } from '../types';
 import { improvementPercent } from '../progress/csf';
 import { SkyScene } from './SkyScene';
@@ -18,10 +18,25 @@ export function HomeScreen({ profile, dashboard, gamification, timePhase, onStar
     [dashboard.sessions]
   );
 
-  const streak = useMemo(() => sessionStreak(dashboard.sessions), [dashboard.sessions]);
+  const [todayKey, setTodayKey] = useState(() => new Date().toDateString());
+  useEffect(() => {
+    const tick = () => {
+      const now = new Date();
+      const next = new Date(now);
+      next.setHours(24, 0, 5, 0);
+      const delay = next.getTime() - now.getTime();
+      return window.setTimeout(() => {
+        setTodayKey(new Date().toDateString());
+      }, delay);
+    };
+    let timer = tick();
+    return () => window.clearTimeout(timer);
+  }, [todayKey]);
+
+  const streak = useMemo(() => sessionStreak(dashboard.sessions), [dashboard.sessions, todayKey]);
   const improvement = useMemo(() => improvementPercent(dashboard.thresholds), [dashboard.thresholds]);
   const formattedImprovement = `${improvement > 0 ? '+' : ''}${improvement}%`;
-  const weekDays = useMemo(() => buildWeekDays(dashboard.sessions), [dashboard.sessions]);
+  const weekDays = useMemo(() => buildWeekDays(dashboard.sessions), [dashboard.sessions, todayKey]);
 
   const greeting = getGreeting(timePhase);
 

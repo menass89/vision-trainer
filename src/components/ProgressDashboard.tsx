@@ -25,7 +25,7 @@ export function ProgressDashboard({ dashboard }: ProgressDashboardProps) {
 
       <div className="progress-hero glass-card">
         <span className="progress-hero__value">{improvement > 0 ? '+' : ''}{improvement}%</span>
-        <span className="progress-hero__label">Vision Improvement</span>
+        <span className="progress-hero__label">{improvement >= 0 ? 'Vision Improvement' : 'Vision Change'}</span>
       </div>
 
       <div className="progress-mini-stats">
