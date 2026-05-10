@@ -160,15 +160,19 @@ export function getPhaseForSession(config: ProgramConfig, sessionNumber: number)
   if (config.phases.length === 0) {
     throw new Error(`Program ${config.goalType} has no phases`);
   }
+  const lastPhase = config.phases[config.phases.length - 1];
   if (sessionNumber < config.phases[0].sessionRange[0]) {
     return config.phases[0];
+  }
+  if (sessionNumber > lastPhase.sessionRange[1]) {
+    return lastPhase;
   }
   for (const phase of config.phases) {
     if (sessionNumber >= phase.sessionRange[0] && sessionNumber <= phase.sessionRange[1]) {
       return phase;
     }
   }
-  return config.phases[config.phases.length - 1];
+  throw new Error(`No phase configured for session ${sessionNumber} in program ${config.goalType}`);
 }
 
 export function computeDurationMs(config: ProgramConfig, sessionNumber: number): number {

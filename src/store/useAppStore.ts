@@ -206,25 +206,27 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  updateSession: async (session) => {
-    await saveSession(session);
-    set({ activeSession: session });
-    await get().refreshDashboard();
-  },
+  updateSession: async (session) =>
+    queueSessionMutation(async () => {
+      await saveSession(session);
+      set({ activeSession: session });
+      await get().refreshDashboard();
+    }),
 
-  abandonSession: async () => {
-    const activeSession = get().activeSession;
-    if (!activeSession) {
-      return;
-    }
-    const abandoned: SessionLog = {
-      ...activeSession,
-      status: 'abandoned'
-    };
-    await saveSession(abandoned);
-    set({ activeSession: null });
-    await get().refreshDashboard();
-  },
+  abandonSession: async () =>
+    queueSessionMutation(async () => {
+      const activeSession = get().activeSession;
+      if (!activeSession) {
+        return;
+      }
+      const abandoned: SessionLog = {
+        ...activeSession,
+        status: 'abandoned'
+      };
+      await saveSession(abandoned);
+      set({ activeSession: null });
+      await get().refreshDashboard();
+    }),
 
   completeSession: async () =>
     queueSessionMutation(async () => {

@@ -66,8 +66,12 @@ export function SessionFlow() {
   };
 
   const onAssessmentComplete = async (result: AssessmentResult) => {
-    await recordAssessment(result);
-    setAssessmentActive(false);
+    try {
+      await recordAssessment(result);
+      setAssessmentActive(false);
+    } catch {
+      setCompletionMessage('Unable to save the assessment. Please try again.');
+    }
   };
 
   if (!activeSession && assessmentActive) {
