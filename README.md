@@ -1,65 +1,56 @@
-# Vision Trainer
+# Welcome to your Expo app 👋
 
-Local-first perceptual learning PWA for contrast sensitivity training. Trains the visual cortex via calibrated Gabor patches, QUEST staircase psychophysics, and condition-specific programs (myopia, presbyopia, sports vision).
+This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
-Wraps as a native iOS app via Capacitor.
+## Get started
 
-## Stack
+1. Install dependencies
 
-- **Frontend**: React 19 + TypeScript + Vite
-- **State**: Zustand
-- **Persistence**: IndexedDB (`idb`)
-- **Rendering**: WebGL2 Gabor renderer
-- **PWA**: `vite-plugin-pwa` (Workbox)
-- **iOS wrapper**: Capacitor 8
+   ```bash
+   npm install
+   ```
 
-## Scripts
+2. Start the app
+
+   ```bash
+   npx expo start
+   ```
+
+In the output, you'll find options to open the app in a
+
+- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
+- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+
+You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+
+## Get a fresh project
+
+When you're ready, run:
 
 ```bash
-npm run dev          # Vite dev server
-npm run build        # Production web build (tsc + vite)
-npm run preview      # Preview production build
-npm run test         # Vitest
-
-# iOS (Capacitor)
-npm run cap:build    # Build for native shell
-npm run cap:sync     # Build + sync to ios/
-npm run cap:open     # Open Xcode workspace
+npm run reset-project
 ```
 
-## iOS Code Signing
+This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
-Capacitor iOS uses automatic code signing. Before building or archiving:
+### Other setup steps
 
-1. Open `ios/App/App.xcworkspace` in Xcode.
-2. Select the `App` target -> **Signing & Capabilities**.
-3. Set your **Team** (Apple Developer account).
+- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
+- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
+- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
 
-This populates `DEVELOPMENT_TEAM` in `ios/App/App.xcodeproj/project.pbxproj`. That file is tracked, so the change stays local only if you avoid committing the modified `project.pbxproj`.
+## Learn more
 
-## Architecture
+To learn more about developing your project with Expo, look at the following resources:
 
-```text
-src/
-├── App.tsx                  # Root layout + tab router
-├── main.tsx                 # Entry + PWA registration
-├── theme.ts                 # Time-of-day theme phases
-├── types.ts                 # Domain types
-├── assessment/              # CSF measurement
-├── components/              # UI surfaces (tabs, screens, scenes)
-├── core/                    # WebGL Gabor renderer, display calibration
-├── data/                    # IndexedDB schema + queries
-├── programs/                # Condition-specific training programs
-├── session/                 # Session lifecycle planner
-├── store/                   # Zustand store
-├── tasks/                   # Psychophysics paradigms (registry)
-└── utils/                   # Shared helpers
-```
+- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
+- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
-## Calibration
+## Join the community
 
-A browser-derived calibration profile (screen geometry, device pixel ratio) is created on first launch and persisted to IndexedDB. `viewingDistanceCm`, `gamma`, and `backgroundLuminanceCdM2` currently fall back to seeded defaults in `src/core/displayCalibration.ts` — physical calibration is approximate until a real measurement workflow is added.
+Join our community of developers creating universal apps.
 
-## License
-
-UNLICENSED — research/personal use.
+- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
+- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
