@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   cancelAnimation,
@@ -8,6 +8,7 @@ import Animated, {
   runOnJS,
   useAnimatedProps,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withSpring,
   withTiming,
@@ -105,7 +106,9 @@ export function CsfGraph({ points, width, height }: CsfGraphProps) {
   const chartPoints = useMemo(() => createChartPoints(points, width, height), [height, points, width]);
   const path = createPath(chartPoints);
   const pathLength = getPathLength(chartPoints);
-  const strokeDashoffset = useSharedValue(pathLength);
+  const reduceMotion = useReducedMotion();
+  const isStatic = reduceMotion || Platform.OS === 'web';
+  const strokeDashoffset = useSharedValue(isStatic ? 0 : pathLength);
   const animatedProps = useAnimatedProps(() => ({
     strokeDashoffset: strokeDashoffset.value,
   }));
@@ -115,6 +118,11 @@ export function CsfGraph({ points, width, height }: CsfGraphProps) {
   const baselineY = height - CHART_BOTTOM;
 
   useEffect(() => {
+    if (isStatic) {
+      strokeDashoffset.value = 0;
+      return;
+    }
+
     strokeDashoffset.value = pathLength;
     strokeDashoffset.value = withTiming(0, {
       duration: 1100,
@@ -122,7 +130,7 @@ export function CsfGraph({ points, width, height }: CsfGraphProps) {
     });
 
     return () => cancelAnimation(strokeDashoffset);
-  }, [pathLength, strokeDashoffset]);
+  }, [isStatic, pathLength, strokeDashoffset]);
 
   const selectNearest = useCallback(
     (fingerX: number) => {
@@ -200,27 +208,52 @@ export function CsfGraph({ points, width, height }: CsfGraphProps) {
           ) : null}
           {path ? (
             <>
-              <AnimatedPath
-                animatedProps={animatedProps}
-                d={path}
-                fill="none"
-                opacity={0.9}
-                stroke={ACCENT_GLOW}
-                strokeDasharray={pathLength}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={9}
-              />
-              <AnimatedPath
-                animatedProps={animatedProps}
-                d={path}
-                fill="none"
-                stroke={ACCENT}
-                strokeDasharray={pathLength}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2.5}
-              />
+              {isStatic ? (
+                <Path
+                  d={path}
+                  fill="none"
+                  opacity={0.9}
+                  stroke={ACCENT_GLOW}
+                  strokeDashoffset={0}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={9}
+                />
+              ) : (
+                <AnimatedPath
+                  animatedProps={animatedProps}
+                  d={path}
+                  fill="none"
+                  opacity={0.9}
+                  stroke={ACCENT_GLOW}
+                  strokeDasharray={pathLength}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={9}
+                />
+              )}
+              {isStatic ? (
+                <Path
+                  d={path}
+                  fill="none"
+                  stroke={ACCENT}
+                  strokeDashoffset={0}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                />
+              ) : (
+                <AnimatedPath
+                  animatedProps={animatedProps}
+                  d={path}
+                  fill="none"
+                  stroke={ACCENT}
+                  strokeDasharray={pathLength}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                />
+              )}
             </>
           ) : null}
           {chartPoints.map((point, index) => (

@@ -1,5 +1,6 @@
 import { type Href, useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
+import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 import { AmbientGradient } from '@/components/home/AmbientGradient';
 import { ContrastArc } from '@/components/home/ContrastArc';
@@ -8,6 +9,24 @@ import { useTodayData } from '@/presenters';
 import { ACCENT, ACCENT_GLOW, radius, space, surface, verdict as verdictColors } from '@/theme/tokens';
 
 const ARC_SIZE = 260;
+const GLOW_BLEED = 22;
+
+function ButtonGlow() {
+  return (
+    <View pointerEvents="none" style={styles.buttonGlow}>
+      <Svg height="100%" width="100%">
+        <Defs>
+          <RadialGradient cx="50%" cy="50%" id="ctaGlow" rx="58%" ry="62%">
+            <Stop offset="0%" stopColor={ACCENT_GLOW} stopOpacity={1} />
+            <Stop offset="55%" stopColor={ACCENT_GLOW} stopOpacity={0.5} />
+            <Stop offset="100%" stopColor={ACCENT_GLOW} stopOpacity={0} />
+          </RadialGradient>
+        </Defs>
+        <Rect fill="url(#ctaGlow)" height="100%" rx="50%" ry="50%" width="100%" />
+      </Svg>
+    </View>
+  );
+}
 
 export default function TodayScreen() {
   const router = useRouter();
@@ -40,7 +59,7 @@ export default function TodayScreen() {
           </FadeIn>
           <FadeIn delay={160} style={styles.footer}>
             <View style={styles.buttonFrame}>
-              <View pointerEvents="none" style={styles.buttonGlow} />
+              <ButtonGlow />
               <PressableScale
                 haptic="success"
                 onPress={() => router.push('/session' as Href)}
@@ -108,13 +127,10 @@ const styles = StyleSheet.create({
   },
   buttonGlow: {
     position: 'absolute',
-    top: -space.xs,
-    right: space.sm,
-    bottom: -space.sm,
-    left: space.sm,
-    backgroundColor: ACCENT_GLOW,
-    borderRadius: radius.pill,
-    opacity: 0.62,
+    top: -GLOW_BLEED,
+    right: -GLOW_BLEED,
+    bottom: -GLOW_BLEED,
+    left: -GLOW_BLEED,
   },
   startButton: {
     alignItems: 'center',

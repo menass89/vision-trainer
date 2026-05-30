@@ -1,4 +1,5 @@
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 
 import { CsfGraph } from '@/components/progress/CsfGraph';
 import { Sparkline } from '@/components/progress/Sparkline';
@@ -11,9 +12,12 @@ const SPARKLINE_HEIGHT = 112;
 const CSF_GRAPH_HEIGHT = 220;
 
 export default function ProgressScreen() {
-  const { width } = useWindowDimensions();
   const { data, isLoading } = useProgressData();
-  const chartWidth = Math.max(width - space.lg * 2 - space.base * 2, 0);
+  const [chartWidth, setChartWidth] = useState(0);
+  const handleChartLayout = useCallback((event: LayoutChangeEvent) => {
+    const next = Math.round(event.nativeEvent.layout.width);
+    setChartWidth((previous) => (previous === next ? previous : next));
+  }, []);
 
   return (
     <Screen scroll style={styles.screen}>
@@ -47,7 +51,11 @@ export default function ProgressScreen() {
                   </AppText>
                 </View>
               ) : (
-                <Sparkline height={SPARKLINE_HEIGHT} points={data.sparkline} width={chartWidth} />
+                <View onLayout={handleChartLayout} style={styles.chartMeasure}>
+                  {chartWidth > 0 ? (
+                    <Sparkline height={SPARKLINE_HEIGHT} points={data.sparkline} width={chartWidth} />
+                  ) : null}
+                </View>
               )}
             </Card>
           </FadeIn>
@@ -61,7 +69,11 @@ export default function ProgressScreen() {
                   Drag to inspect
                 </AppText>
               </View>
-              <CsfGraph height={CSF_GRAPH_HEIGHT} points={data.csf} width={chartWidth} />
+              <View onLayout={handleChartLayout} style={styles.chartMeasure}>
+                {chartWidth > 0 ? (
+                  <CsfGraph height={CSF_GRAPH_HEIGHT} points={data.csf} width={chartWidth} />
+                ) : null}
+              </View>
             </Card>
           </FadeIn>
         </>
@@ -97,6 +109,9 @@ const styles = StyleSheet.create({
   },
   cardHeading: {
     gap: space.xs,
+  },
+  chartMeasure: {
+    width: '100%',
   },
   emptyTrend: {
     alignItems: 'center',

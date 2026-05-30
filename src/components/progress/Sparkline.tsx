@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import Animated, {
   cancelAnimation,
   Easing,
   useAnimatedProps,
+  useReducedMotion,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
@@ -59,7 +60,9 @@ export function Sparkline({ points, width, height }: SparklineProps) {
   const chartPoints = createChartPoints(points, width, height);
   const path = createPath(chartPoints);
   const pathLength = getPathLength(chartPoints);
-  const strokeDashoffset = useSharedValue(pathLength);
+  const reduceMotion = useReducedMotion();
+  const isStatic = reduceMotion || Platform.OS === 'web';
+  const strokeDashoffset = useSharedValue(isStatic ? 0 : pathLength);
   const animatedProps = useAnimatedProps(() => ({
     strokeDashoffset: strokeDashoffset.value,
   }));
@@ -69,6 +72,11 @@ export function Sparkline({ points, width, height }: SparklineProps) {
     firstPoint && lastPoint ? `${path} L ${lastPoint.x} ${height} L ${firstPoint.x} ${height} Z` : '';
 
   useEffect(() => {
+    if (isStatic) {
+      strokeDashoffset.value = 0;
+      return;
+    }
+
     strokeDashoffset.value = pathLength;
     strokeDashoffset.value = withTiming(0, {
       duration: 900,
@@ -76,7 +84,7 @@ export function Sparkline({ points, width, height }: SparklineProps) {
     });
 
     return () => cancelAnimation(strokeDashoffset);
-  }, [pathLength, strokeDashoffset]);
+  }, [isStatic, pathLength, strokeDashoffset]);
 
   return (
     <View style={[styles.container, { width, height: height + LABEL_HEIGHT }]}>
@@ -84,27 +92,52 @@ export function Sparkline({ points, width, height }: SparklineProps) {
         {areaPath ? <Path d={areaPath} fill={ACCENT} opacity={0.08} /> : null}
         {path ? (
           <>
-            <AnimatedPath
-              animatedProps={animatedProps}
-              d={path}
-              fill="none"
-              opacity={0.9}
-              stroke={ACCENT_GLOW}
-              strokeDasharray={pathLength}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={8}
-            />
-            <AnimatedPath
-              animatedProps={animatedProps}
-              d={path}
-              fill="none"
-              stroke={ACCENT}
-              strokeDasharray={pathLength}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-            />
+            {isStatic ? (
+              <Path
+                d={path}
+                fill="none"
+                opacity={0.9}
+                stroke={ACCENT_GLOW}
+                strokeDashoffset={0}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={8}
+              />
+            ) : (
+              <AnimatedPath
+                animatedProps={animatedProps}
+                d={path}
+                fill="none"
+                opacity={0.9}
+                stroke={ACCENT_GLOW}
+                strokeDasharray={pathLength}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={8}
+              />
+            )}
+            {isStatic ? (
+              <Path
+                d={path}
+                fill="none"
+                stroke={ACCENT}
+                strokeDashoffset={0}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+              />
+            ) : (
+              <AnimatedPath
+                animatedProps={animatedProps}
+                d={path}
+                fill="none"
+                stroke={ACCENT}
+                strokeDasharray={pathLength}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+              />
+            )}
           </>
         ) : null}
         {chartPoints.map((point, index) => {
