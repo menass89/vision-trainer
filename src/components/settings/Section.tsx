@@ -1,0 +1,47 @@
+import { Children, Fragment, type ReactNode } from 'react';
+import { StyleSheet, View } from 'react-native';
+
+import { AppText, Hairline } from '@/components/ui';
+import { hairline, radius, space, surface } from '@/theme/tokens';
+
+export type SectionProps = {
+  title: string;
+  children: ReactNode;
+};
+
+export function Section({ title, children }: SectionProps) {
+  const rows = Children.toArray(children);
+
+  return (
+    <View style={styles.section}>
+      <AppText color="muted" uppercase variant="micro">
+        {title}
+      </AppText>
+      <View style={styles.group}>
+        {rows.map((row, index) => (
+          <Fragment key={index}>
+            {index > 0 ? <Hairline style={styles.hairline} /> : null}
+            {row}
+          </Fragment>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  section: {
+    gap: space.sm,
+    marginBottom: space.lg,
+  },
+  group: {
+    backgroundColor: surface.raised,
+    borderColor: surface.hairline,
+    borderRadius: radius.lg,
+    borderWidth: hairline.px1,
+    overflow: 'hidden',
+  },
+  hairline: {
+    marginLeft: space.base,
+  },
+});

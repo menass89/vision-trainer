@@ -1,27 +1,136 @@
-// PLACEHOLDER — body filled in Phase 3c/3d/...
 import { StyleSheet } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 
-import { AppText, FadeIn, Screen } from '@/components/ui';
-import { space } from '@/theme/tokens';
+import { Row } from '@/components/settings/Row';
+import { Section } from '@/components/settings/Section';
+import {
+  SegmentedControl,
+  type SegmentOption,
+} from '@/components/settings/SegmentedControl';
+import { Toggle } from '@/components/settings/Toggle';
+import { AppText, FadeIn, PressableScale, Screen } from '@/components/ui';
+import { type SettingsState, useSettingsState } from '@/presenters';
+import { space, text } from '@/theme/tokens';
+
+const WEAK_EYE_OPTIONS: SegmentOption<SettingsState['monocularWeakEye']>[] = [
+  { label: 'Left', value: 'left' },
+  { label: 'Right', value: 'right' },
+  { label: 'Off', value: 'off' },
+];
 
 export default function SettingsScreen() {
+  const { state, set } = useSettingsState();
+
   return (
-    <Screen>
-      <FadeIn style={styles.placeholder}>
+    <Screen scroll style={styles.screen}>
+      <FadeIn style={styles.title}>
         <AppText variant="title">Settings</AppText>
-        <AppText color="muted" variant="caption">
-          Phase 3g — coming next
-        </AppText>
+      </FadeIn>
+      <FadeIn delay={60}>
+        <Section title="Stimulus">
+          <Row
+            description="Separate red/cyan channels for amblyopia training"
+            label="Dichoptic mode"
+            right={
+              <Toggle
+                onChange={(value) => set('dichopticEnabled', value)}
+                value={state.dichopticEnabled}
+              />
+            }
+          />
+          <Row
+            description="Boost the non-dominant eye"
+            label="Weak eye"
+            right={
+              <SegmentedControl
+                onChange={(value) => set('monocularWeakEye', value)}
+                options={WEAK_EYE_OPTIONS}
+                value={state.monocularWeakEye}
+              />
+            }
+          />
+        </Section>
+      </FadeIn>
+      <FadeIn delay={120}>
+        <Section title="Feedback">
+          <Row
+            label="Haptics"
+            right={
+              <Toggle
+                onChange={(value) => set('hapticsEnabled', value)}
+                value={state.hapticsEnabled}
+              />
+            }
+          />
+          <Row
+            label="Sound cues"
+            right={
+              <Toggle
+                onChange={(value) => set('soundEnabled', value)}
+                value={state.soundEnabled}
+              />
+            }
+          />
+          <Row
+            description="Calm ambient animation"
+            label="Reduce motion"
+            right={
+              <Toggle
+                onChange={(value) => set('reduceMotion', value)}
+                value={state.reduceMotion}
+              />
+            }
+          />
+        </Section>
+      </FadeIn>
+      <FadeIn delay={180}>
+        <Section title="About">
+          <Row
+            label="Version"
+            right={
+              <AppText color="muted" variant="caption">
+                1.0.0
+              </AppText>
+            }
+          />
+          <Row
+            description="How perceptual learning works"
+            label="The science"
+            right={<ScienceLink />}
+          />
+        </Section>
       </FadeIn>
     </Screen>
   );
 }
 
+function ScienceLink() {
+  const handlePress = () => {
+    // TODO(phase4): link to the science explainer.
+  };
+
+  return (
+    <PressableScale haptic="none" hitSlop={space.sm} onPress={handlePress} scaleTo={0.94}>
+      <Svg height={16} width={16}>
+        <Path
+          d="M6 3.5L10.5 8L6 12.5"
+          fill="none"
+          stroke={text.muted}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+        />
+      </Svg>
+    </PressableScale>
+  );
+}
+
 const styles = StyleSheet.create({
-  placeholder: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: space.sm,
+  screen: {
+    paddingBottom: space.lg,
+    paddingTop: space.lg,
+  },
+  title: {
+    marginBottom: space.xl,
   },
 });
