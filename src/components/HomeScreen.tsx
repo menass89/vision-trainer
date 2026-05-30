@@ -2,7 +2,6 @@ import { PlayCircle } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import type { DashboardSnapshot, GamificationState, TimePhase, UserProfile } from '../types';
 import { improvementPercent } from '../progress/csf';
-import { SkyScene } from './SkyScene';
 
 type HomeScreenProps = {
   profile: UserProfile;
@@ -42,23 +41,25 @@ export function HomeScreen({ profile, dashboard, gamification, timePhase, onStar
 
   return (
     <section className="home-immersive">
-      <SkyScene phase={timePhase} className="home-immersive__sky" />
       <div className="home-immersive__content">
-        <h2 className="home-immersive__greeting">{greeting}, {profile.displayName}</h2>
-        <p className="home-immersive__subtitle">Day {completedSessions + 1}</p>
+        <div className="home-immersive__hero">
+          <p className="home-immersive__greeting">{greeting}, {profile.displayName}</p>
+          <h1 className="home-immersive__headline">
+            <span>Day <b className="home-immersive__day-number">{completedSessions + 1}</b>.</span>
+            <strong>Ready to train.</strong>
+          </h1>
+        </div>
 
         <div className="streak-bar" aria-label="Weekly streak">
           {weekDays.map((day) => (
             <div key={day.label} className="streak-day">
               <span className="streak-day__label">{day.label}</span>
-              <div className={`streak-dot streak-dot--${day.status}`}>
-                {day.status === 'done' ? '✓' : day.status === 'today' ? '→' : ''}
-              </div>
+              <div className={`streak-dot streak-dot--${day.status}`} />
             </div>
           ))}
         </div>
 
-        <div className="home-session-card glass-card">
+        <div className="home-session-card">
           <span className="home-session-card__meta">Session {completedSessions + 1} · ~25 min</span>
           <button type="button" className="start-btn wide" onClick={onStartSession}>
             <PlayCircle size={18} />
@@ -72,7 +73,7 @@ export function HomeScreen({ profile, dashboard, gamification, timePhase, onStar
             <span className="home-stat__label">Streak</span>
           </div>
           <div className="home-stat">
-            <span className="home-stat__value">{formattedImprovement}</span>
+            <span className="home-stat__value home-stat__value--signal">{formattedImprovement}</span>
             <span className="home-stat__label">CS Gain</span>
           </div>
           <div className="home-stat">

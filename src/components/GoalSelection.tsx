@@ -1,4 +1,4 @@
-import { Eye, Glasses, Zap } from 'lucide-react';
+import { Activity, ArrowRight, Eye, Glasses, Zap } from 'lucide-react';
 import { useState } from 'react';
 import type { GoalType } from '../types';
 
@@ -35,7 +35,7 @@ const GOALS: Array<{ type: GoalType; icon: typeof Eye; label: string; tagline: s
     label: 'Sports Vision',
     tagline: 'React faster, see more',
     details: [
-      'Full range — coarse to fine detail',
+      'Full range, coarse to fine detail',
       'Fast flashes train reaction speed',
       '30 sessions · ~20 min each',
     ],
@@ -46,6 +46,7 @@ export function GoalSelection({ onSelect }: GoalSelectionProps) {
   const [name, setName] = useState('');
   const [monocular, setMonocular] = useState(false);
   const [monocularEye, setMonocularEye] = useState<'left' | 'right'>('right');
+  const [selectedGoal, setSelectedGoal] = useState<GoalType | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [selectionError, setSelectionError] = useState<string | null>(null);
 
@@ -65,8 +66,16 @@ export function GoalSelection({ onSelect }: GoalSelectionProps) {
 
   return (
     <section className="goal-selection" aria-labelledby="goal-heading">
-      <h2 id="goal-heading" className="goal-selection__heading">Welcome to Vision Trainer</h2>
-      <p className="goal-selection__subtitle">What's your first name?</p>
+      <div className="goal-selection__bleed" aria-hidden="true" />
+      <div className="goal-selection__wordmark">
+        <Activity size={15} />
+        <span>Vision Trainer</span>
+      </div>
+      <h1 id="goal-heading" className="goal-selection__heading">
+        <span>Train your sight.</span>
+        <strong>Measure the gain.</strong>
+      </h1>
+      <p className="goal-selection__subtitle">Start with a focused training program.</p>
 
       <input
         type="text"
@@ -79,15 +88,16 @@ export function GoalSelection({ onSelect }: GoalSelectionProps) {
         autoFocus
       />
 
-      <p className="goal-selection__subtitle" style={{ marginTop: '0.5rem' }}>What would you like to improve?</p>
+      <p className="goal-selection__section-label">Choose your focus</p>
 
       <div className="goal-cards">
         {GOALS.map(({ type, icon: Icon, label, tagline, details }) => (
           <button
             key={type}
             type="button"
-            className="goal-card glass-card"
-            onClick={() => { void handleSelect(type); }}
+            className={`goal-card ${selectedGoal === type ? 'goal-card--selected' : ''}`}
+            onClick={() => setSelectedGoal(type)}
+            aria-pressed={selectedGoal === type}
             disabled={isPending}
           >
             <Icon size={28} />
@@ -142,6 +152,16 @@ export function GoalSelection({ onSelect }: GoalSelectionProps) {
           </div>
         </div>
       )}
+
+      <button
+        type="button"
+        className="start-btn goal-selection__cta wide"
+        onClick={() => { if (selectedGoal) void handleSelect(selectedGoal); }}
+        disabled={!selectedGoal || isPending}
+      >
+        {isPending ? 'Saving Program' : 'Continue'}
+        <ArrowRight size={18} />
+      </button>
     </section>
   );
 }
