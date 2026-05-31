@@ -5,33 +5,33 @@
 import { StyleSheet } from 'react-native';
 
 export const surface = {
-  base: '#0A0B0D',
-  raised: '#15110E',
-  overlay: '#1F1813',
-  warm: '#1A1210',
-  hairline: '#2A241F',
-  hairlineStrong: '#352D26'
+  base: '#080A0D',
+  raised: '#0E1316',
+  overlay: '#141F22',
+  warm: '#0C1417',
+  hairline: '#1E2A2D',
+  hairlineStrong: '#28363A'
 } as const;
 
 export const text = {
-  primary: '#F4F0EC',
-  secondary: '#B3AAA3',
-  muted: '#6F665F',
-  inverse: '#1A1410'
+  primary: '#EFF3F4',
+  secondary: '#A7B2B4',
+  muted: '#67726F',
+  inverse: '#08161A'
 } as const;
 
-// SIGNATURE ACCENT - single living/active hue (warm ember).
+// SIGNATURE ACCENT - single living/active hue (lunar cyan, instrument-grade).
 // Gradient stops live in accent.
-export const ACCENT = '#FF8A45' as const;
-export const ACCENT_GLOW = 'rgba(255,138,69,0.30)' as const;
-export const ACCENT_MUTED = '#7A4A2C' as const;
+export const ACCENT = '#33D2D6' as const;
+export const ACCENT_GLOW = 'rgba(51,210,214,0.30)' as const;
+export const ACCENT_MUTED = '#2B6166' as const;
 
 export const accent = {
   default: ACCENT,
   glow: ACCENT_GLOW,
   muted: ACCENT_MUTED,
-  amber: '#FFB86B',
-  ember: '#FF7A3D'
+  amber: '#6FE3E6',
+  ember: '#26C3C8'
 } as const;
 
 export const verdict = {
@@ -45,9 +45,9 @@ export const data = {
   amber: '#E8A05A',
   green: '#A9C46C',
   norm: '#8A6A4A',
-  track: '#241A14',
-  canvas: '#0E0A08',
-  heroGlow: 'rgba(200,120,60,0.10)'
+  track: '#16201F',
+  canvas: '#080C0E',
+  heroGlow: 'rgba(51,200,214,0.10)'
 } as const;
 
 export const material = {
