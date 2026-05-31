@@ -8,6 +8,7 @@ export const surface = {
   base: '#080A0D',
   raised: '#0E1316',
   card: '#12181C',
+  cardPressed: '#161D21',
   overlay: '#141F22',
   warm: '#0C1417',
   hairline: '#1E2A2D',
@@ -140,7 +141,8 @@ export const motion = {
     liquid: { stiffness: 220, damping: 28, mass: 1 },
     reward: { stiffness: 200, damping: 12, mass: 1 },
     snap: { stiffness: 180, damping: 22, mass: 1 },
-    response: { stiffness: 240, damping: 22, mass: 1 }
+    response: { stiffness: 240, damping: 22, mass: 1 },
+    toggle: { stiffness: 200, damping: 15, mass: 1 }
   },
   timing: {
     entranceMs: 280,

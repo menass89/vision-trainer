@@ -7,9 +7,10 @@ import { hairline, radius, space, surface } from '@/theme/tokens';
 export type SectionProps = {
   title: string;
   children: ReactNode;
+  footer?: string;
 };
 
-export function Section({ title, children }: SectionProps) {
+export function Section({ title, children, footer }: SectionProps) {
   const rows = Children.toArray(children);
 
   return (
@@ -25,6 +26,11 @@ export function Section({ title, children }: SectionProps) {
           </Fragment>
         ))}
       </View>
+      {footer ? (
+        <AppText color="muted" style={styles.footer} variant="caption">
+          {footer}
+        </AppText>
+      ) : null}
     </View>
   );
 }
@@ -40,6 +46,9 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: hairline.px1,
     overflow: 'hidden',
+  },
+  footer: {
+    paddingHorizontal: space.base,
   },
   hairline: {
     marginLeft: space.base,

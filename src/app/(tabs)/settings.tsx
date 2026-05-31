@@ -9,7 +9,7 @@ import {
   type SegmentOption,
 } from '@/components/settings/SegmentedControl';
 import { Toggle } from '@/components/settings/Toggle';
-import { AppText, FadeIn, PressableScale, Screen } from '@/components/ui';
+import { AppText, FadeIn, Screen } from '@/components/ui';
 import { type SettingsState, useSettingsState } from '@/presenters';
 import { notificationService } from '@/services/notifications';
 import { space, text } from '@/theme/tokens';
@@ -24,6 +24,7 @@ const WEAK_EYE_OPTIONS: SegmentOption<SettingsState['monocularWeakEye']>[] = [
 ];
 
 export default function SettingsScreen() {
+  const router = useRouter();
   const { state, set } = useSettingsState();
 
   const handleRemindersChange = async (next: boolean) => {
@@ -53,7 +54,9 @@ export default function SettingsScreen() {
         <AppText variant="title">Settings</AppText>
       </FadeIn>
       <FadeIn delay={60}>
-        <Section title="Stimulus">
+        <Section
+          footer="Weak-eye boost favours your non-dominant eye. Both modes need red/cyan glasses."
+          title="Stimulus">
           <Row
             description="Separate red/cyan channels for amblyopia training"
             label="Dichoptic mode"
@@ -65,7 +68,6 @@ export default function SettingsScreen() {
             }
           />
           <Row
-            description="Boost the non-dominant eye"
             label="Weak eye"
             right={
               <SegmentedControl
@@ -136,9 +138,11 @@ export default function SettingsScreen() {
             }
           />
           <Row
+            accessibilityLabel="The science"
             description="How perceptual learning works"
             label="The science"
-            right={<ScienceLink />}
+            onPress={() => router.push('/science' as Href)}
+            right={<Chevron />}
           />
         </Section>
       </FadeIn>
@@ -146,28 +150,18 @@ export default function SettingsScreen() {
   );
 }
 
-function ScienceLink() {
-  const router = useRouter();
-
+function Chevron() {
   return (
-    <PressableScale
-      accessibilityLabel="The science"
-      accessibilityRole="button"
-      haptic="selection"
-      hitSlop={space.sm}
-      onPress={() => router.push('/science' as Href)}
-      scaleTo={0.94}>
-      <Svg height={16} width={16}>
-        <Path
-          d="M6 3.5L10.5 8L6 12.5"
-          fill="none"
-          stroke={text.muted}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={1.5}
-        />
-      </Svg>
-    </PressableScale>
+    <Svg height={16} width={16}>
+      <Path
+        d="M6 3.5L10.5 8L6 12.5"
+        fill="none"
+        stroke={text.muted}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+      />
+    </Svg>
   );
 }
 

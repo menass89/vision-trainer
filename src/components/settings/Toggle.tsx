@@ -8,6 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { PressableScale } from '@/components/ui';
+import { haptics } from '@/theme/haptics';
 import { ACCENT, motion, radius, surface, text } from '@/theme/tokens';
 
 export type ToggleProps = {
@@ -26,7 +27,7 @@ export function Toggle({ value, onChange, disabled = false }: ToggleProps) {
   const progress = useSharedValue(value ? 1 : 0);
 
   useEffect(() => {
-    progress.value = withSpring(value ? 1 : 0, motion.spring.input);
+    progress.value = withSpring(value ? 1 : 0, motion.spring.toggle);
   }, [progress, value]);
 
   const trackStyle = useAnimatedStyle(() => ({
@@ -39,14 +40,16 @@ export function Toggle({ value, onChange, disabled = false }: ToggleProps) {
   const handleChange = () => {
     const nextValue = !value;
 
-    progress.value = withSpring(nextValue ? 1 : 0, motion.spring.input);
+    // Commit-frame feedback: the tick lands exactly as the knob crosses, not on touch-down.
+    haptics.select();
+    progress.value = withSpring(nextValue ? 1 : 0, motion.spring.toggle);
     onChange(nextValue);
   };
 
   return (
     <PressableScale
       disabled={disabled}
-      haptic="selection"
+      haptic="none"
       onPress={handleChange}
       scaleTo={0.94}>
       <Animated.View style={[styles.track, trackStyle]}>
