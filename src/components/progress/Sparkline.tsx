@@ -181,15 +181,6 @@ export function Sparkline({ points, width, height }: SparklineProps) {
           {lastPoint.day}
         </AppText>
       ) : null}
-      {lastPoint ? (
-        <AppText
-          color="primary"
-          style={[styles.valueLabel, { top: Math.max(0, lastPoint.y - 16) }]}
-          tabular
-          variant="micro">
-          {(points.at(-1)?.value ?? 0).toFixed(2)}
-        </AppText>
-      ) : null}
     </View>
   );
 }
@@ -207,10 +198,5 @@ const styles = StyleSheet.create({
     bottom: 0,
     position: 'absolute',
     right: 0,
-  },
-  valueLabel: {
-    position: 'absolute',
-    right: 0,
-    textAlign: 'right',
   },
 });
