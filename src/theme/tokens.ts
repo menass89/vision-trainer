@@ -35,9 +35,9 @@ export const accent = {
 } as const;
 
 export const verdict = {
-  improving: '#A9C46C',
+  improving: '#5FD0B0',
   holding: '#8A9099',
-  regressing: '#E07A5F'
+  regressing: '#E0607A'
 } as const;
 
 export const data = {

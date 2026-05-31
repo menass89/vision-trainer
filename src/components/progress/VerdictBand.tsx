@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { AppText } from '@/components/ui';
-import { data, radius, space } from '@/theme/tokens';
+import { radius, space, verdict as verdictColors } from '@/theme/tokens';
 
 export type VerdictBandProps = {
   verdict: 'improving' | 'holding' | 'regressing';
@@ -17,9 +17,9 @@ function formatDelta(delta: number) {
 
 export function VerdictBand({ verdict, delta }: VerdictBandProps) {
   const verdictColor = {
-    improving: data.green,
-    holding: data.norm,
-    regressing: data.coral,
+    improving: verdictColors.improving,
+    holding: verdictColors.holding,
+    regressing: verdictColors.regressing,
   }[verdict];
   const direction = verdict === 'holding' || delta === 0 ? 'holding' : delta > 0 ? 'up' : 'down';
 
