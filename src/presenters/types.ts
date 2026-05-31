@@ -18,11 +18,14 @@ export type CsfPoint = { spatialFrequency: number; sensitivity: number };
 export type ProgressView = {
   /** Cash-App oversized numeral */
   headlineAcuity: number;
+  previousAcuity: number;
   verdict: Verdict;
   /** signed delta vs previous period */
   delta: number;
   sparkline: SparkPoint[];
   csf: CsfPoint[];
+  csfReferences: { label: string; sensitivity: number }[];
+  contributors: { label: string; sensitivity: number; norm: number }[];
 };
 
 export type SettingsState = {

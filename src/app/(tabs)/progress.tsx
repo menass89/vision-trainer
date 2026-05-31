@@ -1,12 +1,15 @@
 import { useCallback, useState } from 'react';
 import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 
+import { ContributorRows } from '@/components/progress/ContributorRows';
+import { CountUpNumber } from '@/components/progress/CountUpNumber';
 import { CsfGraph } from '@/components/progress/CsfGraph';
 import { Sparkline } from '@/components/progress/Sparkline';
 import { VerdictBand } from '@/components/progress/VerdictBand';
-import { AppText, Card, FadeIn, Screen, Shimmer } from '@/components/ui';
+import { AppText, Bloom, Card, FadeIn, Screen, Shimmer } from '@/components/ui';
 import { useProgressData } from '@/presenters';
-import { radius, space } from '@/theme/tokens';
+import { haptics } from '@/theme/haptics';
+import { data as dataColors, motion, radius, space } from '@/theme/tokens';
 
 const SPARKLINE_HEIGHT = 112;
 const CSF_GRAPH_HEIGHT = 220;
@@ -34,9 +37,17 @@ export default function ProgressScreen() {
             <AppText color="muted" uppercase variant="micro">
               Log contrast sensitivity
             </AppText>
-            <AppText style={styles.headline} tabular variant="display">
-              {data.headlineAcuity.toFixed(2)}
-            </AppText>
+            <View
+              accessibilityLabel={data.headlineAcuity.toFixed(2)}
+              style={styles.heroNumber}>
+              <Bloom color={dataColors.heroGlow} />
+              <CountUpNumber
+                durationMs={motion.timing.countUpProgressMs}
+                from={data.previousAcuity}
+                onSettle={haptics.numberSettle}
+                to={data.headlineAcuity}
+              />
+            </View>
             <VerdictBand delta={data.delta} verdict={data.verdict} />
           </FadeIn>
           <FadeIn delay={120}>
@@ -71,9 +82,22 @@ export default function ProgressScreen() {
               </View>
               <View onLayout={handleChartLayout} style={styles.chartMeasure}>
                 {chartWidth > 0 ? (
-                  <CsfGraph height={CSF_GRAPH_HEIGHT} points={data.csf} width={chartWidth} />
+                  <CsfGraph
+                    height={CSF_GRAPH_HEIGHT}
+                    points={data.csf}
+                    references={data.csfReferences}
+                    width={chartWidth}
+                  />
                 ) : null}
               </View>
+            </Card>
+          </FadeIn>
+          <FadeIn delay={240}>
+            <Card style={styles.card}>
+              <AppText color="secondary" variant="caption">
+                By spatial frequency
+              </AppText>
+              <ContributorRows rows={data.contributors} />
             </Card>
           </FadeIn>
         </>
@@ -99,6 +123,9 @@ function LoadingProgress() {
       <FadeIn delay={180}>
         <Shimmer height={286} radius={radius.lg} width="100%" />
       </FadeIn>
+      <FadeIn delay={240}>
+        <Shimmer height={248} radius={radius.lg} width="100%" />
+      </FadeIn>
     </>
   );
 }
@@ -118,13 +145,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: SPARKLINE_HEIGHT + 20,
   },
-  headline: {
-    textAlign: 'center',
-  },
   hero: {
     alignItems: 'center',
     gap: space.sm,
     paddingVertical: space.xxl,
+  },
+  heroNumber: {
+    alignItems: 'center',
+    height: 160,
+    justifyContent: 'center',
+    width: 260,
   },
   loadingHero: {
     alignItems: 'center',

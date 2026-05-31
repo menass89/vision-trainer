@@ -1,7 +1,8 @@
 import { StyleSheet, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 
 import { AppText } from '@/components/ui';
-import { hairline, radius, space, verdict as verdictColors } from '@/theme/tokens';
+import { data, radius, space } from '@/theme/tokens';
 
 export type VerdictBandProps = {
   verdict: 'improving' | 'holding' | 'regressing';
@@ -9,27 +10,37 @@ export type VerdictBandProps = {
 };
 
 function formatDelta(delta: number) {
-  const sign = delta < 0 ? '−' : '+';
+  const sign = delta < 0 ? '−' : delta > 0 ? '+' : '';
 
   return `${sign}${Math.abs(delta).toFixed(2)}`;
 }
 
 export function VerdictBand({ verdict, delta }: VerdictBandProps) {
-  const verdictColor = verdictColors[verdict];
+  const verdictColor = {
+    improving: data.green,
+    holding: data.norm,
+    regressing: data.coral,
+  }[verdict];
+  const direction = verdict === 'holding' || delta === 0 ? 'holding' : delta > 0 ? 'up' : 'down';
 
   return (
     <View
       style={[
         styles.band,
         {
-          backgroundColor: `${verdictColor}24`,
-          borderColor: verdictColor,
+          backgroundColor: `${verdictColor}1F`,
         },
       ]}>
-      <AppText style={{ color: verdictColor }} uppercase variant="caption">
-        {verdict}
-      </AppText>
-      <AppText color="secondary" tabular variant="caption">
+      {direction === 'holding' ? (
+        <AppText style={{ color: verdictColor }} variant="caption">
+          —
+        </AppText>
+      ) : (
+        <Svg height={6} viewBox="0 0 8 6" width={8}>
+          <Path d={direction === 'up' ? 'M 4 0 L 8 6 L 0 6 Z' : 'M 0 0 L 8 0 L 4 6 Z'} fill={verdictColor} />
+        </Svg>
+      )}
+      <AppText style={{ color: verdictColor }} tabular variant="caption">
         {formatDelta(delta)}
       </AppText>
     </View>
@@ -41,9 +52,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'center',
     borderRadius: radius.pill,
-    borderWidth: hairline.px1,
     flexDirection: 'row',
-    gap: space.sm,
+    gap: space.xs,
     paddingHorizontal: space.md,
     paddingVertical: space.xs,
   },

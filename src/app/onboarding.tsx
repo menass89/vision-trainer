@@ -1,12 +1,11 @@
-import * as Haptics from 'expo-haptics';
 import { type Href, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { BreathingOrb } from '@/components/onboarding/BreathingOrb';
-import { AppText, FadeIn, PressableScale, Screen } from '@/components/ui';
-import { ACCENT, radius, space, surface } from '@/theme/tokens';
+import { AppText, Bloom, FadeIn, PressableScale, Screen } from '@/components/ui';
+import { ACCENT, ACCENT_GLOW, radius, space, surface } from '@/theme/tokens';
 
 const STEPS = [
   { id: 'welcome', buttonLabel: 'Begin' },
@@ -21,12 +20,6 @@ export default function OnboardingScreen() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const currentStep = STEPS[step];
-
-  useEffect(() => {
-    if (step === 2) {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-  }, [step]);
 
   const advance = () => {
     setStep((current) => Math.min(current + 1, STEPS.length - 1));
@@ -57,16 +50,19 @@ export default function OnboardingScreen() {
             <>
               <StepHero step={step} />
               <View style={styles.actions}>
-                <PressableScale
-                  haptic={step === 5 ? 'success' : 'selection'}
-                  onPress={
-                    step === 3 ? handleEnableReminders : step === 5 ? handleStart : advance
-                  }
-                  style={[styles.primaryButton, step === 5 && styles.startButton]}>
-                  <AppText color={step === 5 ? 'inverse' : 'primary'} variant="heading">
-                    {currentStep.buttonLabel}
-                  </AppText>
-                </PressableScale>
+                <View style={styles.primaryButtonFrame}>
+                  {step === 5 ? <Bloom color={ACCENT_GLOW} style={styles.startButtonBloom} /> : null}
+                  <PressableScale
+                    haptic={step === 5 ? 'milestone' : 'selection'}
+                    onPress={
+                      step === 3 ? handleEnableReminders : step === 5 ? handleStart : advance
+                    }
+                    style={[styles.primaryButton, step === 5 && styles.startButton]}>
+                    <AppText color={step === 5 ? 'inverse' : 'primary'} variant="heading">
+                      {currentStep.buttonLabel}
+                    </AppText>
+                  </PressableScale>
+                </View>
                 {step === 3 ? (
                   <PressableScale onPress={advance} style={styles.secondaryChoice}>
                     <AppText color="muted" variant="caption">
@@ -95,7 +91,7 @@ function StepHero({ step }: StepHeroProps) {
       <View style={styles.copy}>
         {step === 0 ? (
           <>
-            <AppText variant="title">Train the way you see.</AppText>
+            <AppText variant="hero">Train the way you see.</AppText>
             <AppText color="secondary" variant="caption">
               A quieter daily practice for sharper contrast.
             </AppText>
@@ -131,7 +127,7 @@ function StepHero({ step }: StepHeroProps) {
         ) : null}
         {step === 5 ? (
           <>
-            <AppText variant="title">You're set.</AppText>
+            <AppText variant="hero">You're set.</AppText>
             <AppText color="secondary" variant="caption">
               Your first session will set a baseline.
             </AppText>
@@ -237,6 +233,9 @@ const styles = StyleSheet.create({
     gap: space.xs,
     paddingBottom: space.lg,
   },
+  primaryButtonFrame: {
+    position: 'relative',
+  },
   primaryButton: {
     alignItems: 'center',
     backgroundColor: surface.raised,
@@ -245,6 +244,13 @@ const styles = StyleSheet.create({
   },
   startButton: {
     backgroundColor: ACCENT,
+  },
+  startButtonBloom: {
+    alignSelf: 'center',
+    height: 140,
+    top: '50%',
+    marginTop: -70,
+    width: 240,
   },
   secondaryChoice: {
     alignItems: 'center',

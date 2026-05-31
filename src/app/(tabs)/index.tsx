@@ -1,29 +1,44 @@
 import { type Href, useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
-import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 import { AmbientGradient } from '@/components/home/AmbientGradient';
-import { ContrastArc } from '@/components/home/ContrastArc';
-import { AppText, FadeIn, PressableScale, Screen, Shimmer } from '@/components/ui';
+import { AppText, Bloom, FadeIn, PressableScale, Screen, Shimmer } from '@/components/ui';
 import { useTodayData } from '@/presenters';
-import { ACCENT, ACCENT_GLOW, radius, space, surface, verdict as verdictColors } from '@/theme/tokens';
+import { ACCENT, ACCENT_GLOW, radius, space, surface } from '@/theme/tokens';
 
-const ARC_SIZE = 260;
 const GLOW_BLEED = 22;
+const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
 
-function ButtonGlow() {
+type WeekRowProps = {
+  activeIndex?: number;
+  sessionDoneToday: boolean;
+};
+
+function WeekRow({ activeIndex = 3, sessionDoneToday }: WeekRowProps) {
   return (
-    <View pointerEvents="none" style={styles.buttonGlow}>
-      <Svg height="100%" width="100%">
-        <Defs>
-          <RadialGradient cx="50%" cy="50%" id="ctaGlow" rx="58%" ry="62%">
-            <Stop offset="0%" stopColor={ACCENT_GLOW} stopOpacity={1} />
-            <Stop offset="55%" stopColor={ACCENT_GLOW} stopOpacity={0.5} />
-            <Stop offset="100%" stopColor={ACCENT_GLOW} stopOpacity={0} />
-          </RadialGradient>
-        </Defs>
-        <Rect fill="url(#ctaGlow)" height="100%" rx="50%" ry="50%" width="100%" />
-      </Svg>
+    <View style={styles.weekRow}>
+      {DAYS.map((day, index) => {
+        const isToday = index === activeIndex;
+        const isDone = index < activeIndex || (isToday && sessionDoneToday);
+
+        return (
+          <View key={`${day}-${index}`} style={styles.dayCell}>
+            <AppText color={isToday ? 'primary' : 'muted'} variant="micro">
+              {day}
+            </AppText>
+            <View style={styles.dayDotFrame}>
+              {isToday ? <Bloom color={ACCENT_GLOW} style={styles.dayBloom} /> : null}
+              <View
+                style={[
+                  styles.dayDot,
+                  isDone ? styles.dayDotDone : styles.dayDotFuture,
+                  isToday && styles.dayDotToday,
+                ]}
+              />
+            </View>
+          </View>
+        );
+      })}
     </View>
   );
 }
@@ -43,39 +58,52 @@ export default function TodayScreen() {
             <AppText color="muted" uppercase variant="micro">
               Today
             </AppText>
-            <View style={styles.streakChip}>
-              <AppText color="secondary" tabular variant="caption">
-                {`${data.streakDays} day streak`}
-              </AppText>
-            </View>
-          </FadeIn>
-          <FadeIn delay={80} style={styles.hero}>
-            <ContrastArc
-              onPress={() => router.push('/progress' as Href)}
-              progress={data.dailyProgress}
-              value={data.contrastSensitivity}
-              verdictColor={verdictColors[data.verdict]}
-            />
-          </FadeIn>
-          <FadeIn delay={160} style={styles.footer}>
-            <View style={styles.buttonFrame}>
-              <ButtonGlow />
-              <PressableScale
-                haptic="success"
-                onPress={() => router.push('/session' as Href)}
-                scaleTo={0.96}
-                style={styles.startButton}>
-                <AppText color="inverse" variant="heading">
-                  {data.sessionDoneToday ? 'Train again' : 'Start session'}
+            {data.streakDays > 0 ? (
+              <View style={styles.streakChip}>
+                <AppText color="secondary" tabular variant="caption">
+                  {`${data.streakDays} day streak`}
                 </AppText>
-              </PressableScale>
-            </View>
-            <AppText color="muted" style={styles.footerCaption} variant="caption">
-              {data.streakDays === 0 && !data.sessionDoneToday
-                ? 'Your first session sets the baseline'
-                : `Next · ${data.nextTargetLabel}`}
-            </AppText>
+              </View>
+            ) : null}
           </FadeIn>
+          <View style={styles.spacer} />
+          <View style={styles.bottomBlock}>
+            <FadeIn>
+              <WeekRow sessionDoneToday={data.sessionDoneToday} />
+            </FadeIn>
+            <FadeIn delay={40} style={styles.titleBlock}>
+              <AppText color="primary" variant="hero">
+                {data.sessionDoneToday
+                  ? 'Come back\ntomorrow'
+                  : data.streakDays === 0
+                    ? 'Set your\nbaseline'
+                    : 'Ready when\nyou are'}
+              </AppText>
+              <AppText color="muted" variant="caption">
+                {data.sessionDoneToday
+                  ? `Next · ${data.nextTargetLabel}`
+                  : data.streakDays === 0
+                    ? 'Your first session sets the baseline'
+                    : `Next · ${data.nextTargetLabel}`}
+              </AppText>
+            </FadeIn>
+            <FadeIn delay={80}>
+              <View style={styles.buttonFrame}>
+                <Bloom color={ACCENT_GLOW} style={styles.buttonBloom} />
+                <PressableScale
+                  accessibilityLabel="Start session"
+                  accessibilityRole="button"
+                  haptic="select"
+                  onPress={() => router.push('/session' as Href)}
+                  scaleTo={0.96}
+                  style={styles.startButton}>
+                  <AppText color="inverse" variant="heading">
+                    {data.sessionDoneToday ? 'Train again' : 'Start session'}
+                  </AppText>
+                </PressableScale>
+              </View>
+            </FadeIn>
+          </View>
         </>
       )}
     </Screen>
@@ -89,13 +117,19 @@ function LoadingToday() {
         <Shimmer height={14} radius={radius.pill} width={48} />
         <Shimmer height={26} radius={radius.pill} width={92} />
       </FadeIn>
-      <FadeIn delay={80} style={styles.hero}>
-        <Shimmer height={ARC_SIZE} radius={radius.pill} width={ARC_SIZE} />
-      </FadeIn>
-      <FadeIn delay={160} style={styles.footer}>
-        <Shimmer height={58} radius={radius.pill} width="100%" />
-        <Shimmer height={18} radius={radius.pill} style={styles.captionShimmer} width={168} />
-      </FadeIn>
+      <View style={styles.spacer} />
+      <View style={styles.bottomBlock}>
+        <FadeIn>
+          <Shimmer height={34} radius={radius.pill} width="100%" />
+        </FadeIn>
+        <FadeIn delay={40} style={styles.loadingTitle}>
+          <Shimmer height={40} radius={radius.md} width="100%" />
+          <Shimmer height={40} radius={radius.md} style={styles.loadingTitleShort} width="100%" />
+        </FadeIn>
+        <FadeIn delay={80}>
+          <Shimmer height={58} radius={radius.pill} width="100%" />
+        </FadeIn>
+      </View>
     </>
   );
 }
@@ -113,19 +147,58 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md,
     paddingVertical: space.xs,
   },
-  hero: {
+  spacer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  footer: {
+  bottomBlock: {
     gap: space.md,
     paddingBottom: space.lg,
+  },
+  weekRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  dayCell: {
+    alignItems: 'center',
+    gap: space.xs,
+  },
+  dayDotFrame: {
+    alignItems: 'center',
+    height: 28,
+    justifyContent: 'center',
+    width: 28,
+  },
+  dayBloom: {
+    height: 28,
+    width: 28,
+  },
+  dayDot: {
+    borderRadius: radius.pill,
+    height: 6,
+    width: 6,
+  },
+  dayDotDone: {
+    backgroundColor: surface.hairlineStrong,
+  },
+  dayDotFuture: {
+    backgroundColor: 'transparent',
+    borderColor: surface.hairline,
+    borderWidth: 1,
+  },
+  dayDotToday: {
+    backgroundColor: ACCENT,
+    borderWidth: 0,
+    height: 8,
+    width: 8,
+  },
+  titleBlock: {
+    gap: space.sm,
   },
   buttonFrame: {
     position: 'relative',
   },
-  buttonGlow: {
+  buttonBloom: {
     position: 'absolute',
     top: -GLOW_BLEED,
     right: -GLOW_BLEED,
@@ -138,10 +211,11 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     paddingVertical: space.base,
   },
-  footerCaption: {
-    textAlign: 'center',
+  loadingTitle: {
+    gap: space.sm,
+    width: '60%',
   },
-  captionShimmer: {
-    alignSelf: 'center',
+  loadingTitleShort: {
+    width: '75%',
   },
 });

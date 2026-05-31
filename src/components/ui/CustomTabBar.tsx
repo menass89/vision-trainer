@@ -86,7 +86,12 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
         return (
           <PressableScale haptic="selection" key={route.key} onPress={handlePress} style={styles.tab}>
             <TabIcon color={color} routeName={route.name} />
-            <AppText color={focused ? 'accent' : 'muted'} uppercase variant="micro">
+            <AppText
+              color={focused ? 'accent' : 'muted'}
+              numberOfLines={1}
+              style={{ letterSpacing: 1 }}
+              uppercase
+              variant="micro">
               {label}
             </AppText>
           </PressableScale>
@@ -107,6 +112,6 @@ const styles = StyleSheet.create({
   tab: {
     flex: 1,
     alignItems: 'center',
-    gap: space.xs,
+    gap: space.sm,
   },
 });

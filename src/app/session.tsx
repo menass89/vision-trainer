@@ -1,10 +1,12 @@
-import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
+  useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
+  withSequence,
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
@@ -12,14 +14,18 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { GaborCanvas, type GaborCanvasHandle } from '@/components/GaborCanvas';
+import { CompletionReward } from '@/components/session/CompletionReward';
 import { KinoEdgeArc } from '@/components/session/KinoEdgeArc';
 import { ResponseSwipe } from '@/components/session/ResponseSwipe';
 import { RewardBurst } from '@/components/session/RewardBurst';
-import { AppText, PressableScale } from '@/components/ui';
+import { AppText, Bloom, GlassSurface, PressableScale } from '@/components/ui';
 import { useSessionController } from '@/presenters';
+import { haptics } from '@/theme/haptics';
+import { easings } from '@/theme/motion';
 import {
   ACCENT,
   ACCENT_GLOW,
+  material,
   motion,
   radius,
   space,
@@ -42,6 +48,8 @@ type UiPhase =
 
 type ChoiceResolver = (choice: TrialInterval | null) => void;
 
+const CHECKMARK_LENGTH = 28;
+const AnimatedPath = Animated.createAnimatedComponent(Path);
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 export default function SessionScreen() {
@@ -65,6 +73,8 @@ export default function SessionScreen() {
   const fieldRotation = useSharedValue(0);
   const feedbackRingScale = useSharedValue(0.7);
   const feedbackRingOpacity = useSharedValue(0);
+  const checkDraw = useSharedValue(0);
+  const checkOpacity = useSharedValue(0);
 
   const fieldStyle = useAnimatedStyle(() => ({
     opacity: fieldOpacity.value,
@@ -77,6 +87,12 @@ export default function SessionScreen() {
   const feedbackRingStyle = useAnimatedStyle(() => ({
     opacity: feedbackRingOpacity.value,
     transform: [{ scale: feedbackRingScale.value }],
+  }));
+  const checkmarkStyle = useAnimatedStyle(() => ({
+    opacity: checkOpacity.value,
+  }));
+  const checkmarkProps = useAnimatedProps(() => ({
+    strokeDashoffset: CHECKMARK_LENGTH * (1 - checkDraw.value),
   }));
 
   const isStillMounted = useCallback(async (ms: number) => {
@@ -157,19 +173,36 @@ export default function SessionScreen() {
       feedbackRingOpacity.value = 1;
       feedbackRingScale.value = withSpring(finishesBlock ? 1.45 : 1.2, motion.spring.reward);
       feedbackRingOpacity.value = withTiming(0, { duration: 420 });
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      checkDraw.value = 0;
+      checkOpacity.value = 1;
+      checkDraw.value = withTiming(1, { duration: 160, easing: easings.out });
+      checkOpacity.value = withDelay(300, withTiming(0, { duration: 200 }));
+      haptics.correct();
     } else {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      checkOpacity.value = 0;
+      haptics.wrong();
     }
 
     if (!(await isStillMounted(450))) return;
 
     trialRunningRef.current = false;
+    fieldScale.value = withSequence(
+      withSpring(0.985, motion.spring.liquid),
+      withSpring(1, motion.spring.liquid)
+    );
+    fieldOpacity.value = withSequence(
+      withSpring(0.9, motion.spring.liquid),
+      withSpring(1, motion.spring.liquid)
+    );
     setPhase('idle');
   }, [
+    checkDraw,
+    checkOpacity,
     controller,
     feedbackRingOpacity,
     feedbackRingScale,
+    fieldOpacity,
+    fieldScale,
     isStillMounted,
     presentInterval,
     setPhase,
@@ -184,11 +217,9 @@ export default function SessionScreen() {
     fieldScale.value = withSpring(0.86, motion.spring.input);
     fieldOpacity.value = withTiming(0.4, { duration: 450 });
     fieldRotation.value = withSpring(3, motion.spring.input);
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
 
     if (!(await isStillMounted(450))) return;
 
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
     setBlockCorrectCount(controller.correctCount - blockStartCorrectCountRef.current);
     setShowBlockSummary(true);
   }, [controller.correctCount, fieldOpacity, fieldRotation, fieldScale, isStillMounted, setPhase]);
@@ -240,7 +271,7 @@ export default function SessionScreen() {
       setShowCompletion(true);
       setBigBurst(true);
       setBurst((current) => current + 1);
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      haptics.rewardChord();
     }
   }, [controller.status, runTrial, showCompletion, startBlockFold, uiPhase]);
 
@@ -266,6 +297,20 @@ export default function SessionScreen() {
             <View style={styles.wrongFeedbackDot} />
           ) : null}
           <Animated.View style={[styles.feedbackRing, feedbackRingStyle]} />
+          <Animated.View style={[styles.checkmark, checkmarkStyle]}>
+            <Svg height={28} width={28}>
+              <AnimatedPath
+                animatedProps={checkmarkProps}
+                d="M4 14L11 21L24 7"
+                fill="none"
+                stroke={ACCENT}
+                strokeDasharray={CHECKMARK_LENGTH}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+              />
+            </Svg>
+          </Animated.View>
         </View>
         <ResponseSwipe enabled={uiPhase === 'response'} onCommit={handleChoice} />
         <RewardBurst big={bigBurst} trigger={burst} />
@@ -273,54 +318,55 @@ export default function SessionScreen() {
 
       {controller.status === 'ready' && uiPhase === 'ready' ? (
         <View style={[styles.centeredOverlay, styles.readyOverlay]}>
-          <AppText style={styles.centeredText} variant="heading">
-            {controller.blockLabel}
-          </AppText>
-          <AppText color="muted" style={styles.centeredText} variant="caption">
-            Two flashes. Pick the one with the pattern.
-          </AppText>
-          <PressableScale haptic="success" onPress={handleBegin} style={styles.action}>
-            <AppText color="inverse" variant="caption">
-              Begin
+          <GlassSurface radius={material.radius} style={styles.overlayCard}>
+            <AppText style={styles.centeredText} variant="heading">
+              {controller.blockLabel}
             </AppText>
-          </PressableScale>
+            <AppText color="muted" style={styles.centeredText} variant="caption">
+              Two flashes. Pick the one with the pattern.
+            </AppText>
+            <PressableScale onPress={handleBegin} style={styles.action}>
+              <AppText color="inverse" variant="caption">
+                Begin
+              </AppText>
+            </PressableScale>
+          </GlassSurface>
         </View>
       ) : null}
 
       {showBlockSummary ? (
         <View style={styles.centeredOverlay}>
-          <AppText color="muted" uppercase variant="micro">
-            Block complete
-          </AppText>
-          <AppText style={styles.score} tabular variant="title">
-            {blockCorrectCount}/{controller.trialsPerBlock}
-          </AppText>
-          <PressableScale onPress={() => void handleContinue()} style={styles.action}>
-            <AppText color="inverse" variant="caption">
-              Continue
+          <GlassSurface radius={material.radius} style={styles.overlayCard}>
+            <AppText color="muted" uppercase variant="micro">
+              Block complete
             </AppText>
-          </PressableScale>
+            <View style={styles.blockScore}>
+              <Bloom color={ACCENT_GLOW} style={styles.blockBloom} />
+              <AppText style={styles.score} tabular variant="title">
+                {blockCorrectCount}/{controller.trialsPerBlock}
+              </AppText>
+            </View>
+            <PressableScale onPress={() => void handleContinue()} style={styles.action}>
+              <AppText color="inverse" variant="caption">
+                Continue
+              </AppText>
+            </PressableScale>
+          </GlassSurface>
         </View>
       ) : null}
 
       {showCompletion ? (
-        <View style={styles.centeredOverlay}>
-          <AppText style={styles.centeredText} variant="title">
-            Session complete
-          </AppText>
-          <AppText color="muted" style={styles.centeredText} tabular variant="caption">
-            {controller.correctCount}/{controller.totalBlocks * controller.trialsPerBlock} correct
-          </AppText>
-          <PressableScale haptic="success" onPress={handleClose} style={styles.action}>
-            <AppText color="inverse" variant="caption">
-              Done
-            </AppText>
-          </PressableScale>
-        </View>
+        <CompletionReward
+          accuracyTarget={Math.round(
+            (controller.correctCount / (controller.totalBlocks * controller.trialsPerBlock)) * 100
+          )}
+          correctCount={controller.correctCount}
+          onDone={handleClose}
+          total={controller.totalBlocks * controller.trialsPerBlock}
+        />
       ) : null}
 
       <PressableScale
-        haptic="light"
         hitSlop={12}
         onPress={handleClose}
         style={[styles.close, { top: insets.top + space.sm }]}>
@@ -376,6 +422,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 72,
   },
+  checkmark: {
+    position: 'absolute',
+  },
   centeredOverlay: {
     alignItems: 'center',
     bottom: 0,
@@ -394,6 +443,20 @@ const styles = StyleSheet.create({
   },
   score: {
     marginTop: space.sm,
+  },
+  overlayCard: {
+    alignItems: 'center',
+    padding: space.lg,
+  },
+  blockScore: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  blockBloom: {
+    bottom: -space.md,
+    left: -space.xl,
+    right: -space.xl,
+    top: -space.md,
   },
   action: {
     alignItems: 'center',

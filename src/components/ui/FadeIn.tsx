@@ -1,6 +1,13 @@
 import type { ReactNode } from 'react';
+import { useEffect } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
-import Animated, { FadeIn as ReanimatedFadeIn } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from 'react-native-reanimated';
 
 export type FadeInProps = {
   children: ReactNode;
@@ -10,9 +17,16 @@ export type FadeInProps = {
 };
 
 export function FadeIn({ children, delay = 0, duration = 280, style }: FadeInProps) {
-  return (
-    <Animated.View entering={ReanimatedFadeIn.delay(delay).duration(duration)} style={style}>
-      {children}
-    </Animated.View>
-  );
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = withDelay(delay, withTiming(1, { duration, easing: Easing.out(Easing.cubic) }));
+  }, [delay, duration, progress]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [{ translateY: 8 * (1 - progress.value) }],
+  }));
+
+  return <Animated.View style={[style, animatedStyle]}>{children}</Animated.View>;
 }

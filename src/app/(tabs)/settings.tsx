@@ -22,7 +22,7 @@ export default function SettingsScreen() {
   const { state, set } = useSettingsState();
 
   return (
-    <Screen scroll style={styles.screen}>
+    <Screen scroll warm style={styles.screen}>
       <FadeIn style={styles.title}>
         <AppText variant="title">Settings</AppText>
       </FadeIn>

@@ -2,7 +2,7 @@ import { Text, type TextProps } from 'react-native';
 
 import { ACCENT, tabularFigures, text, type as typo } from '@/theme/tokens';
 
-export type Variant = 'display' | 'title' | 'heading' | 'body' | 'caption' | 'micro';
+export type Variant = 'display' | 'title' | 'heading' | 'body' | 'caption' | 'micro' | 'hero';
 export type ColorKey = 'primary' | 'secondary' | 'muted' | 'inverse' | 'accent';
 
 export type AppTextProps = TextProps & {

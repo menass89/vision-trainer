@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import { useMemo } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -12,6 +11,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
+import { haptics } from '@/theme/haptics';
 import { motion, radius, space, surface, text, type as typo } from '@/theme/tokens';
 import type { TrialInterval } from '@/types';
 
@@ -21,7 +21,7 @@ export type ResponseSwipeProps = {
 };
 
 function fireThresholdHaptic() {
-  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  haptics.select();
 }
 
 export function ResponseSwipe({ enabled, onCommit }: ResponseSwipeProps) {

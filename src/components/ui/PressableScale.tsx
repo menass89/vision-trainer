@@ -1,14 +1,29 @@
-import * as Haptics from 'expo-haptics';
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  type PressableProps,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
+import { haptics } from '@/theme/haptics';
 import { motion } from '@/theme/tokens';
 
-export type PressableScaleProps = {
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+export type PressableScaleProps = Pick<
+  PressableProps,
+  | 'accessibilityRole'
+  | 'accessibilityLabel'
+  | 'accessibilityHint'
+  | 'accessibilityState'
+  | 'testID'
+> & {
   onPress?: () => void;
   onLongPress?: () => void;
-  haptic?: 'light' | 'selection' | 'success' | 'none';
+  haptic?: 'select' | 'correct' | 'wrong' | 'milestone' | 'none' | 'selection';
   scaleTo?: number;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
@@ -19,12 +34,17 @@ export type PressableScaleProps = {
 export function PressableScale({
   onPress,
   onLongPress,
-  haptic = 'selection',
+  haptic = 'select',
   scaleTo = motion.pressScale,
   disabled = false,
   style,
   children,
   hitSlop,
+  accessibilityRole,
+  accessibilityLabel,
+  accessibilityHint,
+  accessibilityState,
+  testID,
 }: PressableScaleProps) {
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
@@ -34,12 +54,10 @@ export function PressableScale({
   const handlePressIn = () => {
     scale.value = withSpring(scaleTo, motion.spring.press);
 
-    if (haptic === 'light') {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    } else if (haptic === 'selection') {
-      void Haptics.selectionAsync();
-    } else if (haptic === 'success') {
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    if (haptic === 'selection') {
+      haptics.select();
+    } else if (haptic !== 'none') {
+      haptics[haptic]();
     }
   };
 
@@ -48,17 +66,21 @@ export function PressableScale({
   };
 
   return (
-    <Pressable
+    <AnimatedPressable
       disabled={disabled}
       hitSlop={hitSlop}
+      accessibilityRole={accessibilityRole}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
+      accessibilityState={accessibilityState}
+      testID={testID}
       onLongPress={onLongPress}
       onPress={onPress}
       onPressIn={handlePressIn}
-      onPressOut={handlePressOut}>
-      <Animated.View style={[style, animatedStyle, disabled && styles.disabled]}>
-        {children}
-      </Animated.View>
-    </Pressable>
+      onPressOut={handlePressOut}
+      style={[style, animatedStyle, disabled && styles.disabled]}>
+      {children}
+    </AnimatedPressable>
   );
 }
 
