@@ -1,5 +1,6 @@
 import { type Href, useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
+import { useReducedMotion } from 'react-native-reanimated';
 
 import { AmbientGradient } from '@/components/home/AmbientGradient';
 import { AppText, Bloom, FadeIn, PressableScale, Screen, Shimmer } from '@/components/ui';
@@ -45,11 +46,12 @@ function WeekRow({ activeIndex = 3, sessionDoneToday }: WeekRowProps) {
 
 export default function TodayScreen() {
   const router = useRouter();
+  const reduceMotion = useReducedMotion();
   const { data, isLoading } = useTodayData();
 
   return (
     <Screen padded>
-      <AmbientGradient reduceMotion={false} />
+      <AmbientGradient reduceMotion={reduceMotion} />
       {isLoading ? (
         <LoadingToday />
       ) : (
