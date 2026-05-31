@@ -49,6 +49,7 @@ type UiPhase =
 type ChoiceResolver = (choice: TrialInterval | null) => void;
 
 const CHECKMARK_LENGTH = 28;
+const READY_GLOW = 'rgba(51,210,214,0.06)';
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
@@ -322,20 +323,24 @@ export default function SessionScreen() {
       </Animated.View>
 
       {controller.status === 'ready' && uiPhase === 'ready' ? (
-        <View style={[styles.centeredOverlay, styles.readyOverlay]}>
-          <GlassSurface radius={material.radius} style={styles.overlayCard}>
-            <AppText style={styles.centeredText} variant="heading">
+        <View style={styles.readyOverlay}>
+          <Bloom color={READY_GLOW} style={styles.readyGlow} />
+          <View style={[styles.readyContent, { paddingBottom: insets.bottom + space.xxl }]}>
+            <AppText color="muted" style={styles.readyMeta} uppercase variant="micro">
               {controller.blockLabel}
             </AppText>
-            <AppText color="muted" style={styles.centeredText} variant="caption">
-              Two flashes. Pick the one with the pattern.
+            <AppText style={styles.readyHero} variant="title">
+              Two flashes.
             </AppText>
-            <PressableScale onPress={handleBegin} style={styles.action}>
-              <AppText color="inverse" variant="caption">
+            <AppText color="secondary" style={styles.readyInstruction} variant="body">
+              Pick the one with the pattern.
+            </AppText>
+            <PressableScale haptic="select" onPress={handleBegin} style={styles.beginGhost}>
+              <AppText color="accent" variant="caption">
                 Begin
               </AppText>
             </PressableScale>
-          </GlassSurface>
+          </View>
         </View>
       ) : null}
 
@@ -442,9 +447,42 @@ const styles = StyleSheet.create({
   },
   readyOverlay: {
     backgroundColor: surface.base,
+    bottom: 0,
+    justifyContent: 'flex-end',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
   },
-  centeredText: {
-    textAlign: 'center',
+  readyGlow: {
+    height: '55%',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: '6%',
+  },
+  readyContent: {
+    paddingHorizontal: space.xl,
+  },
+  readyMeta: {
+    letterSpacing: 1.6,
+  },
+  readyHero: {
+    marginTop: space.md,
+  },
+  readyInstruction: {
+    marginTop: space.sm,
+  },
+  beginGhost: {
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    borderColor: 'rgba(51,210,214,0.45)',
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    justifyContent: 'center',
+    marginTop: space.xl,
+    paddingHorizontal: space.lg,
+    paddingVertical: space.md,
   },
   score: {
     marginTop: space.sm,
