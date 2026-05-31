@@ -5,7 +5,12 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 
 import { BreathingOrb } from '@/components/onboarding/BreathingOrb';
 import { AppText, Bloom, FadeIn, PressableScale, Screen } from '@/components/ui';
+import { notificationService } from '@/services/notifications';
+import { useAppStore } from '@/store/useAppStore';
 import { ACCENT, ACCENT_GLOW, radius, space, surface } from '@/theme/tokens';
+
+const REMINDER_HOUR = 19;
+const REMINDER_MINUTE = 0;
 
 const STEPS = [
   { id: 'welcome', buttonLabel: 'Begin' },
@@ -25,8 +30,12 @@ export default function OnboardingScreen() {
     setStep((current) => Math.min(current + 1, STEPS.length - 1));
   };
 
-  const handleEnableReminders = () => {
-    // TODO(phase4): trigger expo-notifications permission after explaining why (two-step pattern).
+  const handleEnableReminders = async () => {
+    const granted = await notificationService.requestRemindersPermission();
+    if (granted) {
+      await notificationService.scheduleDailyReminder(REMINDER_HOUR, REMINDER_MINUTE);
+      useAppStore.getState().updateSetting('remindersEnabled', true);
+    }
     advance();
   };
 
@@ -55,7 +64,13 @@ export default function OnboardingScreen() {
                   <PressableScale
                     haptic={step === 5 ? 'milestone' : 'selection'}
                     onPress={
-                      step === 3 ? handleEnableReminders : step === 5 ? handleStart : advance
+                      step === 3
+                        ? () => {
+                            void handleEnableReminders();
+                          }
+                        : step === 5
+                          ? handleStart
+                          : advance
                     }
                     style={[styles.primaryButton, step === 5 && styles.startButton]}>
                     <AppText color={step === 5 ? 'inverse' : 'primary'} variant="heading">

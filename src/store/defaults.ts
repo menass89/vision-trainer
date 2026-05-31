@@ -6,4 +6,5 @@ export const DEFAULT_SETTINGS: SettingsState = {
   hapticsEnabled: true,
   soundEnabled: false,
   reduceMotion: false,
+  remindersEnabled: false,
 };

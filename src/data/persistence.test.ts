@@ -70,6 +70,7 @@ describe('memoryPersistence', () => {
       hapticsEnabled: true,
       soundEnabled: false,
       reduceMotion: false,
+      remindersEnabled: false,
     };
     await memoryPersistence.saveSettings(settings);
     settings.hapticsEnabled = false; // mutate caller's copy after save

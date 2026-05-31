@@ -36,6 +36,7 @@ export type SettingsState = {
   hapticsEnabled: boolean;
   soundEnabled: boolean;
   reduceMotion: boolean;
+  remindersEnabled: boolean;
 };
 
 export type Loadable<T> = { data: T; isLoading: boolean };

@@ -10,7 +10,11 @@ import {
 import { Toggle } from '@/components/settings/Toggle';
 import { AppText, FadeIn, PressableScale, Screen } from '@/components/ui';
 import { type SettingsState, useSettingsState } from '@/presenters';
+import { notificationService } from '@/services/notifications';
 import { space, text } from '@/theme/tokens';
+
+const REMINDER_HOUR = 19;
+const REMINDER_MINUTE = 0;
 
 const WEAK_EYE_OPTIONS: SegmentOption<SettingsState['monocularWeakEye']>[] = [
   { label: 'Left', value: 'left' },
@@ -20,6 +24,22 @@ const WEAK_EYE_OPTIONS: SegmentOption<SettingsState['monocularWeakEye']>[] = [
 
 export default function SettingsScreen() {
   const { state, set } = useSettingsState();
+
+  const handleRemindersChange = async (next: boolean) => {
+    if (next) {
+      const granted = await notificationService.requestRemindersPermission();
+      if (!granted) {
+        // Permission denied/unavailable — keep the toggle off.
+        set('remindersEnabled', false);
+        return;
+      }
+      await notificationService.scheduleDailyReminder(REMINDER_HOUR, REMINDER_MINUTE);
+      set('remindersEnabled', true);
+    } else {
+      await notificationService.cancelDailyReminder();
+      set('remindersEnabled', false);
+    }
+  };
 
   return (
     <Screen scroll warm style={styles.screen}>
@@ -84,6 +104,22 @@ export default function SettingsScreen() {
         </Section>
       </FadeIn>
       <FadeIn delay={180}>
+        <Section title="Reminders">
+          <Row
+            description="A gentle evening nudge to keep your streak"
+            label="Daily reminder"
+            right={
+              <Toggle
+                onChange={(value) => {
+                  void handleRemindersChange(value);
+                }}
+                value={state.remindersEnabled}
+              />
+            }
+          />
+        </Section>
+      </FadeIn>
+      <FadeIn delay={240}>
         <Section title="About">
           <Row
             label="Version"

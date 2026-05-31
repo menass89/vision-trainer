@@ -103,6 +103,7 @@ describe('data mappers', () => {
       hapticsEnabled: false,
       soundEnabled: true,
       reduceMotion: true,
+      remindersEnabled: true,
     };
 
     expect(payloadToSettings(settingsToPayload(settings))).toEqual(settings);
