@@ -1,13 +1,14 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { type Href, useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 
 import { AmbientGradient } from '@/components/home/AmbientGradient';
+import { BaselineRing } from '@/components/home/BaselineRing';
 import { AppText, Bloom, FadeIn, PressableScale, Screen, Shimmer } from '@/components/ui';
 import { useTodayData } from '@/presenters';
 import { ACCENT, ACCENT_GLOW, radius, space, surface } from '@/theme/tokens';
 
-const GLOW_BLEED = 22;
 const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
 
 type WeekRowProps = {
@@ -68,7 +69,13 @@ export default function TodayScreen() {
               </View>
             ) : null}
           </FadeIn>
-          <View style={styles.spacer} />
+          <View style={styles.spacer}>
+            <FadeIn delay={20}>
+              <BaselineRing
+                progress={data.sessionDoneToday ? 1 : data.streakDays === 0 ? 0.08 : 0.5}
+              />
+            </FadeIn>
+          </View>
           <View style={styles.bottomBlock}>
             <FadeIn>
               <WeekRow activeIndex={data.todayIndex} sessionDoneToday={data.sessionDoneToday} />
@@ -90,20 +97,24 @@ export default function TodayScreen() {
               </AppText>
             </FadeIn>
             <FadeIn delay={80}>
-              <View style={styles.buttonFrame}>
-                <Bloom color={ACCENT_GLOW} style={styles.buttonBloom} />
-                <PressableScale
-                  accessibilityLabel={data.sessionDoneToday ? 'Train again' : 'Start session'}
-                  accessibilityRole="button"
-                  haptic="select"
-                  onPress={() => router.push('/session' as Href)}
-                  scaleTo={0.96}
-                  style={styles.startButton}>
-                  <AppText color="inverse" variant="heading">
-                    {data.sessionDoneToday ? 'Train again' : 'Start session'}
-                  </AppText>
-                </PressableScale>
-              </View>
+              <PressableScale
+                accessibilityLabel={data.sessionDoneToday ? 'Train again' : 'Start session'}
+                accessibilityRole="button"
+                haptic="select"
+                onPress={() => router.push('/session' as Href)}
+                scaleTo={0.96}
+                style={styles.startButton}>
+                <LinearGradient
+                  colors={['rgba(255,255,255,0.16)', 'rgba(255,255,255,0)']}
+                  end={{ x: 0.5, y: 1 }}
+                  pointerEvents="none"
+                  start={{ x: 0.5, y: 0 }}
+                  style={styles.startButtonSheen}
+                />
+                <AppText color="inverse" variant="heading">
+                  {data.sessionDoneToday ? 'Train again' : 'Start session'}
+                </AppText>
+              </PressableScale>
             </FadeIn>
           </View>
         </>
@@ -150,7 +161,9 @@ const styles = StyleSheet.create({
     paddingVertical: space.xs,
   },
   spacer: {
+    alignItems: 'center',
     flex: 1,
+    justifyContent: 'center',
   },
   bottomBlock: {
     gap: space.md,
@@ -197,21 +210,20 @@ const styles = StyleSheet.create({
   titleBlock: {
     gap: space.sm,
   },
-  buttonFrame: {
-    position: 'relative',
-  },
-  buttonBloom: {
-    position: 'absolute',
-    top: -GLOW_BLEED,
-    right: -GLOW_BLEED,
-    bottom: -GLOW_BLEED,
-    left: -GLOW_BLEED,
-  },
   startButton: {
     alignItems: 'center',
     backgroundColor: ACCENT,
     borderRadius: radius.pill,
+    justifyContent: 'center',
+    overflow: 'hidden',
     paddingVertical: space.base,
+  },
+  startButtonSheen: {
+    height: '60%',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
   },
   loadingTitle: {
     gap: space.sm,

@@ -18,7 +18,7 @@ export type AmbientGradientProps = {
   reduceMotion?: boolean;
 };
 
-const AMBIENT_COLORS = ['#140E0A', '#0C0A0B', '#0A0B0D'] as const;
+const AMBIENT_COLORS = ['#0B1417', '#080A0D', '#06080A'] as const;
 const DRIFT_OFFSET = 12;
 const SPACE_FOR_DRIFT = DRIFT_OFFSET * 2;
 const BLOOM_LAG_MS = 400;
