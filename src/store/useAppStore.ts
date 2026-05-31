@@ -16,26 +16,34 @@ type AppState = {
   recordSessionResult: (session: SessionLog, thresholds: ThresholdEstimate[]) => Promise<void>;
 };
 
+// Shared across re-entrant calls so React Strict Mode's dev double-mount runs
+// init/load exactly once instead of racing two concurrent hydrations.
+let hydration: Promise<void> | null = null;
+
 export const useAppStore = create<AppState>((set, get) => ({
   hydrated: false,
   settings: DEFAULT_SETTINGS,
   sessions: [],
   thresholds: [],
 
-  hydrate: async () => {
-    if (get().hydrated) return;
-    try {
-      await persistence.init();
-      const [sessions, thresholds, settings] = await Promise.all([
-        persistence.loadSessions(),
-        persistence.loadThresholds(),
-        persistence.loadSettings(),
-      ]);
-      set({ sessions, thresholds, settings: settings ?? DEFAULT_SETTINGS, hydrated: true });
-    } catch {
-      // Degraded boot (e.g. sqlite unavailable on web): render with defaults/empty state.
-      set({ hydrated: true });
-    }
+  hydrate: () => {
+    if (get().hydrated) return Promise.resolve();
+    if (hydration) return hydration;
+    hydration = (async () => {
+      try {
+        await persistence.init();
+        const [sessions, thresholds, settings] = await Promise.all([
+          persistence.loadSessions(),
+          persistence.loadThresholds(),
+          persistence.loadSettings(),
+        ]);
+        set({ sessions, thresholds, settings: settings ?? DEFAULT_SETTINGS, hydrated: true });
+      } catch {
+        // Degraded boot (e.g. sqlite unavailable on web): render with defaults/empty state.
+        set({ hydrated: true });
+      }
+    })();
+    return hydration;
   },
 
   updateSetting: (key, value) => {
