@@ -27,17 +27,22 @@ export default function SettingsScreen() {
   const { state, set } = useSettingsState();
 
   const handleRemindersChange = async (next: boolean) => {
-    if (next) {
-      const granted = await notificationService.requestRemindersPermission();
-      if (!granted) {
-        // Permission denied/unavailable — keep the toggle off.
+    try {
+      if (next) {
+        const granted = await notificationService.requestRemindersPermission();
+        if (!granted) {
+          // Permission denied/unavailable - keep the toggle off.
+          set('remindersEnabled', false);
+          return;
+        }
+        await notificationService.scheduleDailyReminder(REMINDER_HOUR, REMINDER_MINUTE);
+        set('remindersEnabled', true);
+      } else {
+        await notificationService.cancelDailyReminder();
         set('remindersEnabled', false);
-        return;
       }
-      await notificationService.scheduleDailyReminder(REMINDER_HOUR, REMINDER_MINUTE);
-      set('remindersEnabled', true);
-    } else {
-      await notificationService.cancelDailyReminder();
+    } catch {
+      // Scheduling/cancellation failed - reflect the actual (off) state.
       set('remindersEnabled', false);
     }
   };

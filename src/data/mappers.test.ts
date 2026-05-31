@@ -11,6 +11,7 @@ vi.mock('@/store/defaults', () => ({
     hapticsEnabled: true,
     soundEnabled: false,
     reduceMotion: false,
+    remindersEnabled: false,
   },
 }));
 
