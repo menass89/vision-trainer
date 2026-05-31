@@ -1,13 +1,14 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { type Href, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { BreathingOrb } from '@/components/onboarding/BreathingOrb';
-import { AppText, Bloom, FadeIn, PressableScale, Screen } from '@/components/ui';
+import { AppText, FadeIn, PressableScale, Screen } from '@/components/ui';
 import { notificationService } from '@/services/notifications';
 import { useAppStore } from '@/store/useAppStore';
-import { ACCENT, ACCENT_GLOW, hairline, radius, space, surface } from '@/theme/tokens';
+import { ACCENT, hairline, radius, space, surface } from '@/theme/tokens';
 
 const REMINDER_HOUR = 19;
 const REMINDER_MINUTE = 0;
@@ -59,25 +60,31 @@ export default function OnboardingScreen() {
             <>
               <StepHero step={step} />
               <View style={styles.actions}>
-                <View style={styles.primaryButtonFrame}>
-                  {step === 5 ? <Bloom color={ACCENT_GLOW} style={styles.startButtonBloom} /> : null}
-                  <PressableScale
-                    haptic={step === 5 ? 'milestone' : 'selection'}
-                    onPress={
-                      step === 3
-                        ? () => {
-                            void handleEnableReminders();
-                          }
-                        : step === 5
-                          ? handleStart
-                          : advance
-                    }
-                    style={[styles.primaryButton, step === 5 && styles.startButton]}>
-                    <AppText color={step === 5 ? 'inverse' : 'primary'} variant="heading">
-                      {currentStep.buttonLabel}
-                    </AppText>
-                  </PressableScale>
-                </View>
+                <PressableScale
+                  haptic={step === 5 ? 'milestone' : 'selection'}
+                  onPress={
+                    step === 3
+                      ? () => {
+                          void handleEnableReminders();
+                        }
+                      : step === 5
+                        ? handleStart
+                        : advance
+                  }
+                  style={[styles.primaryButton, step === 5 && styles.startButton]}>
+                  {step === 5 ? (
+                    <LinearGradient
+                      colors={['rgba(255,255,255,0.16)', 'rgba(255,255,255,0)']}
+                      end={{ x: 0.5, y: 1 }}
+                      pointerEvents="none"
+                      start={{ x: 0.5, y: 0 }}
+                      style={styles.buttonSheen}
+                    />
+                  ) : null}
+                  <AppText color={step === 5 ? 'inverse' : 'primary'} variant="heading">
+                    {currentStep.buttonLabel}
+                  </AppText>
+                </PressableScale>
                 {step === 3 ? (
                   <PressableScale onPress={advance} style={styles.secondaryChoice}>
                     <AppText color="muted" variant="caption">
@@ -128,7 +135,7 @@ function StepHero({ step }: StepHeroProps) {
               This colour means <AppText color="accent" variant="title">action.</AppText>
             </AppText>
             <AppText color="muted" variant="caption">
-              The warm glow marks anything you can start or commit.
+              The glow marks anything you can start or commit.
             </AppText>
           </>
         ) : null}
@@ -178,11 +185,7 @@ type FooterProps = {
 function Footer({ onBack, step }: FooterProps) {
   return (
     <View style={styles.footer}>
-      <View style={styles.progress}>
-        {STEPS.map((item, index) => (
-          <ProgressDot active={index === step} key={item.id} />
-        ))}
-      </View>
+      <ProgressBar step={step} />
       <View style={styles.footerNav}>
         {step > 0 ? (
           <PressableScale hitSlop={space.sm} onPress={onBack} style={styles.backButton}>
@@ -198,30 +201,26 @@ function Footer({ onBack, step }: FooterProps) {
   );
 }
 
-type ProgressDotProps = {
-  active: boolean;
+type ProgressBarProps = {
+  step: number;
 };
 
-function ProgressDot({ active }: ProgressDotProps) {
-  const progress = useSharedValue(active ? 1 : 0);
+function ProgressBar({ step }: ProgressBarProps) {
+  const fill = useSharedValue((step + 1) / STEPS.length);
 
   useEffect(() => {
-    progress.value = withTiming(active ? 1 : 0, { duration: 240 });
-  }, [active, progress]);
+    fill.value = withTiming((step + 1) / STEPS.length, { duration: 320 });
+  }, [fill, step]);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: 0.42 + progress.value * 0.58,
-    transform: [{ scale: 1 + progress.value * 0.32 }],
+  // Contained 2px bar inside a fixed-height track: animating width reflows nothing else.
+  const fillStyle = useAnimatedStyle(() => ({
+    width: `${fill.value * 100}%`,
   }));
 
   return (
-    <Animated.View
-      style={[
-        styles.progressDot,
-        { backgroundColor: active ? ACCENT : surface.hairlineStrong },
-        animatedStyle,
-      ]}
-    />
+    <View style={styles.progressTrack}>
+      <Animated.View style={[styles.progressFill, fillStyle]} />
+    </View>
   );
 }
 
@@ -248,9 +247,6 @@ const styles = StyleSheet.create({
     gap: space.xs,
     paddingBottom: space.lg,
   },
-  primaryButtonFrame: {
-    position: 'relative',
-  },
   primaryButton: {
     alignItems: 'center',
     backgroundColor: surface.raised,
@@ -262,13 +258,14 @@ const styles = StyleSheet.create({
   startButton: {
     backgroundColor: ACCENT,
     borderColor: ACCENT,
+    overflow: 'hidden',
   },
-  startButtonBloom: {
-    alignSelf: 'center',
-    height: 140,
-    top: '50%',
-    marginTop: -70,
-    width: 240,
+  buttonSheen: {
+    height: '60%',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
   },
   secondaryChoice: {
     alignItems: 'center',
@@ -288,17 +285,17 @@ const styles = StyleSheet.create({
     gap: space.sm,
     paddingTop: space.sm,
   },
-  progress: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: space.sm,
-    justifyContent: 'center',
-    minHeight: space.md,
-  },
-  progressDot: {
+  progressTrack: {
+    backgroundColor: surface.hairline,
     borderRadius: radius.pill,
-    height: 6,
-    width: 6,
+    height: 2,
+    overflow: 'hidden',
+    width: '100%',
+  },
+  progressFill: {
+    backgroundColor: ACCENT,
+    borderRadius: radius.pill,
+    height: 2,
   },
   footerNav: {
     minHeight: 28,
