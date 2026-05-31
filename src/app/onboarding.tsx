@@ -7,7 +7,7 @@ import { BreathingOrb } from '@/components/onboarding/BreathingOrb';
 import { AppText, Bloom, FadeIn, PressableScale, Screen } from '@/components/ui';
 import { notificationService } from '@/services/notifications';
 import { useAppStore } from '@/store/useAppStore';
-import { ACCENT, ACCENT_GLOW, radius, space, surface } from '@/theme/tokens';
+import { ACCENT, ACCENT_GLOW, hairline, radius, space, surface } from '@/theme/tokens';
 
 const REMINDER_HOUR = 19;
 const REMINDER_MINUTE = 0;
@@ -254,11 +254,14 @@ const styles = StyleSheet.create({
   primaryButton: {
     alignItems: 'center',
     backgroundColor: surface.raised,
+    borderColor: surface.hairlineStrong,
     borderRadius: radius.pill,
+    borderWidth: hairline.px1,
     paddingVertical: space.base,
   },
   startButton: {
     backgroundColor: ACCENT,
+    borderColor: ACCENT,
   },
   startButtonBloom: {
     alignSelf: 'center',

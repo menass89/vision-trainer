@@ -44,6 +44,10 @@ export default function RootLayout() {
             options={{ presentation: 'fullScreenModal', gestureEnabled: true, animation: 'fade' }}
           />
           <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
+          <Stack.Screen
+            name="science"
+            options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+          />
         </Stack>
       </SafeAreaProvider>
     </GestureHandlerRootView>

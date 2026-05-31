@@ -1,9 +1,16 @@
 import type { BottomTabBarProps } from 'expo-router/build/react-navigation/bottom-tabs';
+import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Line, Path } from 'react-native-svg';
 
-import { ACCENT, hairline, space, surface, text } from '@/theme/tokens';
+import { ACCENT, hairline, motion, radius, space, surface, text } from '@/theme/tokens';
 
 import { AppText } from './AppText';
 import { PressableScale } from './PressableScale';
@@ -61,6 +68,73 @@ function TabIcon({ color, routeName }: TabIconProps) {
   );
 }
 
+type TabButtonProps = {
+  focused: boolean;
+  label: string;
+  onPress: () => void;
+  routeName: string;
+};
+
+function TabButton({ focused, label, onPress, routeName }: TabButtonProps) {
+  const reduceMotion = useReducedMotion();
+  const progress = useSharedValue(focused ? 1 : 0);
+
+  useEffect(() => {
+    const target = focused ? 1 : 0;
+    if (reduceMotion) {
+      progress.value = target;
+      return;
+    }
+    progress.value = withSpring(target, motion.spring.snap);
+  }, [focused, progress, reduceMotion]);
+
+  const liftStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: 1 + progress.value * 0.06 }, { translateY: progress.value * -1 }],
+  }));
+  const accentLayerStyle = useAnimatedStyle(() => ({ opacity: progress.value }));
+  const dotStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [{ scale: 0.4 + progress.value * 0.6 }],
+  }));
+
+  return (
+    <PressableScale
+      accessibilityRole="button"
+      accessibilityState={{ selected: focused }}
+      haptic="selection"
+      onPress={onPress}
+      style={styles.tab}>
+      <Animated.View style={[styles.iconWrap, liftStyle]}>
+        <TabIcon color={text.muted} routeName={routeName} />
+        <Animated.View style={[styles.iconOverlay, accentLayerStyle]}>
+          <TabIcon color={ACCENT} routeName={routeName} />
+        </Animated.View>
+      </Animated.View>
+      <View style={styles.labelWrap}>
+        <AppText
+          color="muted"
+          numberOfLines={1}
+          style={styles.label}
+          uppercase
+          variant="micro">
+          {label}
+        </AppText>
+        <Animated.View pointerEvents="none" style={[styles.labelOverlay, accentLayerStyle]}>
+          <AppText
+            color="accent"
+            numberOfLines={1}
+            style={styles.label}
+            uppercase
+            variant="micro">
+            {label}
+          </AppText>
+        </Animated.View>
+      </View>
+      <Animated.View style={[styles.dot, dotStyle]} />
+    </PressableScale>
+  );
+}
+
 export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
 
@@ -68,7 +142,6 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
     <View style={[styles.bar, { paddingBottom: insets.bottom + space.sm }]}>
       {state.routes.map((route, index) => {
         const focused = state.index === index;
-        const color = focused ? ACCENT : text.muted;
         const label = descriptors[route.key].options.title ?? route.name;
 
         const handlePress = () => {
@@ -84,17 +157,13 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
         };
 
         return (
-          <PressableScale haptic="selection" key={route.key} onPress={handlePress} style={styles.tab}>
-            <TabIcon color={color} routeName={route.name} />
-            <AppText
-              color={focused ? 'accent' : 'muted'}
-              numberOfLines={1}
-              style={{ letterSpacing: 1 }}
-              uppercase
-              variant="micro">
-              {label}
-            </AppText>
-          </PressableScale>
+          <TabButton
+            focused={focused}
+            key={route.key}
+            label={label}
+            onPress={handlePress}
+            routeName={route.name}
+          />
         );
       })}
     </View>
@@ -104,14 +173,46 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
 const styles = StyleSheet.create({
   bar: {
     backgroundColor: surface.base,
-    borderTopWidth: hairline.px1,
     borderTopColor: surface.hairline,
+    borderTopWidth: hairline.px1,
     flexDirection: 'row',
     paddingTop: space.sm,
   },
-  tab: {
-    flex: 1,
+  dot: {
+    backgroundColor: ACCENT,
+    borderRadius: radius.pill,
+    height: 4,
+    width: 4,
+  },
+  iconOverlay: {
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  iconWrap: {
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  label: {
+    letterSpacing: 1,
+  },
+  labelOverlay: {
+    alignItems: 'center',
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  labelWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tab: {
+    alignItems: 'center',
+    flex: 1,
     gap: space.sm,
   },
 });

@@ -1,3 +1,4 @@
+import { type Href, useRouter } from 'expo-router';
 import { StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
@@ -141,12 +142,16 @@ export default function SettingsScreen() {
 }
 
 function ScienceLink() {
-  const handlePress = () => {
-    // TODO(phase4): link to the science explainer.
-  };
+  const router = useRouter();
 
   return (
-    <PressableScale haptic="none" hitSlop={space.sm} onPress={handlePress} scaleTo={0.94}>
+    <PressableScale
+      accessibilityLabel="The science"
+      accessibilityRole="button"
+      haptic="selection"
+      hitSlop={space.sm}
+      onPress={() => router.push('/science' as Href)}
+      scaleTo={0.94}>
       <Svg height={16} width={16}>
         <Path
           d="M6 3.5L10.5 8L6 12.5"
