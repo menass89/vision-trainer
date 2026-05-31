@@ -27,30 +27,47 @@ const store: {
   settings: null,
 };
 
+/** Deep copy so callers never hold a reference into the backing store. */
+function clone<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+
+/** Upsert by `id`, mirroring the native backend's `INSERT OR REPLACE`. */
+function upsertById<T extends { id: string }>(list: T[], item: T): void {
+  const index = list.findIndex((existing) => existing.id === item.id);
+  if (index >= 0) {
+    list[index] = item;
+  } else {
+    list.push(item);
+  }
+}
+
 export const memoryPersistence: Persistence = {
   async init() {
     // No durable store to migrate.
   },
 
   async loadSessions() {
-    return [...store.sessions];
+    return store.sessions.map(clone);
   },
 
   async loadThresholds() {
-    return [...store.thresholds];
+    return store.thresholds.map(clone);
   },
 
   async loadSettings() {
-    return store.settings;
+    return store.settings ? clone(store.settings) : null;
   },
 
   async saveSettings(settings) {
-    store.settings = settings;
+    store.settings = clone(settings);
   },
 
   async saveSessionResult(session, thresholds) {
-    store.sessions.push(session);
-    store.thresholds.push(...thresholds);
+    upsertById(store.sessions, clone(session));
+    for (const threshold of thresholds) {
+      upsertById(store.thresholds, clone(threshold));
+    }
   },
 };
 

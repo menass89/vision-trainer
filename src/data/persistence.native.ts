@@ -55,8 +55,8 @@ export const sqlitePersistence: Persistence = {
     const db = await getDatabase();
     const sessionRow = sessionToRow(session);
     const thresholdRows = thresholds.map(thresholdToRow);
-    await db.withTransactionAsync(async () => {
-      await db.runAsync(
+    await db.withExclusiveTransactionAsync(async (txn) => {
+      await txn.runAsync(
         'INSERT OR REPLACE INTO sessions (id, started_at, completed_at, status, payload) VALUES (?, ?, ?, ?, ?)',
         sessionRow.id,
         sessionRow.started_at,
@@ -65,7 +65,7 @@ export const sqlitePersistence: Persistence = {
         sessionRow.payload
       );
       for (const row of thresholdRows) {
-        await db.runAsync(
+        await txn.runAsync(
           'INSERT OR REPLACE INTO thresholds (id, session_id, condition_key, spatial_frequency, created_at, payload) VALUES (?, ?, ?, ?, ?, ?)',
           row.id,
           row.session_id,

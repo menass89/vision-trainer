@@ -4,7 +4,11 @@ let databasePromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
 export function getDatabase(): Promise<SQLite.SQLiteDatabase> {
   if (!databasePromise) {
-    databasePromise = SQLite.openDatabaseAsync('vision-trainer.db');
+    databasePromise = SQLite.openDatabaseAsync('vision-trainer.db').catch((error) => {
+      // Don't cache a rejected open — let the next caller retry.
+      databasePromise = null;
+      throw error;
+    });
   }
   return databasePromise;
 }

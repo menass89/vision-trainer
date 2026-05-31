@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import { useAppStore } from '@/store/useAppStore';
 import { now } from '@/utils/clock';
 
@@ -8,5 +10,6 @@ export function useProgressData(): Loadable<ProgressView> {
   const hydrated = useAppStore((state) => state.hydrated);
   const sessions = useAppStore((state) => state.sessions);
   const thresholds = useAppStore((state) => state.thresholds);
-  return { data: deriveProgressView(sessions, thresholds, now()), isLoading: !hydrated };
+  const data = useMemo(() => deriveProgressView(sessions, thresholds, now()), [sessions, thresholds]);
+  return { data, isLoading: !hydrated };
 }
