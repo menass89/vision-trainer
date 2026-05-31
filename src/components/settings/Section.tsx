@@ -31,11 +31,11 @@ export function Section({ title, children }: SectionProps) {
 
 const styles = StyleSheet.create({
   section: {
-    gap: space.sm,
-    marginBottom: space.lg,
+    gap: space.md,
+    marginBottom: space.xl,
   },
   group: {
-    backgroundColor: surface.raised,
+    backgroundColor: surface.card,
     borderColor: surface.hairline,
     borderRadius: radius.lg,
     borderWidth: hairline.px1,

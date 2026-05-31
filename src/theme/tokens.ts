@@ -7,6 +7,7 @@ import { StyleSheet } from 'react-native';
 export const surface = {
   base: '#080A0D',
   raised: '#0E1316',
+  card: '#12181C',
   overlay: '#141F22',
   warm: '#0C1417',
   hairline: '#1E2A2D',
