@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { useAppStore } from '@/store/useAppStore';
 import { surface } from '@/theme/tokens';
 import { useAppFonts } from '@/theme/useAppFonts';
 
@@ -12,12 +13,20 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useAppFonts();
+  const hydrated = useAppStore((state) => state.hydrated);
+  const hydrate = useAppStore((state) => state.hydrate);
 
   useEffect(() => {
-    if (loaded || error) SplashScreen.hideAsync();
-  }, [loaded, error]);
+    void hydrate();
+  }, [hydrate]);
 
-  if (!loaded && !error) return null;
+  const ready = (loaded || error) && hydrated;
+
+  useEffect(() => {
+    if (ready) SplashScreen.hideAsync();
+  }, [ready]);
+
+  if (!ready) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: surface.base }}>

@@ -2,7 +2,6 @@ import type {
   ContrastCondition,
   EyeMode,
   GoalType,
-  ParadigmId,
   PlannedBlock,
   SessionLog,
   SessionType,
@@ -11,9 +10,11 @@ import type {
 import { conditionKey } from '../core/displayCalibration';
 import { uuid } from '../core/uuid';
 import { planProgramSession } from '../programs/programPlanner';
+import { populationNormContrast } from '../progress/norms';
 import { getParadigmModule } from '../tasks/paradigmRegistry';
 
 export type { PlannedBlock } from '../types';
+export { populationNormContrast } from '../progress/norms';
 
 export function createSessionLog(
   calibrationId: string,
@@ -137,21 +138,4 @@ function durationOnlyKey(condition: ContrastCondition): string {
 
 function legacyBlockConditionKey(condition: ContrastCondition): string {
   return conditionKey(condition.spatialFrequencyCpd, condition.orientationDeg, condition.paradigm);
-}
-
-export function populationNormContrast(spatialFrequencyCpd: number, paradigm: ParadigmId): number {
-  const baselineNorms = new Map<number, number>([
-    [1.5, 0.018],
-    [3, 0.012],
-    [6, 0.016],
-    [12, 0.04]
-  ]);
-  const paradigmMultiplier: Record<ParadigmId, number> = {
-    'contrast-detection': 1,
-    'lateral-masking': 1.25,
-    'spatial-masking': 1.7,
-    'backward-masking': 8,
-    'pedestal-discrimination': 0.6
-  };
-  return (baselineNorms.get(spatialFrequencyCpd) ?? 0.03) * (paradigmMultiplier[paradigm] ?? 1);
 }
