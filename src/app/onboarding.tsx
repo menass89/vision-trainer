@@ -2,14 +2,24 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { type Href, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, {
+  cancelAnimation,
+  Easing,
+  interpolate,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { BreathingOrb } from '@/components/onboarding/BreathingOrb';
 import { AppText, FadeIn, PressableScale, Screen } from '@/components/ui';
 import { notificationService } from '@/services/notifications';
 import { useAppStore } from '@/store/useAppStore';
-import { ACCENT, hairline, radius, space, surface } from '@/theme/tokens';
+import { ACCENT, hairline, motion, radius, space, surface, text, type } from '@/theme/tokens';
 
+const BASE_ORB = 180;
 const REMINDER_HOUR = 19;
 const REMINDER_MINUTE = 0;
 
@@ -53,12 +63,19 @@ export default function OnboardingScreen() {
   return (
     <Screen padded warm>
       <View style={styles.screen}>
-        <FadeIn key={currentStep.id} duration={420} style={styles.page}>
-          {step === 4 ? (
+        {step === 4 ? (
+          <FadeIn key="calibration" duration={420} style={styles.page}>
             <CalibrationStep onPress={handleCalibration} />
-          ) : (
-            <>
-              <StepHero step={step} />
+          </FadeIn>
+        ) : (
+          <View style={styles.page}>
+            <View style={styles.hero}>
+              <PersistentOrb step={step} />
+              <FadeIn key={currentStep.id} duration={320} style={styles.copy}>
+                <StepCopy step={step} />
+              </FadeIn>
+            </View>
+            <FadeIn key={`actions-${currentStep.id}`} duration={320}>
               <View style={styles.actions}>
                 <PressableScale
                   haptic={step === 5 ? 'milestone' : 'selection'}
@@ -93,70 +110,120 @@ export default function OnboardingScreen() {
                   </PressableScale>
                 ) : null}
               </View>
-            </>
-          )}
-        </FadeIn>
+            </FadeIn>
+          </View>
+        )}
         <Footer onBack={() => setStep((current) => Math.max(current - 1, 0))} step={step} />
       </View>
     </Screen>
   );
 }
 
-type StepHeroProps = {
+type PersistentOrbProps = {
   step: number;
 };
 
-function StepHero({ step }: StepHeroProps) {
+// Co-Star/Linear: one orb is the constant of the flow. It scales between steps with a spring
+// instead of remounting per step (which stutters), so the eye tracks a single living object.
+function PersistentOrb({ step }: PersistentOrbProps) {
+  const target = (step === 2 ? 180 : 152) / BASE_ORB;
+  const orbScale = useSharedValue(target);
+
+  useEffect(() => {
+    orbScale.value = withSpring(target, motion.spring.snap);
+  }, [orbScale, target]);
+
+  const orbStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: orbScale.value }],
+  }));
+
   return (
-    <View style={styles.hero}>
-      <BreathingOrb size={step === 2 ? 180 : 152} />
-      <View style={styles.copy}>
-        {step === 0 ? (
-          <>
-            <AppText variant="hero">Train the way you see.</AppText>
-            <AppText color="secondary" variant="caption">
-              A quieter daily practice for sharper contrast.
-            </AppText>
-          </>
-        ) : null}
-        {step === 1 ? (
-          <>
-            <AppText variant="title">
-              Your brain sharpens contrast with practice — measurably.
-            </AppText>
-            <AppText color="secondary">
-              Short, consistent sessions help perceptual learning settle in over time.
-            </AppText>
-          </>
-        ) : null}
-        {step === 2 ? (
-          <>
-            <AppText variant="title">
-              This colour means <AppText color="accent" variant="title">action.</AppText>
-            </AppText>
-            <AppText color="muted" variant="caption">
-              The glow marks anything you can start or commit.
-            </AppText>
-          </>
-        ) : null}
-        {step === 3 ? (
-          <>
-            <AppText variant="title">A gentle cue keeps the practice close.</AppText>
-            <AppText color="secondary">
-              Daily reminders make it easier to keep your streak and retain each session's gains.
-            </AppText>
-          </>
-        ) : null}
-        {step === 5 ? (
-          <>
-            <AppText variant="hero">You're set.</AppText>
-            <AppText color="secondary" variant="caption">
-              Your first session will set a baseline.
-            </AppText>
-          </>
-        ) : null}
-      </View>
-    </View>
+    <Animated.View style={orbStyle}>
+      <BreathingOrb size={BASE_ORB} />
+    </Animated.View>
+  );
+}
+
+type FocusInTextProps = {
+  children: string;
+};
+
+// Open: the welcome title collapses its letter-spacing into focus - the type itself is the entrance.
+function FocusInText({ children }: FocusInTextProps) {
+  const progress = useSharedValue(0);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (reduceMotion) {
+      progress.value = 1;
+      return;
+    }
+
+    progress.value = withTiming(1, { duration: 520, easing: Easing.out(Easing.cubic) });
+
+    return () => cancelAnimation(progress);
+  }, [progress, reduceMotion]);
+
+  const textStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    letterSpacing: interpolate(progress.value, [0, 1], [8, type.hero.letterSpacing]),
+  }));
+
+  return <Animated.Text style={[styles.focusHero, textStyle]}>{children}</Animated.Text>;
+}
+
+type StepCopyProps = {
+  step: number;
+};
+
+function StepCopy({ step }: StepCopyProps) {
+  return (
+    <>
+      {step === 0 ? (
+        <>
+          <FocusInText>Train the way you see.</FocusInText>
+          <AppText color="secondary" variant="caption">
+            A quieter daily practice for sharper contrast.
+          </AppText>
+        </>
+      ) : null}
+      {step === 1 ? (
+        <>
+          <AppText variant="title">
+            Your brain sharpens contrast with practice — measurably.
+          </AppText>
+          <AppText color="secondary">
+            Short, consistent sessions help perceptual learning settle in over time.
+          </AppText>
+        </>
+      ) : null}
+      {step === 2 ? (
+        <>
+          <AppText variant="title">
+            This colour means <AppText color="accent" variant="title">action.</AppText>
+          </AppText>
+          <AppText color="muted" variant="caption">
+            The glow marks anything you can start or commit.
+          </AppText>
+        </>
+      ) : null}
+      {step === 3 ? (
+        <>
+          <AppText variant="title">A gentle cue keeps the practice close.</AppText>
+          <AppText color="secondary">
+            Daily reminders make it easier to keep your streak and retain each session's gains.
+          </AppText>
+        </>
+      ) : null}
+      {step === 5 ? (
+        <>
+          <AppText variant="hero">You're set.</AppText>
+          <AppText color="secondary" variant="caption">
+            Your first session will set a baseline.
+          </AppText>
+        </>
+      ) : null}
+    </>
   );
 }
 
@@ -168,7 +235,7 @@ function CalibrationStep({ onPress }: CalibrationStepProps) {
   return (
     <View style={styles.hero}>
       <PressableScale onPress={onPress} scaleTo={0.99} style={styles.calibrationTap}>
-        <BreathingOrb reactivity={0.9} size={206} />
+        <BreathingOrb cadence="breath" reactivity={0.9} size={206} />
         <AppText style={styles.calibrationCopy} variant="title">
           Tap when the glow feels comfortable in your room.
         </AppText>
@@ -242,6 +309,12 @@ const styles = StyleSheet.create({
   copy: {
     gap: space.base,
     maxWidth: 340,
+  },
+  focusHero: {
+    color: text.primary,
+    fontFamily: type.hero.fontFamily,
+    fontSize: type.hero.fontSize,
+    lineHeight: type.hero.lineHeight,
   },
   actions: {
     gap: space.xs,
