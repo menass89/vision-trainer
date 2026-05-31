@@ -41,10 +41,6 @@ export const verdict = {
 } as const;
 
 export const data = {
-  coral: '#E07A5F',
-  amber: '#E8A05A',
-  green: '#A9C46C',
-  norm: '#8A6A4A',
   track: '#16201F',
   canvas: '#080C0E',
   heroGlow: 'rgba(51,200,214,0.10)'

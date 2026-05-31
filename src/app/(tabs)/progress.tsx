@@ -6,10 +6,10 @@ import { CountUpNumber } from '@/components/progress/CountUpNumber';
 import { CsfGraph } from '@/components/progress/CsfGraph';
 import { Sparkline } from '@/components/progress/Sparkline';
 import { VerdictBand } from '@/components/progress/VerdictBand';
-import { AppText, Bloom, Card, FadeIn, Screen, Shimmer } from '@/components/ui';
+import { AppText, Card, FadeIn, Screen, Shimmer } from '@/components/ui';
 import { useProgressData } from '@/presenters';
 import { haptics } from '@/theme/haptics';
-import { data as dataColors, motion, radius, space } from '@/theme/tokens';
+import { motion, radius, space } from '@/theme/tokens';
 
 const SPARKLINE_HEIGHT = 112;
 const CSF_GRAPH_HEIGHT = 220;
@@ -40,7 +40,6 @@ export default function ProgressScreen() {
             <View
               accessibilityLabel={data.headlineAcuity.toFixed(2)}
               style={styles.heroNumber}>
-              <Bloom color={dataColors.heroGlow} />
               <CountUpNumber
                 durationMs={motion.timing.countUpProgressMs}
                 from={data.previousAcuity}

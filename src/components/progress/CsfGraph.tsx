@@ -12,11 +12,11 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
+import Svg, { Circle, Defs, Line, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 
 import { AppText } from '@/components/ui';
 import { haptics } from '@/theme/haptics';
-import { ACCENT_GLOW, data, motion, radius, surface, text } from '@/theme/tokens';
+import { ACCENT, ACCENT_GLOW, motion, radius, surface, text, verdict } from '@/theme/tokens';
 
 export type CsfGraphProps = {
   points: { spatialFrequency: number; sensitivity: number }[];
@@ -227,7 +227,7 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
         <Svg height={height} width={width}>
           {safeZone ? (
             <Rect
-              fill={data.green}
+              fill={verdict.improving}
               fillOpacity={0.05}
               height={safeZone.height}
               width={Math.max(width - CHART_INSET * 2, 0)}
@@ -254,7 +254,7 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
           {referenceLines.map((reference) => (
             <Line
               key={reference.label}
-              stroke={data.norm}
+              stroke={text.muted}
               strokeDasharray="4 4"
               strokeOpacity={0.6}
               strokeWidth={1}
@@ -283,7 +283,13 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
               y2={baselineY}
             />
           ) : null}
-          {areaPath ? <Path d={areaPath} fill={data.amber} fillOpacity={0.07} stroke="none" /> : null}
+          <Defs>
+            <LinearGradient gradientUnits="userSpaceOnUse" id="csfArea" x1={0} x2={0} y1={CHART_TOP} y2={baselineY}>
+              <Stop offset="0" stopColor={ACCENT} stopOpacity={0.18} />
+              <Stop offset="1" stopColor={ACCENT} stopOpacity={0} />
+            </LinearGradient>
+          </Defs>
+          {areaPath ? <Path d={areaPath} fill="url(#csfArea)" stroke="none" /> : null}
           {path ? (
             <>
               {isStatic ? (
@@ -314,22 +320,22 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
                 <Path
                   d={path}
                   fill="none"
-                  stroke={data.amber}
+                  stroke={ACCENT}
                   strokeDashoffset={0}
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={3}
+                  strokeWidth={2.5}
                 />
               ) : (
                 <AnimatedPath
                   animatedProps={animatedProps}
                   d={path}
                   fill="none"
-                  stroke={data.amber}
+                  stroke={ACCENT}
                   strokeDasharray={pathLength}
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={3}
+                  strokeWidth={2.5}
                 />
               )}
             </>
@@ -385,8 +391,10 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   selectedDot: {
-    backgroundColor: data.amber,
+    backgroundColor: ACCENT,
+    borderColor: surface.base,
     borderRadius: radius.pill,
+    borderWidth: 2,
     height: SELECTED_DOT_SIZE,
     position: 'absolute',
     width: SELECTED_DOT_SIZE,

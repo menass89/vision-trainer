@@ -11,7 +11,7 @@ import Animated, {
 
 import { AppText } from '@/components/ui';
 import { easings } from '@/theme/motion';
-import { data, radius, space } from '@/theme/tokens';
+import { data, radius, space, verdict } from '@/theme/tokens';
 
 export type ContributorRowsProps = {
   rows: { label: string; sensitivity: number; norm: number }[];
@@ -26,9 +26,9 @@ type ContributorRowProps = ContributorRowsProps['rows'][number] & {
 function getDivergingColor(sensitivity: number, norm: number) {
   const ratio = sensitivity / norm;
 
-  if (ratio >= 1.15) return data.green;
-  if (ratio <= 0.9) return data.coral;
-  return data.amber;
+  if (ratio >= 1.15) return verdict.improving;
+  if (ratio <= 0.9) return verdict.regressing;
+  return verdict.holding;
 }
 
 function ContributorRow({
