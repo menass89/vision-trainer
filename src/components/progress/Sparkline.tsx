@@ -11,7 +11,7 @@ import Animated, {
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { AppText } from '@/components/ui';
-import { ACCENT, ACCENT_GLOW, space } from '@/theme/tokens';
+import { ACCENT, ACCENT_GLOW, space, surface } from '@/theme/tokens';
 
 export type SparklineProps = {
   points: { day: string; value: number }[];
@@ -143,14 +143,30 @@ export function Sparkline({ points, width, height }: SparklineProps) {
         {chartPoints.map((point, index) => {
           const isLast = index === chartPoints.length - 1;
 
+          if (isLast) {
+            // Copilot Money endpoint: an open ring (base-color knockout) reads as "you are here",
+            // and rhymes with the CSF selected-dot ring on the sibling chart.
+            return (
+              <Circle
+                cx={point.x}
+                cy={point.y}
+                fill={surface.base}
+                key={`${point.day}-${index}`}
+                r={4}
+                stroke={ACCENT}
+                strokeWidth={2}
+              />
+            );
+          }
+
           return (
             <Circle
               cx={point.x}
               cy={point.y}
               fill={ACCENT}
               key={`${point.day}-${index}`}
-              opacity={isLast ? 1 : 0.72}
-              r={isLast ? 3.5 : 2}
+              opacity={0.72}
+              r={2}
             />
           );
         })}
@@ -163,6 +179,15 @@ export function Sparkline({ points, width, height }: SparklineProps) {
       {lastPoint && lastPoint !== firstPoint ? (
         <AppText color="muted" style={styles.lastLabel} variant="micro">
           {lastPoint.day}
+        </AppText>
+      ) : null}
+      {lastPoint ? (
+        <AppText
+          color="primary"
+          style={[styles.valueLabel, { top: Math.max(0, lastPoint.y - 16) }]}
+          tabular
+          variant="micro">
+          {(points.at(-1)?.value ?? 0).toFixed(2)}
         </AppText>
       ) : null}
     </View>
@@ -182,5 +207,10 @@ const styles = StyleSheet.create({
     bottom: 0,
     position: 'absolute',
     right: 0,
+  },
+  valueLabel: {
+    position: 'absolute',
+    right: 0,
+    textAlign: 'right',
   },
 });

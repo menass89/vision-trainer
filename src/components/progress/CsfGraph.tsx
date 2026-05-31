@@ -276,6 +276,7 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
             <Line
               opacity={0.82}
               stroke={surface.hairlineStrong}
+              strokeDasharray="3 3"
               strokeWidth={1}
               x1={selectedPoint.x}
               x2={selectedPoint.x}
