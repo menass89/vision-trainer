@@ -7,6 +7,8 @@ export type TodayView = {
   dailyProgress: number;
   streakDays: number;
   sessionDoneToday: boolean;
+  /** 0=Sun ... 6=Sat */
+  todayIndex: number;
   /** e.g. "6 cpd · 4 min" */
   nextTargetLabel: string;
   verdict: Verdict;

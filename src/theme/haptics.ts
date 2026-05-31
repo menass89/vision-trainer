@@ -3,11 +3,10 @@ import { Platform } from 'react-native';
 
 const ok = Platform.OS !== 'web';
 const run = (fn: () => Promise<unknown>) => {
-  if (ok) {
-    try {
-      void fn();
-    } catch {}
-  }
+  if (!ok) return;
+  try {
+    fn().catch(() => {});
+  } catch {}
 };
 
 export const haptics = {

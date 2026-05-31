@@ -60,6 +60,7 @@ export default function SessionScreen() {
   const isMountedRef = useRef(true);
   const trialRunningRef = useRef(false);
   const foldRunningRef = useRef(false);
+  const continueRunningRef = useRef(false);
   const choiceResolverRef = useRef<ChoiceResolver | null>(null);
   const blockStartCorrectCountRef = useRef(0);
   const [uiPhase, setUiPhase] = useState<UiPhase>('ready');
@@ -225,19 +226,23 @@ export default function SessionScreen() {
   }, [controller.correctCount, fieldOpacity, fieldRotation, fieldScale, isStillMounted, setPhase]);
 
   const handleContinue = useCallback(async () => {
-    if (!showBlockSummary || !isMountedRef.current) return;
+    if (continueRunningRef.current || !showBlockSummary || !isMountedRef.current) return;
+    continueRunningRef.current = true;
+    try {
+      setShowBlockSummary(false);
+      blockStartCorrectCountRef.current = controller.correctCount;
+      controller.advanceBlock();
+      fieldScale.value = withSpring(1, motion.spring.input);
+      fieldOpacity.value = withTiming(1, { duration: 450 });
+      fieldRotation.value = withSpring(0, motion.spring.input);
 
-    setShowBlockSummary(false);
-    blockStartCorrectCountRef.current = controller.correctCount;
-    controller.advanceBlock();
-    fieldScale.value = withSpring(1, motion.spring.input);
-    fieldOpacity.value = withTiming(1, { duration: 450 });
-    fieldRotation.value = withSpring(0, motion.spring.input);
+      if (!(await isStillMounted(450))) return;
 
-    if (!(await isStillMounted(450))) return;
-
-    foldRunningRef.current = false;
-    setPhase('idle');
+      foldRunningRef.current = false;
+      setPhase('idle');
+    } finally {
+      continueRunningRef.current = false;
+    }
   }, [
     controller,
     fieldOpacity,

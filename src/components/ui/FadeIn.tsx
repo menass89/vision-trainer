@@ -4,6 +4,7 @@ import type { StyleProp, ViewStyle } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withDelay,
   withTiming,
@@ -18,10 +19,15 @@ export type FadeInProps = {
 
 export function FadeIn({ children, delay = 0, duration = 280, style }: FadeInProps) {
   const progress = useSharedValue(0);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
+    if (reduceMotion) {
+      progress.value = 1;
+      return;
+    }
     progress.value = withDelay(delay, withTiming(1, { duration, easing: Easing.out(Easing.cubic) }));
-  }, [delay, duration, progress]);
+  }, [delay, duration, progress, reduceMotion]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: progress.value,

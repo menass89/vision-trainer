@@ -14,6 +14,7 @@ export type GlassSurfaceProps = {
 export function GlassSurface({ style, children, radius = material.radius }: GlassSurfaceProps) {
   return (
     <BlurView
+      experimentalBlurMethod="dimezisBlurView"
       intensity={material.blurIntensity}
       style={[styles.surface, { borderRadius: radius }, style]}
       tint={material.blurTint}>

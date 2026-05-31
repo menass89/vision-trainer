@@ -1,5 +1,5 @@
 {
-  "name": "vt-expo-tmp",
+  "name": "vision-trainer",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "dependencies": {

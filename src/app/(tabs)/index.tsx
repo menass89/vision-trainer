@@ -69,7 +69,7 @@ export default function TodayScreen() {
           <View style={styles.spacer} />
           <View style={styles.bottomBlock}>
             <FadeIn>
-              <WeekRow sessionDoneToday={data.sessionDoneToday} />
+              <WeekRow activeIndex={data.todayIndex} sessionDoneToday={data.sessionDoneToday} />
             </FadeIn>
             <FadeIn delay={40} style={styles.titleBlock}>
               <AppText color="primary" variant="hero">
@@ -91,7 +91,7 @@ export default function TodayScreen() {
               <View style={styles.buttonFrame}>
                 <Bloom color={ACCENT_GLOW} style={styles.buttonBloom} />
                 <PressableScale
-                  accessibilityLabel="Start session"
+                  accessibilityLabel={data.sessionDoneToday ? 'Train again' : 'Start session'}
                   accessibilityRole="button"
                   haptic="select"
                   onPress={() => router.push('/session' as Href)}
