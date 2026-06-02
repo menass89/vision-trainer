@@ -98,7 +98,7 @@ export function TrajectoryPointLight({
     const traveled = pathLength - progress.value;
     const point = posAt(traveled);
     const drawT = pathLength <= 0 ? 1 : 1 - progress.value / pathLength;
-    const appear = Math.min(drawT / 0.12, 1);
+    const appear = Math.max(0, Math.min(drawT / 0.12, 1));
 
     return {
       cx: point.x,
@@ -110,7 +110,7 @@ export function TrajectoryPointLight({
     const traveled = pathLength - progress.value;
     const point = posAt(traveled);
     const drawT = pathLength <= 0 ? 1 : 1 - progress.value / pathLength;
-    const appear = Math.min(drawT / 0.12, 1);
+    const appear = Math.max(0, Math.min(drawT / 0.12, 1));
 
     return {
       cx: point.x,

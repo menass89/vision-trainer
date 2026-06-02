@@ -44,12 +44,18 @@ export default function OnboardingScreen() {
   };
 
   const handleEnableReminders = async () => {
-    const granted = await notificationService.requestRemindersPermission();
-    if (granted) {
-      await notificationService.scheduleDailyReminder(REMINDER_HOUR, REMINDER_MINUTE);
-      useAppStore.getState().updateSetting('remindersEnabled', true);
+    try {
+      const granted = await notificationService.requestRemindersPermission();
+      if (granted) {
+        await notificationService.scheduleDailyReminder(REMINDER_HOUR, REMINDER_MINUTE);
+        useAppStore.getState().updateSetting('remindersEnabled', true);
+      }
+    } catch {
+      // Permission/scheduling failed — reflect the off state, never strand the user.
+      useAppStore.getState().updateSetting('remindersEnabled', false);
+    } finally {
+      advance();
     }
-    advance();
   };
 
   const handleCalibration = () => {

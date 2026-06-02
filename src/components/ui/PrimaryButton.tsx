@@ -76,11 +76,12 @@ const styles = StyleSheet.create({
   },
   solid: {
     backgroundColor: ACCENT,
+    // iOS-only cyan glow (premium CTA signature). No Android `elevation` — it would
+    // ignore shadowColor and stamp a grey material box instead of this glow.
     shadowColor: ACCENT,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.45,
     shadowRadius: 18,
-    elevation: 8,
   },
   ghost: {
     backgroundColor: surface.raised,

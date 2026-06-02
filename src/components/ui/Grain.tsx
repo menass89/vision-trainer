@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Platform, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import Svg, { Defs, FeColorMatrix, FeTurbulence, Filter, Rect } from 'react-native-svg';
 
 export type GrainProps = {
@@ -9,6 +9,9 @@ export type GrainProps = {
 
 export function Grain({ opacity = 0.035, style }: GrainProps) {
   const rawId = useId();
+  // react-native-svg 15.x has no native FeTurbulence — grain is a web-only texture.
+  // Render nothing on native rather than emit a dead filter + console warning.
+  if (Platform.OS !== 'web') return null;
   const filterId = `grain-${rawId.replace(/:/g, '')}`;
 
   return (
