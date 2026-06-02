@@ -21,15 +21,16 @@ const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
 
 type WeekRowProps = {
   activeIndex?: number;
-  sessionDoneToday: boolean;
+  weekDays: boolean[];
 };
 
-function WeekRow({ activeIndex = 3, sessionDoneToday }: WeekRowProps) {
+function WeekRow({ activeIndex = 3, weekDays }: WeekRowProps) {
   return (
     <View style={styles.weekRow}>
       {DAYS.map((day, index) => {
         const isToday = index === activeIndex;
-        const isDone = index < activeIndex || (isToday && sessionDoneToday);
+        // Honest per-day truth: a dot lights only if that calendar day was completed.
+        const isDone = weekDays[index] ?? false;
 
         return (
           <View key={`${day}-${index}`} style={styles.dayCell}>
@@ -112,7 +113,7 @@ function TodayContent({ data, reduceMotion, router }: TodayContentProps) {
       </View>
       <View style={styles.bottomBlock}>
         <FadeIn>
-          <WeekRow activeIndex={data.todayIndex} sessionDoneToday={data.sessionDoneToday} />
+          <WeekRow activeIndex={data.todayIndex} weekDays={data.weekDays} />
         </FadeIn>
         <FadeIn delay={40} style={styles.titleBlock}>
           <AppText color="primary" variant="hero">

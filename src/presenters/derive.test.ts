@@ -86,6 +86,8 @@ describe('presenter derivation', () => {
     expect(todayView.contrastSensitivity).toBeGreaterThan(0);
     expect(todayView.streakDays).toBe(2);
     expect(todayView.sessionDoneToday).toBe(true);
+    // fixedNow is Sun 2026-05-31 → today lit, yesterday (Sat) sits in last week.
+    expect(todayView.weekDays).toEqual([true, false, false, false, false, false, false]);
     expect(progressView.sparkline).toHaveLength(2);
     expect(progressView.csf).toEqual([{ spatialFrequency: 4, sensitivity: 50 }]);
     expect(progressView.contributors[0]?.norm).toBeGreaterThan(0);

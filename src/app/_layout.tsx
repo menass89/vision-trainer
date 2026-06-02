@@ -1,5 +1,5 @@
 import * as SplashScreen from 'expo-splash-screen';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -15,6 +15,9 @@ export default function RootLayout() {
   const [loaded, error] = useAppFonts();
   const hydrated = useAppStore((state) => state.hydrated);
   const hydrate = useAppStore((state) => state.hydrate);
+  const onboardingComplete = useAppStore((state) => state.settings.onboardingComplete);
+  const router = useRouter();
+  const segments = useSegments();
 
   useEffect(() => {
     void hydrate();
@@ -25,6 +28,17 @@ export default function RootLayout() {
   useEffect(() => {
     if (ready) SplashScreen.hideAsync();
   }, [ready]);
+
+  // Route gate: a returning user skips onboarding; a fresh user can't slip past it.
+  useEffect(() => {
+    if (!ready) return;
+    const inOnboarding = segments[0] === 'onboarding';
+    if (!onboardingComplete && !inOnboarding) {
+      router.replace('/onboarding');
+    } else if (onboardingComplete && inOnboarding) {
+      router.replace('/(tabs)');
+    }
+  }, [ready, onboardingComplete, segments, router]);
 
   if (!ready) return null;
 

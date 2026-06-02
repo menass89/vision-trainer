@@ -1,7 +1,7 @@
 import { buildBeforeAfterCsf, buildLatestCsf, improvementPercent } from '@/progress/csf';
 import { populationNormContrast } from '@/progress/norms';
 import type { SessionLog, ThresholdEstimate } from '@/types';
-import { computeStreak, localDayKeyFromIso, weekdayShortFromIso } from '@/utils/clock';
+import { computeStreak, localDayKeyFromIso, weekCompletion, weekdayShortFromIso } from '@/utils/clock';
 import { todayIndex } from '@/utils/clock';
 
 import type { ProgressView, TodayView, Verdict } from './types';
@@ -48,6 +48,7 @@ export function deriveTodayView(
   const streakDays = computeStreak(dayKeys, now);
   const sessionDoneToday = dayKeys.includes(todayKey);
   const index = todayIndex(now);
+  const weekDays = weekCompletion(dayKeys, now);
 
   const latest = buildLatestCsf(thresholds);
   if (latest.length === 0) {
@@ -57,6 +58,7 @@ export function deriveTodayView(
       streakDays,
       sessionDoneToday,
       todayIndex: index,
+      weekDays,
       nextTargetLabel: 'First session · 4 min',
       verdict: 'holding',
     };
@@ -70,6 +72,7 @@ export function deriveTodayView(
     streakDays,
     sessionDoneToday,
     todayIndex: index,
+    weekDays,
     nextTargetLabel: recent ? `${formatCpd(recent.spatialFrequencyCpd)} cpd · 4 min` : '6 cpd · 4 min',
     verdict: verdictFromPercent(improvementPercent(thresholds)),
   };

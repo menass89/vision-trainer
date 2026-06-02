@@ -35,6 +35,24 @@ export function computeStreak(completedDayKeys: string[], now: Date = new Date()
   return streak;
 }
 
+/**
+ * Completion flags for the local week (Sun..Sat) containing `now`.
+ * A future day is `false` because nothing was logged; a missed past day is
+ * `false` because no session matched its key — no day is ever fabricated.
+ * @param completedDayKeys local-day-key strings of completed sessions (any order, dups ok)
+ */
+export function weekCompletion(completedDayKeys: string[], now: Date = new Date()): boolean[] {
+  const days = new Set(completedDayKeys);
+  const sunday = new Date(now);
+  sunday.setHours(0, 0, 0, 0);
+  sunday.setDate(sunday.getDate() - sunday.getDay());
+  return Array.from({ length: 7 }, (_, index) => {
+    const cursor = new Date(sunday);
+    cursor.setDate(sunday.getDate() + index);
+    return days.has(localDayKey(cursor));
+  });
+}
+
 const WEEKDAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
 
 /** The single ambient-clock accessor for the whole app. */

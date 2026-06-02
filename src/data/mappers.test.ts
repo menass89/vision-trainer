@@ -12,6 +12,7 @@ vi.mock('@/store/defaults', () => ({
     soundEnabled: false,
     reduceMotion: false,
     remindersEnabled: false,
+    onboardingComplete: false,
   },
 }));
 
@@ -105,6 +106,7 @@ describe('data mappers', () => {
       soundEnabled: true,
       reduceMotion: true,
       remindersEnabled: true,
+      onboardingComplete: true,
     };
 
     expect(payloadToSettings(settingsToPayload(settings))).toEqual(settings);

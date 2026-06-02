@@ -6,6 +6,7 @@ import {
   localDayKey,
   localDayKeyFromIso,
   todayIndex,
+  weekCompletion,
   weekdayShortFromIso,
 } from './clock';
 
@@ -51,6 +52,20 @@ describe('clock', () => {
         new globalThis.Date(2026, 4, 31)
       )
     ).toBe(3);
+  });
+
+  it('maps completed days onto the local Sun..Sat week, fabricating none', () => {
+    // Wed 2026-06-03 → week starts Sun 2026-05-31.
+    expect(
+      weekCompletion(['2026-06-01', '2026-06-03'], new globalThis.Date(2026, 5, 3))
+    ).toEqual([false, true, false, true, false, false, false]);
+  });
+
+  it('ignores completed days outside the current week', () => {
+    // Sun 2026-05-31 starts its own week; the prior Sat belongs to last week.
+    expect(
+      weekCompletion(['2026-05-30', '2026-05-31'], new globalThis.Date(2026, 4, 31))
+    ).toEqual([true, false, false, false, false, false, false]);
   });
 
   it('formats a local calendar day key from an ISO timestamp', () => {

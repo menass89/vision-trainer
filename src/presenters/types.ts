@@ -9,6 +9,8 @@ export type TodayView = {
   sessionDoneToday: boolean;
   /** 0=Sun ... 6=Sat */
   todayIndex: number;
+  /** completion flags for this local week, Sun..Sat — drives the week dots honestly */
+  weekDays: boolean[];
   /** e.g. "6 cpd · 4 min" */
   nextTargetLabel: string;
   verdict: Verdict;
@@ -37,6 +39,7 @@ export type SettingsState = {
   soundEnabled: boolean;
   reduceMotion: boolean;
   remindersEnabled: boolean;
+  onboardingComplete: boolean;
 };
 
 export type Loadable<T> = { data: T; isLoading: boolean };

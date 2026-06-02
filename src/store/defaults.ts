@@ -7,4 +7,5 @@ export const DEFAULT_SETTINGS: SettingsState = {
   soundEnabled: false,
   reduceMotion: false,
   remindersEnabled: false,
+  onboardingComplete: false,
 };

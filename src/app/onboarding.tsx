@@ -64,7 +64,8 @@ export default function OnboardingScreen() {
   };
 
   const handleStart = () => {
-    // TODO(phase4): persist onboardingComplete and gate this route in the root layout.
+    // Persisted so the root layout never re-onboards a returning user on cold launch.
+    useAppStore.getState().updateSetting('onboardingComplete', true);
     router.replace('/(tabs)' as Href);
   };
 
