@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     backgroundColor: surface.card,
     borderColor: surface.hairline,
     borderRadius: radius.lg,
-    borderWidth: hairline.px1,
+    borderWidth: hairline.width,
     overflow: 'hidden',
   },
   footer: {

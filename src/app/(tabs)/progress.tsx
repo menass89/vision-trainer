@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
   hero: {
     alignItems: 'center',
     gap: space.sm,
-    paddingVertical: space.xxl,
+    paddingVertical: space.xl,
   },
   heroNumber: {
     alignItems: 'center',
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     paddingVertical: space.xxl,
   },
   screen: {
-    gap: space.sm,
+    gap: space.md,
     paddingBottom: space.lg,
     paddingTop: space.lg,
   },

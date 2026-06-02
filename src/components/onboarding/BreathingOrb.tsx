@@ -214,7 +214,7 @@ export function BreathingOrb({
             cy={size / 2 + bodyR * 0.16}
             fill="none"
             r={bodyR * 0.92}
-            stroke="#050708"
+            stroke="#04090B"
             strokeOpacity={0.22}
             strokeWidth={1.5}
           />

@@ -27,7 +27,7 @@ function RowBody({ label, description, right }: RowBodyProps) {
   return (
     <>
       <View style={styles.copy}>
-        <AppText variant="body">{label}</AppText>
+        <AppText variant="bodyStrong">{label}</AppText>
         {description ? (
           <AppText color="muted" variant="caption">
             {description}

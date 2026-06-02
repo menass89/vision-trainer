@@ -18,7 +18,7 @@ export type SegmentedControlProps<T extends string = string> = {
 
 const SEGMENT_WIDTH = 52;
 const CONTAINER_INSET = 2;
-const ACCENT_TINT = `${ACCENT}29`;
+const ACCENT_TINT = `${ACCENT}38`;
 
 export function SegmentedControl<T extends string>({
   options,

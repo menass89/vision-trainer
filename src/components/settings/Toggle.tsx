@@ -31,7 +31,7 @@ export function Toggle({ value, onChange, disabled = false }: ToggleProps) {
   }, [progress, value]);
 
   const trackStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(progress.value, [0, 1], [surface.overlay, ACCENT]),
+    backgroundColor: interpolateColor(progress.value, [0, 1], [surface.hairlineStrong, ACCENT]),
   }));
   const knobStyle = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(progress.value, [0, 1], [text.secondary, text.inverse]),

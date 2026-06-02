@@ -4,7 +4,7 @@ import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { AppText } from './AppText';
 import { PressableScale, type PressableScaleProps } from './PressableScale';
-import { ACCENT, radius, space, surface } from '@/theme/tokens';
+import { ACCENT, ACCENT_CORE, radius, space, surface } from '@/theme/tokens';
 
 export type PrimaryButtonProps = {
   label: string;
@@ -41,13 +41,22 @@ export function PrimaryButton({
       scaleTo={0.96}
       style={[styles.base, isSolid ? styles.solid : styles.ghost, style]}>
       {isSolid ? (
-        <LinearGradient
-          colors={['rgba(255,255,255,0.16)', 'rgba(255,255,255,0)']}
-          end={{ x: 0.5, y: 1 }}
-          pointerEvents="none"
-          start={{ x: 0.5, y: 0 }}
-          style={styles.sheen}
-        />
+        <>
+          <LinearGradient
+            colors={[ACCENT_CORE, ACCENT]}
+            end={{ x: 0.5, y: 1 }}
+            pointerEvents="none"
+            start={{ x: 0.5, y: 0 }}
+            style={StyleSheet.absoluteFill}
+          />
+          <LinearGradient
+            colors={['rgba(255,255,255,0.16)', 'rgba(255,255,255,0)']}
+            end={{ x: 0.5, y: 1 }}
+            pointerEvents="none"
+            start={{ x: 0.5, y: 0 }}
+            style={styles.sheen}
+          />
+        </>
       ) : null}
       <AppText color={isSolid ? 'inverse' : 'primary'} variant="heading">
         {label}
@@ -67,6 +76,11 @@ const styles = StyleSheet.create({
   },
   solid: {
     backgroundColor: ACCENT,
+    shadowColor: ACCENT,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.45,
+    shadowRadius: 18,
+    elevation: 8,
   },
   ghost: {
     backgroundColor: surface.raised,

@@ -55,7 +55,7 @@ export default function SettingsScreen() {
     <Screen scroll warm style={styles.screen}>
       <AmbientGradient constellation reduceMotion={reduceMotion} />
       <FadeIn style={styles.title}>
-        <AppText variant="title">Settings</AppText>
+        <AppText variant="hero">Settings</AppText>
       </FadeIn>
       <FadeIn delay={60}>
         <Section
@@ -160,7 +160,7 @@ function Chevron() {
       <Path
         d="M6 3.5L10.5 8L6 12.5"
         fill="none"
-        stroke={text.muted}
+        stroke={text.secondary}
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={1.5}
@@ -175,6 +175,6 @@ const styles = StyleSheet.create({
     paddingTop: space.lg,
   },
   title: {
-    marginBottom: space.xl,
+    marginBottom: space.lg,
   },
 });

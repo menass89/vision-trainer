@@ -8,10 +8,10 @@ import { AppText, Bloom, FadeIn, PrimaryButton, Screen, Shimmer } from '@/compon
 import { useTodayData } from '@/presenters';
 import type { TodayView } from '@/presenters/types';
 import {
+  ACCENT,
   ACCENT_CORE,
   ACCENT_GLOW,
   ACCENT_MUTED,
-  ACCENT_SOFT,
   radius,
   space,
   surface,
@@ -220,14 +220,14 @@ const styles = StyleSheet.create({
     width: 6,
   },
   dayDotDone: {
-    backgroundColor: ACCENT_SOFT,
+    backgroundColor: ACCENT,
     borderRadius: radius.pill,
     height: 6,
     width: 6,
   },
   dayDotFuture: {
     backgroundColor: ACCENT_MUTED,
-    opacity: 0.5,
+    opacity: 0.32,
   },
   dayDotToday: {
     backgroundColor: ACCENT_CORE,

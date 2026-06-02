@@ -101,13 +101,13 @@ export const type = {
     fontFamily: fontFamily.bold,
     fontSize: 47,
     lineHeight: 47,
-    letterSpacing: -1.6
+    letterSpacing: -1.9
   },
   display: {
     fontFamily: fontFamily.semibold,
     fontSize: 88,
     lineHeight: 88,
-    letterSpacing: -2
+    letterSpacing: -2.6
   },
   title: {
     fontFamily: fontFamily.semibold,
@@ -127,17 +127,23 @@ export const type = {
     lineHeight: 24,
     letterSpacing: 0
   },
+  bodyStrong: {
+    fontFamily: fontFamily.medium,
+    fontSize: 15,
+    lineHeight: 24,
+    letterSpacing: 0
+  },
   caption: {
     fontFamily: fontFamily.medium,
     fontSize: 13,
     lineHeight: 18,
-    letterSpacing: 0.2
+    letterSpacing: 0
   },
   micro: {
     fontFamily: fontFamily.semibold,
     fontSize: 11,
-    lineHeight: 14,
-    letterSpacing: 1.2
+    lineHeight: 15,
+    letterSpacing: 1.4
   }
 } as const;
 

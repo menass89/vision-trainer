@@ -44,7 +44,7 @@ export function ProgressEmptySky({ onBegin, reduceMotion }: ProgressEmptySkyProp
             {/* dormant axis — the chart that will fill in */}
             <Line x1={12} y1={122} x2={288} y2={122} stroke={ACCENT_MUTED} strokeOpacity={0.14} strokeWidth={1} />
             {STAR_POINTS.map(({ x }) => (
-              <Line key={`tick-${x}`} x1={x} y1={118} x2={x} y2={122} stroke={ACCENT_MUTED} strokeOpacity={0.22} strokeWidth={1} />
+              <Line key={`tick-${x}`} x1={x} y1={122} x2={x} y2={126} stroke={ACCENT_MUTED} strokeOpacity={0.22} strokeWidth={1} />
             ))}
             <Path
               d={ARC_PATH}
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   bottomBlock: {
-    gap: space.md,
+    gap: space.lg,
     paddingBottom: space.xl,
   },
   dormantBody: {

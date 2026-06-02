@@ -12,7 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Bloom, Grain } from '@/components/ui';
-import { ACCENT, data, motion } from '@/theme/tokens';
+import { ACCENT, ACCENT_CORE, data, motion } from '@/theme/tokens';
 
 export type AmbientGradientProps = {
   constellation?: boolean;
@@ -43,6 +43,7 @@ const STARFIELD = (() => {
       left: 3 + rand() * 94, // % of width
       size: 0.8 + mag * 2.0, // 0.8 .. 2.8 px
       opacity: 0.1 + mag * 0.42, // 0.10 .. 0.52
+      bright: mag > 0.6, // brightest quartile burns at the hot core hue
     };
   });
 })();
@@ -175,6 +176,7 @@ export function AmbientGradient({
               height: s.size,
               borderRadius: s.size / 2,
               opacity: s.opacity,
+              backgroundColor: s.bright ? ACCENT_CORE : ACCENT,
             },
           ]}
         />

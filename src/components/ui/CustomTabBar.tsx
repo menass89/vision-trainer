@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   outer: {
     alignItems: 'center',
     backgroundColor: surface.base,
-    paddingHorizontal: space.base,
+    paddingHorizontal: space.lg,
     paddingTop: space.sm,
   },
   pillShadow: {

@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import { hairline, radius, space, surface } from '@/theme/tokens';
 
-const CARD_FILL = ['#11171B', '#0C1014'] as const;
+const CARD_FILL = ['#141C20', '#0E1418'] as const;
 const RAISED_FILL = ['#141F22', '#0E1316'] as const;
 
 export type CardProps = {
@@ -35,7 +35,7 @@ export function Card({ children, style, raised = false }: CardProps) {
 const styles = StyleSheet.create({
   shadow: {
     borderRadius: radius.lg,
-    shadowColor: '#000',
+    shadowColor: '#02080A',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.5,
     shadowRadius: 14,
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     backgroundColor: surface.raised,
     borderColor: surface.hairline,
     borderRadius: radius.lg,
-    borderWidth: hairline.px1,
+    borderWidth: hairline.width,
     overflow: 'hidden',
     padding: space.base,
   },

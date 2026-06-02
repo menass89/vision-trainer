@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
   },
   hero: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     gap: space.xl,
     paddingVertical: space.xxl,
   },
@@ -348,16 +348,16 @@ const styles = StyleSheet.create({
     paddingTop: space.sm,
   },
   progressTrack: {
-    backgroundColor: surface.hairline,
+    backgroundColor: surface.hairlineStrong,
     borderRadius: radius.pill,
-    height: 2,
+    height: 3,
     overflow: 'hidden',
     width: '100%',
   },
   progressFill: {
     backgroundColor: ACCENT,
     borderRadius: radius.pill,
-    height: 2,
+    height: 3,
   },
   footerNav: {
     minHeight: 28,
