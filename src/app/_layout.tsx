@@ -30,17 +30,18 @@ export default function RootLayout() {
   }, [ready]);
 
   // Route gate: a returning user skips onboarding; a fresh user can't slip past it.
-  useEffect(() => {
-    if (!ready) return;
-    const inOnboarding = segments[0] === 'onboarding';
-    if (!onboardingComplete && !inOnboarding) {
-      router.replace('/onboarding');
-    } else if (onboardingComplete && inOnboarding) {
-      router.replace('/(tabs)');
-    }
-  }, [ready, onboardingComplete, segments, router]);
+  // `needsRedirect` is computed during render so we can withhold the tree until the
+  // redirect settles — otherwise the deep-linked screen paints for one frame first.
+  const inOnboarding = segments[0] === 'onboarding';
+  const needsRedirect =
+    ready && ((!onboardingComplete && !inOnboarding) || (onboardingComplete && inOnboarding));
 
-  if (!ready) return null;
+  useEffect(() => {
+    if (!needsRedirect) return;
+    router.replace(onboardingComplete ? '/(tabs)' : '/onboarding');
+  }, [needsRedirect, onboardingComplete, router]);
+
+  if (!ready || needsRedirect) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: surface.base }}>
