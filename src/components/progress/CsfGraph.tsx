@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -17,7 +17,7 @@ import Svg, { Circle, Defs, Line, LinearGradient, Path, RadialGradient, Rect, St
 import { TrajectoryPointLight } from '@/components/progress/TrajectoryPointLight';
 import { AppText } from '@/components/ui';
 import { haptics } from '@/theme/haptics';
-import { ACCENT, ACCENT_GLOW, motion, radius, surface, text, verdict } from '@/theme/tokens';
+import { ACCENT, ACCENT_CORE, ACCENT_GLOW, ACCENT_HOT, motion, radius, surface, text, verdict } from '@/theme/tokens';
 
 export type CsfGraphProps = {
   points: { spatialFrequency: number; sensitivity: number }[];
@@ -40,7 +40,6 @@ const CHART_TOP = 34;
 const CHART_BOTTOM = 12;
 const CHART_INSET = 8;
 const SELECTED_DOT_SIZE = 12;
-const NODE_NEUTRALS = [text.muted, '#7B828A', '#8A9198', text.secondary] as const;
 const EMPTY_REFERENCES: NonNullable<CsfGraphProps['references']> = [];
 
 function clamp(value: number, minimum: number, maximum: number) {
@@ -355,15 +354,35 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
               )}
             </>
           ) : null}
-          {chartPoints.map((point, index) => (
-            <Circle
-              cx={point.x}
-              cy={point.y}
-              fill={NODE_NEUTRALS[index % NODE_NEUTRALS.length]}
-              key={point.spatialFrequency}
-              r={3}
-            />
-          ))}
+          {/* Constellation: each measured frequency is a lit star, brightness rising
+              with sensitivity so the peak burns hottest — the empty sky, bloomed. */}
+          {chartPoints.map((point) => {
+            const span = baselineY - CHART_TOP || 1;
+            const b = clamp(1 - (point.y - CHART_TOP) / span, 0, 1);
+            const coreColor = b > 0.85 ? ACCENT_HOT : b > 0.4 ? ACCENT_CORE : ACCENT;
+
+            return (
+              <Fragment key={point.spatialFrequency}>
+                <Circle
+                  cx={point.x}
+                  cy={point.y}
+                  fill={ACCENT_GLOW}
+                  opacity={0.12 + b * 0.26}
+                  r={4 + b * 8}
+                />
+                <Circle
+                  cx={point.x}
+                  cy={point.y}
+                  fill={coreColor}
+                  opacity={0.55 + b * 0.45}
+                  r={1.7 + b * 1.5}
+                />
+                {b > 0.85 ? (
+                  <Circle cx={point.x} cy={point.y} fill={ACCENT_HOT} opacity={0.95} r={1.1} />
+                ) : null}
+              </Fragment>
+            );
+          })}
           {chartPoints.length > 0 ? (
             <TrajectoryPointLight
               coreR={3.5}

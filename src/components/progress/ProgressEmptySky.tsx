@@ -68,9 +68,6 @@ export function ProgressEmptySky({ onBegin, reduceMotion }: ProgressEmptySkyProp
               />
             ))}
           </Svg>
-          <AppText color="muted" style={styles.axisCaption} uppercase variant="micro">
-            Contrast sensitivity by spatial frequency
-          </AppText>
         </FadeIn>
       </View>
       <FadeIn delay={180} style={styles.bottomBlock}>
@@ -94,10 +91,6 @@ export function ProgressEmptySky({ onBegin, reduceMotion }: ProgressEmptySkyProp
 const styles = StyleSheet.create({
   arc: {
     width: '100%',
-  },
-  axisCaption: {
-    marginTop: space.sm,
-    textAlign: 'center',
   },
   bottomBlock: {
     gap: space.lg,
