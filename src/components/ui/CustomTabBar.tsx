@@ -1,4 +1,7 @@
-import type { BottomTabBarProps } from 'expo-router/build/react-navigation/bottom-tabs';
+import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { BlurView } from 'expo-blur';
+import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
@@ -10,7 +13,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Line, Path } from 'react-native-svg';
 
-import { ACCENT, hairline, motion, radius, space, surface, text } from '@/theme/tokens';
+import { ACCENT, ACCENT_GLOW, material, motion, space, surface, text } from '@/theme/tokens';
 
 import { AppText } from './AppText';
 import { PressableScale } from './PressableScale';
@@ -92,10 +95,6 @@ function TabButton({ focused, label, onPress, routeName }: TabButtonProps) {
     transform: [{ scale: 1 + progress.value * 0.06 }, { translateY: progress.value * -1 }],
   }));
   const accentLayerStyle = useAnimatedStyle(() => ({ opacity: progress.value }));
-  const dotStyle = useAnimatedStyle(() => ({
-    opacity: progress.value,
-    transform: [{ scale: 0.4 + progress.value * 0.6 }],
-  }));
 
   return (
     <PressableScale
@@ -130,27 +129,25 @@ function TabButton({ focused, label, onPress, routeName }: TabButtonProps) {
           </AppText>
         </Animated.View>
       </View>
-      <Animated.View style={[styles.dot, dotStyle]} />
     </PressableScale>
   );
 }
 
 export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
+  const liquidGlass = isLiquidGlassAvailable();
 
-  return (
-    <View style={[styles.bar, { paddingBottom: insets.bottom + space.sm }]}>
+  const row = (
+    <View style={styles.row}>
       {state.routes.map((route, index) => {
         const focused = state.index === index;
         const label = descriptors[route.key].options.title ?? route.name;
-
         const handlePress = () => {
           const event = navigation.emit({
             type: 'tabPress',
             target: route.key,
             canPreventDefault: true,
           });
-
           if (!focused && !event.defaultPrevented) {
             navigation.navigate(route.name);
           }
@@ -168,21 +165,81 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
       })}
     </View>
   );
+
+  const sheen = (
+    <LinearGradient
+      colors={['rgba(255,255,255,0.10)', 'rgba(255,255,255,0)']}
+      end={{ x: 0.5, y: 1 }}
+      pointerEvents="none"
+      start={{ x: 0.5, y: 0 }}
+      style={styles.sheen}
+    />
+  );
+
+  return (
+    <View style={[styles.outer, { paddingBottom: insets.bottom + space.sm }]}>
+      <View style={styles.pillShadow}>
+        {liquidGlass ? (
+          <GlassView
+            colorScheme="dark"
+            glassEffectStyle="regular"
+            style={styles.pill}
+            tintColor="rgba(12,20,23,0.55)">
+            {sheen}
+            {row}
+          </GlassView>
+        ) : (
+          <BlurView
+            experimentalBlurMethod="dimezisBlurView"
+            intensity={material.blurIntensity}
+            style={[styles.pill, styles.pillFallback]}
+            tint="dark">
+            {sheen}
+            {row}
+          </BlurView>
+        )}
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-  bar: {
+  outer: {
+    alignItems: 'center',
     backgroundColor: surface.base,
-    borderTopColor: surface.hairline,
-    borderTopWidth: hairline.px1,
-    flexDirection: 'row',
+    paddingHorizontal: space.base,
     paddingTop: space.sm,
   },
-  dot: {
-    backgroundColor: ACCENT,
-    borderRadius: radius.pill,
-    height: 4,
-    width: 4,
+  pillShadow: {
+    borderRadius: 28,
+    shadowColor: ACCENT_GLOW,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.5,
+    shadowRadius: 24,
+    width: '100%',
+  },
+  pill: {
+    borderColor: material.hairlineOnGlass,
+    borderRadius: 28,
+    borderWidth: 1,
+    flexDirection: 'row',
+    overflow: 'hidden',
+  },
+  pillFallback: {
+    backgroundColor: 'rgba(12,20,23,0.55)',
+  },
+  sheen: {
+    height: '55%',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  row: {
+    flexDirection: 'row',
+    paddingHorizontal: space.sm,
+    paddingVertical: space.sm,
+    width: '100%',
   },
   iconOverlay: {
     bottom: 0,

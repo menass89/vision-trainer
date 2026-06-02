@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated, {
   useAnimatedProps,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withDelay,
   withSequence,
@@ -14,11 +15,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { GaborCanvas, type GaborCanvasHandle } from '@/components/GaborCanvas';
+import { AmbientGradient } from '@/components/home/AmbientGradient';
 import { CompletionReward } from '@/components/session/CompletionReward';
 import { KinoEdgeArc } from '@/components/session/KinoEdgeArc';
 import { ResponseSwipe } from '@/components/session/ResponseSwipe';
 import { RewardBurst } from '@/components/session/RewardBurst';
-import { AppText, Bloom, GlassSurface, PressableScale } from '@/components/ui';
+import { AppText, Bloom, GlassSurface, PressableScale, PrimaryButton } from '@/components/ui';
 import { useSessionController } from '@/presenters';
 import { haptics } from '@/theme/haptics';
 import { easings } from '@/theme/motion';
@@ -56,6 +58,7 @@ const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 export default function SessionScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const reduceMotion = useReducedMotion();
   const controller = useSessionController();
   const canvasRef = useRef<GaborCanvasHandle>(null);
   const isMountedRef = useRef(true);
@@ -324,22 +327,21 @@ export default function SessionScreen() {
 
       {controller.status === 'ready' && uiPhase === 'ready' ? (
         <View style={styles.readyOverlay}>
+          <AmbientGradient constellation reduceMotion={reduceMotion} />
           <Bloom color={READY_GLOW} style={styles.readyGlow} />
           <View style={[styles.readyContent, { paddingBottom: insets.bottom + space.xxl }]}>
             <AppText color="muted" style={styles.readyMeta} uppercase variant="micro">
               {controller.blockLabel}
             </AppText>
-            <AppText style={styles.readyHero} variant="title">
-              Two flashes.
+            <AppText style={styles.readyHero} variant="hero">
+              Two flashes
             </AppText>
             <AppText color="secondary" style={styles.readyInstruction} variant="body">
               Pick the one with the pattern.
             </AppText>
-            <PressableScale haptic="select" onPress={handleBegin} style={styles.beginGhost}>
-              <AppText color="accent" variant="caption">
-                Begin
-              </AppText>
-            </PressableScale>
+            <View style={styles.beginWrap}>
+              <PrimaryButton haptic="select" label="Begin" onPress={handleBegin} />
+            </View>
           </View>
         </View>
       ) : null}
@@ -462,7 +464,7 @@ const styles = StyleSheet.create({
     top: '6%',
   },
   readyContent: {
-    paddingHorizontal: space.xl,
+    paddingHorizontal: space.lg,
   },
   readyMeta: {
     letterSpacing: 1.6,
@@ -473,16 +475,8 @@ const styles = StyleSheet.create({
   readyInstruction: {
     marginTop: space.sm,
   },
-  beginGhost: {
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    borderColor: 'rgba(51,210,214,0.45)',
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    justifyContent: 'center',
+  beginWrap: {
     marginTop: space.xl,
-    paddingHorizontal: space.lg,
-    paddingVertical: space.md,
   },
   score: {
     marginTop: space.sm,

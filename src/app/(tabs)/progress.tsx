@@ -1,21 +1,28 @@
 import { useCallback, useState } from 'react';
+import { type Href, useRouter } from 'expo-router';
 import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
+import { useReducedMotion } from 'react-native-reanimated';
 
+import { AmbientGradient } from '@/components/home/AmbientGradient';
 import { ContributorRows } from '@/components/progress/ContributorRows';
 import { CountUpNumber } from '@/components/progress/CountUpNumber';
 import { CsfGraph } from '@/components/progress/CsfGraph';
+import { ProgressEmptySky } from '@/components/progress/ProgressEmptySky';
 import { Sparkline } from '@/components/progress/Sparkline';
 import { VerdictBand } from '@/components/progress/VerdictBand';
-import { AppText, Card, FadeIn, Screen, Shimmer } from '@/components/ui';
+import { AppText, Bloom, Card, FadeIn, Screen, Shimmer } from '@/components/ui';
 import { useProgressData } from '@/presenters';
 import { haptics } from '@/theme/haptics';
-import { motion, radius, space } from '@/theme/tokens';
+import { data as tokenData, motion, radius, space, surface } from '@/theme/tokens';
 
 const SPARKLINE_HEIGHT = 112;
 const CSF_GRAPH_HEIGHT = 220;
 
 export default function ProgressScreen() {
+  const router = useRouter();
+  const reduceMotion = useReducedMotion();
   const { data, isLoading } = useProgressData();
+  const isEmpty = data.csf.length === 0;
   const [chartWidth, setChartWidth] = useState(0);
   const handleChartLayout = useCallback((event: LayoutChangeEvent) => {
     const next = Math.round(event.nativeEvent.layout.width);
@@ -24,8 +31,14 @@ export default function ProgressScreen() {
 
   return (
     <Screen scroll style={styles.screen}>
+      <AmbientGradient constellation reduceMotion={reduceMotion} />
       {isLoading ? (
         <LoadingProgress />
+      ) : isEmpty ? (
+        <ProgressEmptySky
+          onBegin={() => router.push('/session' as Href)}
+          reduceMotion={reduceMotion}
+        />
       ) : (
         <>
           <FadeIn>
@@ -40,6 +53,7 @@ export default function ProgressScreen() {
             <View
               accessibilityLabel={data.headlineAcuity.toFixed(2)}
               style={styles.heroNumber}>
+              <Bloom color={tokenData.heroGlow} opacity={0.7} rx="62%" ry="48%" />
               <CountUpNumber
                 durationMs={motion.timing.countUpProgressMs}
                 from={data.previousAcuity}
@@ -56,8 +70,12 @@ export default function ProgressScreen() {
               </AppText>
               {data.sparkline.length === 0 ? (
                 <View style={styles.emptyTrend}>
-                  <AppText color="muted" variant="caption">
-                    Complete a session to see your trend
+                  <AppText color="secondary" variant="caption">
+                    Awaiting first reading
+                  </AppText>
+                  <View style={styles.emptyTrendBaseline} />
+                  <AppText color="muted" uppercase variant="micro">
+                    Complete a session to chart your trend
                   </AppText>
                 </View>
               ) : (
@@ -141,8 +159,14 @@ const styles = StyleSheet.create({
   },
   emptyTrend: {
     alignItems: 'center',
+    gap: space.xs,
     justifyContent: 'center',
     minHeight: SPARKLINE_HEIGHT + 20,
+  },
+  emptyTrendBaseline: {
+    backgroundColor: surface.hairline,
+    height: StyleSheet.hairlineWidth,
+    width: '70%',
   },
   hero: {
     alignItems: 'center',

@@ -9,9 +9,9 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { AppText } from '@/components/ui';
+import { AppText, Hairline } from '@/components/ui';
 import { easings } from '@/theme/motion';
-import { data, radius, space, verdict } from '@/theme/tokens';
+import { data, radius, space, surface, verdict } from '@/theme/tokens';
 
 export type ContributorRowsProps = {
   rows: { label: string; sensitivity: number; norm: number }[];
@@ -19,6 +19,7 @@ export type ContributorRowsProps = {
 
 type ContributorRowProps = ContributorRowsProps['rows'][number] & {
   delay: number;
+  isLast: boolean;
   maxSensitivity: number;
   isStatic: boolean;
 };
@@ -36,6 +37,7 @@ function ContributorRow({
   sensitivity,
   norm,
   delay,
+  isLast,
   maxSensitivity,
   isStatic,
 }: ContributorRowProps) {
@@ -63,15 +65,19 @@ function ContributorRow({
 
   return (
     <View style={styles.row}>
-      <AppText color="secondary" style={styles.label} tabular variant="caption">
-        {label}
-      </AppText>
+      <View style={styles.topRow}>
+        <AppText color="muted" tabular uppercase variant="micro">
+          {label}
+        </AppText>
+        <View style={styles.leader} />
+        <AppText style={[styles.value, { color: fillColor }]} tabular variant="caption">
+          {sensitivity}
+        </AppText>
+      </View>
       <View style={styles.track}>
         <Animated.View style={[styles.fill, { backgroundColor: fillColor }, animatedStyle]} />
       </View>
-      <AppText style={[styles.value, { color: fillColor }]} tabular variant="caption">
-        {sensitivity}
-      </AppText>
+      {isLast ? null : <Hairline style={styles.divider} />}
     </View>
   );
 }
@@ -87,6 +93,7 @@ export function ContributorRows({ rows }: ContributorRowsProps) {
         <ContributorRow
           {...row}
           delay={index * 40}
+          isLast={index === rows.length - 1}
           isStatic={isStatic}
           key={row.label}
           maxSensitivity={maxSensitivity}
@@ -97,27 +104,39 @@ export function ContributorRows({ rows }: ContributorRowsProps) {
 }
 
 const styles = StyleSheet.create({
+  divider: {
+    marginTop: space.sm,
+  },
   fill: {
     borderRadius: radius.pill,
     height: '100%',
   },
-  label: {
-    width: 64,
+  leader: {
+    alignSelf: 'flex-end',
+    borderBottomColor: surface.hairline,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderStyle: 'dotted',
+    flex: 1,
+    marginBottom: space.xs,
+    marginHorizontal: space.sm,
   },
   list: {
     gap: space.md,
   },
   row: {
+    flexDirection: 'column',
+  },
+  topRow: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: space.sm,
   },
   track: {
     backgroundColor: data.track,
     borderRadius: radius.pill,
-    flex: 1,
-    height: 4,
+    height: 2,
+    marginTop: space.xs,
     overflow: 'hidden',
+    width: '100%',
   },
   value: {
     textAlign: 'right',

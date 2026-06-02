@@ -12,8 +12,9 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import Svg, { Circle, Defs, Line, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
+import Svg, { Circle, Defs, Line, LinearGradient, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 
+import { TrajectoryPointLight } from '@/components/progress/TrajectoryPointLight';
 import { AppText } from '@/components/ui';
 import { haptics } from '@/theme/haptics';
 import { ACCENT, ACCENT_GLOW, motion, radius, surface, text, verdict } from '@/theme/tokens';
@@ -289,7 +290,20 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
               <Stop offset="0" stopColor={ACCENT} stopOpacity={0.18} />
               <Stop offset="1" stopColor={ACCENT} stopOpacity={0} />
             </LinearGradient>
+            <RadialGradient id="csfBloom" cx="50%" cy="50%" r="55%">
+              <Stop offset="0%" stopColor={ACCENT_GLOW} stopOpacity={1} />
+              <Stop offset="55%" stopColor={ACCENT_GLOW} stopOpacity={0.45} />
+              <Stop offset="100%" stopColor={ACCENT_GLOW} stopOpacity={0} />
+            </RadialGradient>
           </Defs>
+          <Rect
+            fill="url(#csfBloom)"
+            height={baselineY - CHART_TOP}
+            opacity={0.1}
+            width={Math.max(width - CHART_INSET * 2, 0)}
+            x={CHART_INSET}
+            y={CHART_TOP}
+          />
           {areaPath ? <Path d={areaPath} fill="url(#csfArea)" stroke="none" /> : null}
           {path ? (
             <>
@@ -350,6 +364,15 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
               r={3}
             />
           ))}
+          {chartPoints.length > 0 ? (
+            <TrajectoryPointLight
+              coreR={3.5}
+              isStatic={isStatic}
+              pathLength={pathLength}
+              points={chartPoints}
+              progress={strokeDashoffset}
+            />
+          ) : null}
         </Svg>
         {referenceLines.map((reference) => (
           <AppText

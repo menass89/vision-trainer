@@ -1,7 +1,9 @@
 import { type Href, useRouter } from 'expo-router';
 import { StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { useReducedMotion } from 'react-native-reanimated';
 
+import { AmbientGradient } from '@/components/home/AmbientGradient';
 import { Row } from '@/components/settings/Row';
 import { Section } from '@/components/settings/Section';
 import {
@@ -24,6 +26,7 @@ const WEAK_EYE_OPTIONS: SegmentOption<SettingsState['monocularWeakEye']>[] = [
 ];
 
 export default function SettingsScreen() {
+  const reduceMotion = useReducedMotion();
   const router = useRouter();
   const { state, set } = useSettingsState();
 
@@ -50,15 +53,16 @@ export default function SettingsScreen() {
 
   return (
     <Screen scroll warm style={styles.screen}>
+      <AmbientGradient constellation reduceMotion={reduceMotion} />
       <FadeIn style={styles.title}>
         <AppText variant="title">Settings</AppText>
       </FadeIn>
       <FadeIn delay={60}>
         <Section
-          footer="Weak-eye boost favours your non-dominant eye. Both modes need red/cyan glasses."
+          footer="Emphasis directs more of the session to the selected eye. Both modes need red/cyan glasses."
           title="Stimulus">
           <Row
-            description="Separate red/cyan channels for amblyopia training"
+            description="Sends a different pattern to each eye through red/cyan glasses"
             label="Dichoptic mode"
             right={
               <Toggle
@@ -68,7 +72,7 @@ export default function SettingsScreen() {
             }
           />
           <Row
-            label="Weak eye"
+            label="Eye emphasis"
             right={
               <SegmentedControl
                 onChange={(value) => set('monocularWeakEye', value)}

@@ -1,13 +1,21 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { type Href, useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 
 import { AmbientGradient } from '@/components/home/AmbientGradient';
-import { BaselineRing } from '@/components/home/BaselineRing';
-import { AppText, Bloom, FadeIn, PressableScale, Screen, Shimmer } from '@/components/ui';
+import { CelestialGabor } from '@/components/home/CelestialGabor';
+import { AppText, Bloom, FadeIn, PrimaryButton, Screen, Shimmer } from '@/components/ui';
 import { useTodayData } from '@/presenters';
-import { ACCENT, ACCENT_GLOW, radius, space, surface } from '@/theme/tokens';
+import type { TodayView } from '@/presenters/types';
+import {
+  ACCENT_CORE,
+  ACCENT_GLOW,
+  ACCENT_MUTED,
+  ACCENT_SOFT,
+  radius,
+  space,
+  surface,
+} from '@/theme/tokens';
 
 const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
 
@@ -25,11 +33,15 @@ function WeekRow({ activeIndex = 3, sessionDoneToday }: WeekRowProps) {
 
         return (
           <View key={`${day}-${index}`} style={styles.dayCell}>
-            <AppText color={isToday ? 'primary' : 'muted'} variant="micro">
+            <AppText color={isToday ? 'primary' : isDone ? 'secondary' : 'muted'} variant="micro">
               {day}
             </AppText>
             <View style={styles.dayDotFrame}>
-              {isToday ? <Bloom color={ACCENT_GLOW} style={styles.dayBloom} /> : null}
+              {isToday ? (
+                <Bloom color={ACCENT_GLOW} style={styles.dayBloom} />
+              ) : isDone ? (
+                <Bloom color={ACCENT_GLOW} opacity={0.5} style={styles.dayBloomSoft} />
+              ) : null}
               <View
                 style={[
                   styles.dayDot,
@@ -52,74 +64,80 @@ export default function TodayScreen() {
 
   return (
     <Screen padded>
-      <AmbientGradient reduceMotion={reduceMotion} />
+      <AmbientGradient constellation reduceMotion={reduceMotion} />
       {isLoading ? (
         <LoadingToday />
       ) : (
-        <>
-          <FadeIn style={styles.eyebrow}>
-            <AppText color="muted" uppercase variant="micro">
-              Today
-            </AppText>
-            {data.streakDays > 0 ? (
-              <View style={styles.streakChip}>
-                <AppText color="secondary" tabular variant="caption">
-                  {`${data.streakDays} day streak`}
-                </AppText>
-              </View>
-            ) : null}
-          </FadeIn>
-          <View style={styles.spacer}>
-            <FadeIn delay={20}>
-              <BaselineRing
-                progress={data.sessionDoneToday ? 1 : data.streakDays === 0 ? 0.08 : 0.5}
-              />
-            </FadeIn>
-          </View>
-          <View style={styles.bottomBlock}>
-            <FadeIn>
-              <WeekRow activeIndex={data.todayIndex} sessionDoneToday={data.sessionDoneToday} />
-            </FadeIn>
-            <FadeIn delay={40} style={styles.titleBlock}>
-              <AppText color="primary" variant="hero">
-                {data.sessionDoneToday
-                  ? 'Come back\ntomorrow'
-                  : data.streakDays === 0
-                    ? 'Set your\nbaseline'
-                    : 'Ready when\nyou are'}
-              </AppText>
-              <AppText color="muted" variant="caption">
-                {data.sessionDoneToday
-                  ? `Next · ${data.nextTargetLabel}`
-                  : data.streakDays === 0
-                    ? 'Your first session sets the baseline'
-                    : `Next · ${data.nextTargetLabel}`}
-              </AppText>
-            </FadeIn>
-            <FadeIn delay={80}>
-              <PressableScale
-                accessibilityLabel={data.sessionDoneToday ? 'Train again' : 'Start session'}
-                accessibilityRole="button"
-                haptic="select"
-                onPress={() => router.push('/session' as Href)}
-                scaleTo={0.96}
-                style={styles.startButton}>
-                <LinearGradient
-                  colors={['rgba(255,255,255,0.16)', 'rgba(255,255,255,0)']}
-                  end={{ x: 0.5, y: 1 }}
-                  pointerEvents="none"
-                  start={{ x: 0.5, y: 0 }}
-                  style={styles.startButtonSheen}
-                />
-                <AppText color="inverse" variant="heading">
-                  {data.sessionDoneToday ? 'Train again' : 'Start session'}
-                </AppText>
-              </PressableScale>
-            </FadeIn>
-          </View>
-        </>
+        <TodayContent data={data} reduceMotion={reduceMotion} router={router} />
       )}
     </Screen>
+  );
+}
+
+type TodayContentProps = {
+  data: TodayView;
+  reduceMotion: boolean;
+  router: ReturnType<typeof useRouter>;
+};
+
+function TodayContent({ data, reduceMotion, router }: TodayContentProps) {
+  const discContrast =
+    data.contrastSensitivity > 0 ? Math.min(1, 0.5 + data.contrastSensitivity * 0.22) : 0.32;
+
+  return (
+    <>
+      <FadeIn style={styles.eyebrow}>
+        <AppText color="muted" uppercase variant="micro">
+          Today
+        </AppText>
+        {data.streakDays > 0 ? (
+          <View style={styles.streakChip}>
+            <AppText color="secondary" tabular variant="caption">
+              {`${data.streakDays} day streak`}
+            </AppText>
+          </View>
+        ) : null}
+      </FadeIn>
+      <View style={styles.spacer}>
+        <FadeIn delay={20}>
+          <View style={styles.orbScale}>
+            <CelestialGabor
+              contrast={discContrast}
+              progress={data.sessionDoneToday ? 1 : data.streakDays === 0 ? 0.08 : 0.5}
+              reduceMotion={reduceMotion}
+              resolveOnMount
+            />
+          </View>
+        </FadeIn>
+      </View>
+      <View style={styles.bottomBlock}>
+        <FadeIn>
+          <WeekRow activeIndex={data.todayIndex} sessionDoneToday={data.sessionDoneToday} />
+        </FadeIn>
+        <FadeIn delay={40} style={styles.titleBlock}>
+          <AppText color="primary" variant="hero">
+            {data.sessionDoneToday
+              ? 'Come back\ntomorrow'
+              : data.streakDays === 0
+                ? 'Set your\nbaseline'
+                : 'Ready when\nyou are'}
+          </AppText>
+          {data.streakDays === 0 && !data.sessionDoneToday ? null : (
+            <AppText color="muted" variant="caption">
+              {`Next · ${data.nextTargetLabel}`}
+            </AppText>
+          )}
+        </FadeIn>
+        <FadeIn delay={80}>
+          <PrimaryButton
+            accessibilityLabel={data.sessionDoneToday ? 'Train again' : 'Start session'}
+            haptic="select"
+            label={data.sessionDoneToday ? 'Train again' : 'Start session'}
+            onPress={() => router.push('/session' as Href)}
+          />
+        </FadeIn>
+      </View>
+    </>
   );
 }
 
@@ -163,11 +181,15 @@ const styles = StyleSheet.create({
   spacer: {
     alignItems: 'center',
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
+    paddingBottom: space.base,
+  },
+  orbScale: {
+    transform: [{ scale: 1.08 }],
   },
   bottomBlock: {
-    gap: space.md,
-    paddingBottom: space.lg,
+    gap: space.lg,
+    paddingBottom: space.xl,
   },
   weekRow: {
     flexDirection: 'row',
@@ -188,42 +210,33 @@ const styles = StyleSheet.create({
     height: 28,
     width: 28,
   },
+  dayBloomSoft: {
+    height: 18,
+    width: 18,
+  },
   dayDot: {
     borderRadius: radius.pill,
     height: 6,
     width: 6,
   },
   dayDotDone: {
-    backgroundColor: surface.hairlineStrong,
+    backgroundColor: ACCENT_SOFT,
+    borderRadius: radius.pill,
+    height: 6,
+    width: 6,
   },
   dayDotFuture: {
-    backgroundColor: 'transparent',
-    borderColor: surface.hairline,
-    borderWidth: 1,
+    backgroundColor: ACCENT_MUTED,
+    opacity: 0.5,
   },
   dayDotToday: {
-    backgroundColor: ACCENT,
+    backgroundColor: ACCENT_CORE,
     borderWidth: 0,
     height: 8,
     width: 8,
   },
   titleBlock: {
     gap: space.sm,
-  },
-  startButton: {
-    alignItems: 'center',
-    backgroundColor: ACCENT,
-    borderRadius: radius.pill,
-    justifyContent: 'center',
-    overflow: 'hidden',
-    paddingVertical: space.base,
-  },
-  startButtonSheen: {
-    height: '60%',
-    left: 0,
-    position: 'absolute',
-    right: 0,
-    top: 0,
   },
   loadingTitle: {
     gap: space.sm,

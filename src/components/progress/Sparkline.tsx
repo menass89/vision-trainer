@@ -8,10 +8,11 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import Svg, { Circle, Path } from 'react-native-svg';
+import Svg, { Circle, Defs, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 
+import { TrajectoryPointLight } from '@/components/progress/TrajectoryPointLight';
 import { AppText } from '@/components/ui';
-import { ACCENT, ACCENT_GLOW, space, surface } from '@/theme/tokens';
+import { ACCENT, ACCENT_GLOW, space } from '@/theme/tokens';
 
 export type SparklineProps = {
   points: { day: string; value: number }[];
@@ -89,6 +90,14 @@ export function Sparkline({ points, width, height }: SparklineProps) {
   return (
     <View style={[styles.container, { width, height: height + LABEL_HEIGHT }]}>
       <Svg height={height} width={width}>
+        <Defs>
+          <RadialGradient id="sparkBloom" cx="50%" cy="50%" r="55%">
+            <Stop offset="0%" stopColor={ACCENT_GLOW} stopOpacity={1} />
+            <Stop offset="55%" stopColor={ACCENT_GLOW} stopOpacity={0.45} />
+            <Stop offset="100%" stopColor={ACCENT_GLOW} stopOpacity={0} />
+          </RadialGradient>
+        </Defs>
+        <Rect fill="url(#sparkBloom)" height={height} opacity={0.1} width={width} x={0} y={0} />
         {areaPath ? <Path d={areaPath} fill={ACCENT} opacity={0.08} /> : null}
         {path ? (
           <>
@@ -143,21 +152,7 @@ export function Sparkline({ points, width, height }: SparklineProps) {
         {chartPoints.map((point, index) => {
           const isLast = index === chartPoints.length - 1;
 
-          if (isLast) {
-            // Copilot Money endpoint: an open ring (base-color knockout) reads as "you are here",
-            // and rhymes with the CSF selected-dot ring on the sibling chart.
-            return (
-              <Circle
-                cx={point.x}
-                cy={point.y}
-                fill={surface.base}
-                key={`${point.day}-${index}`}
-                r={4}
-                stroke={ACCENT}
-                strokeWidth={2}
-              />
-            );
-          }
+          if (isLast) return null;
 
           return (
             <Circle
@@ -170,6 +165,15 @@ export function Sparkline({ points, width, height }: SparklineProps) {
             />
           );
         })}
+        {chartPoints.length > 0 ? (
+          <TrajectoryPointLight
+            coreR={4}
+            isStatic={isStatic}
+            pathLength={pathLength}
+            points={chartPoints}
+            progress={strokeDashoffset}
+          />
+        ) : null}
       </Svg>
       {firstPoint ? (
         <AppText color="muted" style={styles.firstLabel} variant="micro">

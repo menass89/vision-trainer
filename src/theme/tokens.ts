@@ -18,20 +18,30 @@ export const surface = {
 export const text = {
   primary: '#EFF3F4',
   secondary: '#A7B2B4',
-  muted: '#67726F',
+  // muted: cool cyan-grey (moonlight, not firelight). ≈4.87:1 on surface.base #080A0D — clears WCAG AA 4.5:1.
+  muted: '#6E827F',
   inverse: '#08161A'
 } as const;
 
-// SIGNATURE ACCENT - single living/active hue (lunar cyan, instrument-grade).
-// Gradient stops live in accent.
+// SIGNATURE ACCENT - single living hue, run as a luminance LADDER, never one flat value.
+// Assign by ROLE: core = the one live element on a screen; default = primary CTA;
+// soft = decorative/structural cyan (gratings, arcs); muted = dim rims; glow = passive/idle states.
+export const ACCENT_CORE = '#5BE9EC' as const;
 export const ACCENT = '#33D2D6' as const;
+export const ACCENT_SOFT = '#1E8C8F' as const;
 export const ACCENT_GLOW = 'rgba(51,210,214,0.30)' as const;
 export const ACCENT_MUTED = '#2B6166' as const;
+// near-white hot core for believable light emission (3-stop glow temperature).
+export const ACCENT_HOT = '#CFFAFB' as const;
 
 export const accent = {
+  core: ACCENT_CORE,
   default: ACCENT,
+  soft: ACCENT_SOFT,
   glow: ACCENT_GLOW,
   muted: ACCENT_MUTED,
+  hot: ACCENT_HOT,
+  idle: ACCENT_GLOW,
   amber: '#6FE3E6',
   ember: '#26C3C8'
 } as const;
@@ -45,7 +55,8 @@ export const verdict = {
 export const data = {
   track: '#16201F',
   canvas: '#080C0E',
-  heroGlow: 'rgba(51,200,214,0.10)'
+  heroGlow: 'rgba(51,200,214,0.10)',
+  heroGlowStrong: 'rgba(51,200,214,0.16)'
 } as const;
 
 export const material = {
@@ -126,7 +137,7 @@ export const type = {
     fontFamily: fontFamily.semibold,
     fontSize: 11,
     lineHeight: 14,
-    letterSpacing: 0.6
+    letterSpacing: 1.2
   }
 } as const;
 
