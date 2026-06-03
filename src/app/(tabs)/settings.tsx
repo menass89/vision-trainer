@@ -143,6 +143,7 @@ export default function SettingsScreen() {
           />
           <Row
             accessibilityLabel="The science"
+            chevron
             description="How perceptual learning works"
             label="The science"
             onPress={() => router.push('/science' as Href)}

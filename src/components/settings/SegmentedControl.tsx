@@ -1,9 +1,14 @@
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 
 import { AppText, PressableScale } from '@/components/ui';
-import { ACCENT, motion, radius, space, surface } from '@/theme/tokens';
+import { ACCENT, ACCENT_MUTED, motion, radius, space, surface } from '@/theme/tokens';
 
 export type SegmentOption<T extends string = string> = {
   label: string;
@@ -30,10 +35,13 @@ export function SegmentedControl<T extends string>({
     0,
   );
   const position = useSharedValue(selectedIndex);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
-    position.value = withSpring(selectedIndex, motion.spring.input);
-  }, [position, selectedIndex]);
+    position.value = reduceMotion
+      ? selectedIndex
+      : withSpring(selectedIndex, motion.spring.input);
+  }, [position, reduceMotion, selectedIndex]);
 
   const highlightStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: position.value * SEGMENT_WIDTH }],
@@ -49,7 +57,7 @@ export function SegmentedControl<T extends string>({
             return;
           }
 
-          position.value = withSpring(index, motion.spring.input);
+          position.value = reduceMotion ? index : withSpring(index, motion.spring.input);
           onChange(option.value);
         };
 
@@ -80,7 +88,9 @@ const styles = StyleSheet.create({
   },
   highlight: {
     backgroundColor: ACCENT_TINT,
+    borderColor: ACCENT_MUTED,
     borderRadius: radius.sm,
+    borderWidth: StyleSheet.hairlineWidth,
     bottom: CONTAINER_INSET,
     left: CONTAINER_INSET,
     position: 'absolute',

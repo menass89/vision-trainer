@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, type ViewStyle, View } from 'react-native';
 import Animated, {
   interpolateColor,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
+  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 
@@ -19,11 +21,14 @@ export type RowProps = {
   right: ReactNode;
   onPress?: () => void;
   accessibilityLabel?: string;
+  chevron?: boolean;
 };
 
-type RowBodyProps = Pick<RowProps, 'label' | 'description' | 'right'>;
+type RowBodyProps = Pick<RowProps, 'label' | 'description' | 'right' | 'chevron'> & {
+  rightStyle?: ReturnType<typeof useAnimatedStyle<ViewStyle>>;
+};
 
-function RowBody({ label, description, right }: RowBodyProps) {
+function RowBody({ label, description, right, chevron, rightStyle }: RowBodyProps) {
   return (
     <>
       <View style={styles.copy}>
@@ -34,13 +39,22 @@ function RowBody({ label, description, right }: RowBodyProps) {
           </AppText>
         ) : null}
       </View>
-      <View style={styles.right}>{right}</View>
+      {chevron ? (
+        <Animated.View style={[styles.right, rightStyle]}>{right}</Animated.View>
+      ) : (
+        <View style={styles.right}>{right}</View>
+      )}
     </>
   );
 }
 
-export function Row({ label, description, right, onPress, accessibilityLabel }: RowProps) {
+export function Row({ label, description, right, onPress, accessibilityLabel, chevron = false }: RowProps) {
   const pressed = useSharedValue(0);
+  const reduceMotion = useReducedMotion();
+  const followX = useSharedValue(0);
+  const rightStyle = useAnimatedStyle<ViewStyle>(() => ({
+    transform: [{ translateX: followX.value }],
+  }));
   const fillStyle = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(pressed.value, [0, 1], [surface.card, surface.cardPressed]),
   }));
@@ -59,14 +73,26 @@ export function Row({ label, description, right, onPress, accessibilityLabel }: 
       accessibilityRole="button"
       onPress={onPress}
       onPressIn={() => {
-        pressed.value = withTiming(1, { duration: 90 });
+        pressed.value = reduceMotion ? 1 : withTiming(1, { duration: 90 });
+        if (chevron) {
+          followX.value = reduceMotion ? 2 : withSpring(2, motion.spring.press);
+        }
         haptics.select();
       }}
       onPressOut={() => {
-        pressed.value = withTiming(0, { duration: motion.timing.rangeFadeMs });
+        pressed.value = reduceMotion ? 0 : withTiming(0, { duration: motion.timing.rangeFadeMs });
+        if (chevron) {
+          followX.value = reduceMotion ? 0 : withSpring(0, motion.spring.press);
+        }
       }}
       style={[styles.row, fillStyle]}>
-      <RowBody description={description} label={label} right={right} />
+      <RowBody
+        chevron={chevron}
+        description={description}
+        label={label}
+        right={right}
+        rightStyle={rightStyle}
+      />
     </AnimatedPressable>
   );
 }

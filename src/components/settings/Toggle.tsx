@@ -3,13 +3,14 @@ import { StyleSheet } from 'react-native';
 import Animated, {
   interpolateColor,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
 
 import { PressableScale } from '@/components/ui';
 import { haptics } from '@/theme/haptics';
-import { ACCENT, motion, radius, surface, text } from '@/theme/tokens';
+import { ACCENT, ACCENT_GLOW, motion, radius, surface, text } from '@/theme/tokens';
 
 export type ToggleProps = {
   value: boolean;
@@ -25,10 +26,12 @@ const KNOB_TRAVEL = TRACK_WIDTH - KNOB_SIZE - KNOB_INSET * 2;
 
 export function Toggle({ value, onChange, disabled = false }: ToggleProps) {
   const progress = useSharedValue(value ? 1 : 0);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
-    progress.value = withSpring(value ? 1 : 0, motion.spring.toggle);
-  }, [progress, value]);
+    const target = value ? 1 : 0;
+    progress.value = reduceMotion ? target : withSpring(target, motion.spring.toggle);
+  }, [progress, reduceMotion, value]);
 
   const trackStyle = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(progress.value, [0, 1], [surface.hairlineStrong, ACCENT]),
@@ -36,13 +39,18 @@ export function Toggle({ value, onChange, disabled = false }: ToggleProps) {
   const knobStyle = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(progress.value, [0, 1], [text.secondary, text.inverse]),
     transform: [{ translateX: progress.value * KNOB_TRAVEL }],
+    shadowColor: ACCENT_GLOW,
+    shadowOpacity: progress.value,
+    shadowRadius: 6 * progress.value,
+    shadowOffset: { width: 0, height: 0 },
   }));
   const handleChange = () => {
     const nextValue = !value;
 
     // Commit-frame feedback: the tick lands exactly as the knob crosses, not on touch-down.
     haptics.select();
-    progress.value = withSpring(nextValue ? 1 : 0, motion.spring.toggle);
+    const target = nextValue ? 1 : 0;
+    progress.value = reduceMotion ? target : withSpring(target, motion.spring.toggle);
     onChange(nextValue);
   };
 

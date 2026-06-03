@@ -2,6 +2,9 @@ import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
+  cancelAnimation,
+  Extrapolation,
+  interpolate,
   useAnimatedProps,
   useAnimatedStyle,
   useReducedMotion,
@@ -20,12 +23,13 @@ import { CompletionReward } from '@/components/session/CompletionReward';
 import { KinoEdgeArc } from '@/components/session/KinoEdgeArc';
 import { ResponseSwipe } from '@/components/session/ResponseSwipe';
 import { RewardBurst } from '@/components/session/RewardBurst';
-import { AppText, Bloom, GlassSurface, PressableScale, PrimaryButton } from '@/components/ui';
+import { AppText, Bloom, FadeIn, GlassSurface, PressableScale, PrimaryButton } from '@/components/ui';
 import { useSessionController } from '@/presenters';
 import { haptics } from '@/theme/haptics';
 import { easings } from '@/theme/motion';
 import {
   ACCENT,
+  ACCENT_CORE,
   ACCENT_GLOW,
   material,
   motion,
@@ -80,6 +84,7 @@ export default function SessionScreen() {
   const feedbackRingOpacity = useSharedValue(0);
   const checkDraw = useSharedValue(0);
   const checkOpacity = useSharedValue(0);
+  const bornProgress = useSharedValue(reduceMotion ? 1 : 0);
 
   const fieldStyle = useAnimatedStyle(() => ({
     opacity: fieldOpacity.value,
@@ -99,6 +104,32 @@ export default function SessionScreen() {
   const checkmarkProps = useAnimatedProps(() => ({
     strokeDashoffset: CHECKMARK_LENGTH * (1 - checkDraw.value),
   }));
+  const readyHaloStyle = useAnimatedStyle(() => {
+    const p = interpolate(bornProgress.value, [0, 0.55], [0, 1], Extrapolation.CLAMP);
+    return {
+      opacity: p,
+      transform: [{ scale: 0.62 + p * 0.38 }],
+    };
+  });
+  const readyWashStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(bornProgress.value, [0.05, 0.5], [0, 1], Extrapolation.CLAMP),
+  }));
+  const metaRiseStyle = useAnimatedStyle(() => {
+    const p = interpolate(bornProgress.value, [0.45, 0.7], [0, 1], Extrapolation.CLAMP);
+    return { opacity: p, transform: [{ translateY: 10 * (1 - p) }] };
+  });
+  const heroRiseStyle = useAnimatedStyle(() => {
+    const p = interpolate(bornProgress.value, [0.55, 0.82], [0, 1], Extrapolation.CLAMP);
+    return { opacity: p, transform: [{ translateY: 10 * (1 - p) }] };
+  });
+  const instructionRiseStyle = useAnimatedStyle(() => {
+    const p = interpolate(bornProgress.value, [0.65, 0.92], [0, 1], Extrapolation.CLAMP);
+    return { opacity: p, transform: [{ translateY: 10 * (1 - p) }] };
+  });
+  const beginRiseStyle = useAnimatedStyle(() => {
+    const p = interpolate(bornProgress.value, [0.75, 1], [0, 1], Extrapolation.CLAMP);
+    return { opacity: p, transform: [{ translateY: 10 * (1 - p) }] };
+  });
 
   const isStillMounted = useCallback(async (ms: number) => {
     await delay(ms);
@@ -295,6 +326,16 @@ export default function SessionScreen() {
     };
   }, []);
 
+  useEffect(() => {
+    if (reduceMotion) {
+      bornProgress.value = 1;
+      return;
+    }
+    bornProgress.value = 0;
+    bornProgress.value = withDelay(0, withTiming(1, { duration: 520, easing: easings.out }));
+    return () => cancelAnimation(bornProgress);
+  }, [bornProgress, reduceMotion]);
+
   return (
     <View style={styles.screen}>
       <Animated.View style={[styles.field, fieldStyle]}>
@@ -327,43 +368,63 @@ export default function SessionScreen() {
 
       {controller.status === 'ready' && uiPhase === 'ready' ? (
         <View style={styles.readyOverlay}>
-          <AmbientGradient constellation reduceMotion={reduceMotion} />
-          <Bloom color={READY_GLOW} style={styles.readyGlow} />
+          <Animated.View style={[StyleSheet.absoluteFill, readyWashStyle]}>
+            <AmbientGradient constellation reduceMotion={reduceMotion} />
+          </Animated.View>
+
+          {/* Center halo that CATCHES the Today orb's departing bloom — same hue ladder, blooms outward. */}
+          <Animated.View pointerEvents="none" style={[styles.readyHalo, readyHaloStyle]}>
+            <Bloom color={ACCENT_GLOW} core={ACCENT_CORE} edge={ACCENT_GLOW} />
+          </Animated.View>
+
+          {/* Existing soft top glow, fades in with the wash. */}
+          <Animated.View style={[styles.readyGlow, readyWashStyle]} pointerEvents="none">
+            <Bloom color={READY_GLOW} />
+          </Animated.View>
+
           <View style={[styles.readyContent, { paddingBottom: insets.bottom + space.xxl }]}>
-            <AppText color="muted" style={styles.readyMeta} uppercase variant="micro">
-              {controller.blockLabel}
-            </AppText>
-            <AppText style={styles.readyHero} variant="hero">
-              Two flashes
-            </AppText>
-            <AppText color="secondary" style={styles.readyInstruction} variant="body">
-              Pick the one with the pattern.
-            </AppText>
-            <View style={styles.beginWrap}>
+            <Animated.View style={metaRiseStyle}>
+              <AppText color="muted" style={styles.readyMeta} uppercase variant="micro">
+                {controller.blockLabel}
+              </AppText>
+            </Animated.View>
+            <Animated.View style={heroRiseStyle}>
+              <AppText style={styles.readyHero} variant="hero">
+                Two flashes
+              </AppText>
+            </Animated.View>
+            <Animated.View style={instructionRiseStyle}>
+              <AppText color="secondary" style={styles.readyInstruction} variant="body">
+                Pick the one with the pattern.
+              </AppText>
+            </Animated.View>
+            <Animated.View style={[styles.beginWrap, beginRiseStyle]}>
               <PrimaryButton haptic="select" label="Begin" onPress={handleBegin} />
-            </View>
+            </Animated.View>
           </View>
         </View>
       ) : null}
 
       {showBlockSummary ? (
         <View style={styles.centeredOverlay}>
-          <GlassSurface radius={material.radius} style={styles.overlayCard}>
-            <AppText color="muted" uppercase variant="micro">
-              Block complete
-            </AppText>
-            <View style={styles.blockScore}>
-              <Bloom color={ACCENT_GLOW} style={styles.blockBloom} />
-              <AppText style={styles.score} tabular variant="title">
-                {blockCorrectCount}/{controller.trialsPerBlock}
+          <FadeIn duration={motion.timing.entranceMs}>
+            <GlassSurface radius={material.radius} style={styles.overlayCard}>
+              <AppText color="muted" uppercase variant="micro">
+                Block complete
               </AppText>
-            </View>
-            <PressableScale onPress={() => void handleContinue()} style={styles.action}>
-              <AppText color="inverse" variant="caption">
-                Continue
-              </AppText>
-            </PressableScale>
-          </GlassSurface>
+              <View style={styles.blockScore}>
+                <Bloom color={ACCENT_GLOW} style={styles.blockBloom} />
+                <AppText style={styles.score} tabular variant="title">
+                  {blockCorrectCount}/{controller.trialsPerBlock}
+                </AppText>
+              </View>
+              <PressableScale onPress={() => void handleContinue()} style={styles.action}>
+                <AppText color="inverse" variant="caption">
+                  Continue
+                </AppText>
+              </PressableScale>
+            </GlassSurface>
+          </FadeIn>
         </View>
       ) : null}
 
@@ -374,6 +435,7 @@ export default function SessionScreen() {
           )}
           correctCount={controller.correctCount}
           onDone={handleClose}
+          reduceMotion={reduceMotion}
           total={controller.totalBlocks * controller.trialsPerBlock}
         />
       ) : null}
@@ -462,6 +524,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     top: '6%',
+  },
+  readyHalo: {
+    alignItems: 'center',
+    height: '70%',
+    justifyContent: 'center',
+    left: '-15%',
+    position: 'absolute',
+    right: '-15%',
+    top: '4%',
   },
   readyContent: {
     paddingHorizontal: space.lg,

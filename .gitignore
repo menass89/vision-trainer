@@ -42,8 +42,9 @@ example
 /ios
 /android
 
-# Codex dispatch briefs (scratch)
+# Codex dispatch briefs + motion-pass plans (scratch)
 _codex/
+_vt_plans/
 
 # Detail-research teardowns (scratch)
 _research/

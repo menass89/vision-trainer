@@ -5,6 +5,7 @@ import Animated, {
   cancelAnimation,
   Easing,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withRepeat,
   withTiming,
@@ -24,11 +25,16 @@ const FULL_WIDTH_FALLBACK = 320;
 export function Shimmer({ width, height, radius = 8, style }: ShimmerProps) {
   const sweepDistance = typeof width === 'number' ? width : FULL_WIDTH_FALLBACK;
   const translateX = useSharedValue(-sweepDistance);
+  const reduceMotion = useReducedMotion();
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
   }));
 
   useEffect(() => {
+    if (reduceMotion) {
+      translateX.value = -sweepDistance;
+      return;
+    }
     translateX.value = withRepeat(
       withTiming(sweepDistance, { duration: 1200, easing: Easing.linear }),
       -1,
@@ -36,7 +42,7 @@ export function Shimmer({ width, height, radius = 8, style }: ShimmerProps) {
     );
 
     return () => cancelAnimation(translateX);
-  }, [sweepDistance, translateX]);
+  }, [reduceMotion, sweepDistance, translateX]);
 
   return (
     <View style={[styles.base, { width, height, borderRadius: radius }, style]}>

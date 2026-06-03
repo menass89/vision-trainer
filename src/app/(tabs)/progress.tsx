@@ -81,7 +81,9 @@ export default function ProgressScreen() {
               ) : (
                 <View onLayout={handleChartLayout} style={styles.chartMeasure}>
                   {chartWidth > 0 ? (
-                    <Sparkline height={SPARKLINE_HEIGHT} points={data.sparkline} width={chartWidth} />
+                    <FadeIn duration={motion.timing.rangeDrawMs}>
+                      <Sparkline height={SPARKLINE_HEIGHT} points={data.sparkline} width={chartWidth} />
+                    </FadeIn>
                   ) : null}
                 </View>
               )}
@@ -99,12 +101,14 @@ export default function ProgressScreen() {
               </View>
               <View onLayout={handleChartLayout} style={styles.chartMeasure}>
                 {chartWidth > 0 ? (
-                  <CsfGraph
-                    height={CSF_GRAPH_HEIGHT}
-                    points={data.csf}
-                    references={data.csfReferences}
-                    width={chartWidth}
-                  />
+                  <FadeIn duration={motion.timing.rangeDrawMs}>
+                    <CsfGraph
+                      height={CSF_GRAPH_HEIGHT}
+                      points={data.csf}
+                      references={data.csfReferences}
+                      width={chartWidth}
+                    />
+                  </FadeIn>
                 ) : null}
               </View>
             </Card>

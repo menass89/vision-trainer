@@ -6,12 +6,14 @@ import Animated, {
   useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
+  type SharedValue,
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
 import Svg, { Circle, Defs, LinearGradient, Line, RadialGradient, Rect, Stop } from 'react-native-svg';
 
-import { ACCENT, ACCENT_MUTED, ACCENT_SOFT, motion, surface } from '@/theme/tokens';
+import { Bloom } from '@/components/ui';
+import { ACCENT, ACCENT_CORE, ACCENT_GLOW, ACCENT_MUTED, ACCENT_SOFT, motion, surface } from '@/theme/tokens';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -45,6 +47,12 @@ export type CelestialGaborProps = {
   contrast?: number;
   resolveOnMount?: boolean;
   reduceMotion?: boolean;
+  /**
+   * 0 = at rest, 1 = fully dilated + dissolved (used by the Today→Session exit theater).
+   * When provided, the orb scales up and fades out, and a center bloom blooms outward.
+   * Owned by the parent so the exit can be timed against navigation.
+   */
+  exit?: SharedValue<number>;
 };
 
 export function CelestialGabor({
@@ -52,6 +60,7 @@ export function CelestialGabor({
   contrast = 1,
   resolveOnMount = false,
   reduceMotion = false,
+  exit,
 }: CelestialGaborProps) {
   const stops = useGratingStops();
   const clamped = Math.max(0, Math.min(progress, 1));
@@ -91,13 +100,37 @@ export function CelestialGabor({
     opacity: resolve.value * clampedContrast,
   }));
 
-  const bodyStyle = useAnimatedStyle(() => ({
-    opacity: 0.9 + breathe.value * 0.1,
-    transform: [{ scale: 1 + breathe.value * 0.035 }],
-  }));
+  const bodyStyle = useAnimatedStyle(() => {
+    const e = exit?.value ?? 0;
+    return {
+      opacity: (0.9 + breathe.value * 0.1) * (1 - e),
+      transform: [{ scale: (1 + breathe.value * 0.035) * (1 + e * 0.18) }],
+    };
+  });
+
+  const haloLayerStyle = useAnimatedStyle(() => {
+    const e = exit?.value ?? 0;
+    return {
+      opacity: 1 - e,
+      transform: [{ scale: 1 + e * 0.18 }],
+    };
+  });
+
+  const exitBloomStyle = useAnimatedStyle(() => {
+    const e = exit?.value ?? 0;
+    // Bloom brightens during the Today exit and hands off to the Session halo.
+    return {
+      opacity: e * 0.6,
+      transform: [{ scale: 0.6 + e * 1.0 }],
+    };
+  });
 
   return (
     <View pointerEvents="none" style={styles.wrap}>
+      <Animated.View pointerEvents="none" style={[styles.exitBloom, exitBloomStyle]}>
+        <Bloom color={ACCENT_GLOW} core={ACCENT_CORE} edge={ACCENT_GLOW} />
+      </Animated.View>
+
       {/* breathing celestial body */}
       <Animated.View style={[StyleSheet.absoluteFill, styles.center, bodyStyle]}>
         <Svg height={SIZE} width={SIZE}>
@@ -169,7 +202,7 @@ export function CelestialGabor({
       </Animated.View>
 
       {/* steady progress halo (does NOT breathe) */}
-      <View style={[StyleSheet.absoluteFill, styles.center]}>
+      <Animated.View style={[StyleSheet.absoluteFill, styles.center, haloLayerStyle]}>
         <Svg height={SIZE} width={SIZE}>
           {/* graticule ring — instrument eyepiece */}
           <Circle cx={C} cy={C} r={GRAT_R} fill="none" stroke={ACCENT_SOFT} strokeOpacity={0.16} strokeWidth={1} />
@@ -198,7 +231,7 @@ export function CelestialGabor({
             transform={`rotate(-90 ${C} ${C})`}
           />
         </Svg>
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -213,5 +246,12 @@ const styles = StyleSheet.create({
   center: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  exitBloom: {
+    alignItems: 'center',
+    height: SIZE,
+    justifyContent: 'center',
+    position: 'absolute',
+    width: SIZE,
   },
 });
