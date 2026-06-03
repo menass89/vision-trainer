@@ -64,7 +64,10 @@ export function CompletionReward({
   const streakWasCounted = today.data.sessionDoneToday;
   const streakFrom = Math.max(streakNow - 1, 0);
   const showStreak = streakNow > 0;
-  const streakIncrements = streakNow > streakFrom;
+  // Only celebrate the +1 once today's session is actually recorded — recordSessionResult
+  // is fired without awaiting, so streakNow can lead sessionDoneToday for a frame. Gate the
+  // count-up and milestone haptic on the live recorded state, never the optimistic streak.
+  const streakIncrements = streakWasCounted && streakNow > streakFrom;
   const didSettleRef = useRef(false);
   const streakTargetRef = useRef(streakNow);
   const backdropOpacity = useSharedValue(0);
@@ -266,7 +269,7 @@ export function CompletionReward({
           <AppText color="muted" uppercase variant="micro">
             Session complete
           </AppText>
-          <View accessibilityLabel={`${accuracyTarget}% accuracy`} style={styles.accuracy}>
+          <View accessible accessibilityLabel={`${accuracyTarget}% accuracy`} style={styles.accuracy}>
             <AnimatedTextInput
               animatedProps={accuracyProps}
               defaultValue="0"
@@ -282,7 +285,10 @@ export function CompletionReward({
             {correctCount}/{total} correct
           </AppText>
           {showStreak ? (
-            <Animated.View style={[styles.streakRow, streakRowStyle]}>
+            <Animated.View
+              accessible
+              accessibilityLabel={`${streakNow} day streak`}
+              style={[styles.streakRow, streakRowStyle]}>
               <AnimatedTextInput
                 animatedProps={streakProps}
                 defaultValue={`${streakFrom}`}
