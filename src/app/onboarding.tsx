@@ -1,10 +1,13 @@
 import { type Href, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   cancelAnimation,
   Easing,
   interpolate,
+  interpolateColor,
+  runOnJS,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -16,11 +19,17 @@ import { AmbientGradient } from '@/components/home/AmbientGradient';
 import { BreathingOrb } from '@/components/onboarding/BreathingOrb';
 import { StepReveal } from '@/components/onboarding/StepReveal';
 import { AppText, FadeIn, PressableScale, PrimaryButton, Screen } from '@/components/ui';
+import { applyBrightness, getCurrentBrightness } from '@/services/brightness';
 import { notificationService } from '@/services/notifications';
 import { useAppStore } from '@/store/useAppStore';
-import { ACCENT, motion, radius, space, surface, text, type } from '@/theme/tokens';
+import { haptics } from '@/theme/haptics';
+import { ACCENT, ACCENT_GLOW, motion, radius, space, surface, text, type } from '@/theme/tokens';
 
 const BASE_ORB = 180;
+const BRIGHTNESS_MAX = 1;
+const BRIGHTNESS_MIN = 0.2;
+const BRIGHTNESS_RANGE = BRIGHTNESS_MAX - BRIGHTNESS_MIN;
+const SLIDER_KNOB_SIZE = 28;
 const REMINDER_HOUR = 19;
 const REMINDER_MINUTE = 0;
 
@@ -59,7 +68,6 @@ export default function OnboardingScreen() {
   };
 
   const handleCalibration = () => {
-    // TODO(phase4): real photometric calibration (viewing distance, background luminance).
     advance();
   };
 
@@ -74,7 +82,7 @@ export default function OnboardingScreen() {
       <View style={styles.screen}>
         {step === 4 ? (
           <FadeIn key="calibration" duration={420} style={styles.page}>
-            <CalibrationStep onPress={handleCalibration} />
+            <CalibrationStep onComplete={handleCalibration} />
           </FadeIn>
         ) : (
           <View style={styles.page}>
@@ -243,18 +251,148 @@ function StepCopy({ step }: StepCopyProps) {
 }
 
 type CalibrationStepProps = {
-  onPress: () => void;
+  onComplete: () => void;
 };
 
-function CalibrationStep({ onPress }: CalibrationStepProps) {
+function clamp(value: number, minimum: number, maximum: number) {
+  return Math.min(Math.max(value, minimum), maximum);
+}
+
+function brightnessToProgress(value: number) {
+  return (clamp(value, BRIGHTNESS_MIN, BRIGHTNESS_MAX) - BRIGHTNESS_MIN) / BRIGHTNESS_RANGE;
+}
+
+function CalibrationStep({ onComplete }: CalibrationStepProps) {
+  const storedBrightness = useAppStore((state) => state.settings.displayBrightness);
+  const [brightness, setBrightness] = useState(
+    clamp(storedBrightness, BRIGHTNESS_MIN, BRIGHTNESS_MAX)
+  );
+  const [trackWidth, setTrackWidth] = useState(0);
+  const lastHapticStepRef = useRef(Math.round(brightness * 10));
+  const latestBrightnessRef = useRef(brightness);
+  const progress = useSharedValue(brightnessToProgress(brightness));
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    let active = true;
+
+    const loadInitialBrightness = async () => {
+      const currentBrightness = await getCurrentBrightness();
+      const initialBrightness = clamp(
+        currentBrightness ?? storedBrightness,
+        BRIGHTNESS_MIN,
+        BRIGHTNESS_MAX
+      );
+
+      if (!active) return;
+
+      latestBrightnessRef.current = initialBrightness;
+      lastHapticStepRef.current = Math.round(initialBrightness * 10);
+      setBrightness(initialBrightness);
+      progress.value = reduceMotion
+        ? brightnessToProgress(initialBrightness)
+        : withTiming(brightnessToProgress(initialBrightness), { duration: 180 });
+    };
+
+    void loadInitialBrightness();
+
+    return () => {
+      active = false;
+    };
+  }, [progress, reduceMotion, storedBrightness]);
+
+  const commitBrightness = useCallback((nextBrightness: number) => {
+    const calibratedBrightness = clamp(nextBrightness, BRIGHTNESS_MIN, BRIGHTNESS_MAX);
+    const hapticStep = Math.round(calibratedBrightness * 10);
+
+    latestBrightnessRef.current = calibratedBrightness;
+    setBrightness(calibratedBrightness);
+    void applyBrightness(calibratedBrightness);
+
+    if (hapticStep !== lastHapticStepRef.current) {
+      lastHapticStepRef.current = hapticStep;
+      haptics.select();
+    }
+  }, []);
+
+  const confirmBrightness = () => {
+    const calibratedBrightness = clamp(latestBrightnessRef.current, BRIGHTNESS_MIN, BRIGHTNESS_MAX);
+
+    useAppStore.getState().updateSetting('displayBrightness', calibratedBrightness);
+    onComplete();
+  };
+
+  const gesture = useMemo(() => {
+    const updateFromX = (x: number) => {
+      'worklet';
+      const travel = Math.max(trackWidth - SLIDER_KNOB_SIZE, 0);
+      const nextProgress =
+        travel === 0
+          ? progress.value
+          : Math.max(0, Math.min(1, (x - SLIDER_KNOB_SIZE / 2) / travel));
+      const nextBrightness = BRIGHTNESS_MIN + nextProgress * BRIGHTNESS_RANGE;
+
+      progress.value = nextProgress;
+      runOnJS(commitBrightness)(nextBrightness);
+    };
+    const pan = Gesture.Pan()
+      .activeOffsetX([-4, 4])
+      .onBegin((event) => {
+        updateFromX(event.x);
+      })
+      .onUpdate((event) => {
+        updateFromX(event.x);
+      });
+    const tap = Gesture.Tap().onEnd((event) => {
+      updateFromX(event.x);
+    });
+
+    return Gesture.Race(pan, tap);
+  }, [commitBrightness, progress, trackWidth]);
+
+  const fillStyle = useAnimatedStyle(() => ({
+    width: `${progress.value * 100}%`,
+  }));
+  const knobStyle = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(progress.value, [0, 1], [text.secondary, text.inverse]),
+    shadowOpacity: 0.3 + progress.value * 0.35,
+    transform: [{ translateX: progress.value * Math.max(trackWidth - SLIDER_KNOB_SIZE, 0) }],
+  }));
+
   return (
-    <View style={styles.hero}>
-      <PressableScale onPress={onPress} scaleTo={0.99} style={styles.calibrationTap}>
+    <View style={styles.calibration}>
+      <View style={styles.calibrationReference}>
         <BreathingOrb cadence="breath" reactivity={0.9} size={206} />
         <AppText style={styles.calibrationCopy} variant="title">
-          Tap when the glow feels comfortable in your room.
+          Set a comfortable glow for your room.
         </AppText>
-      </PressableScale>
+      </View>
+
+      <View style={styles.calibrationControls}>
+        <GestureDetector gesture={gesture}>
+          <View
+            onLayout={(event) => setTrackWidth(event.nativeEvent.layout.width)}
+            style={styles.slider}>
+            <View pointerEvents="none" style={styles.sliderTrack}>
+              <Animated.View style={[styles.sliderFill, fillStyle]} />
+            </View>
+            <Animated.View pointerEvents="none" style={[styles.sliderKnob, knobStyle]} />
+          </View>
+        </GestureDetector>
+        <View style={styles.sliderLabels}>
+          <AppText color="muted" variant="micro">
+            Dim
+          </AppText>
+          <AppText color="muted" tabular variant="micro">
+            {Math.round(brightness * 100)}%
+          </AppText>
+          <AppText color="muted" variant="micro">
+            Bright
+          </AppText>
+        </View>
+      </View>
+
+      <PrimaryButton label="This feels right" onPress={confirmBrightness} />
     </View>
   );
 }
@@ -339,15 +477,60 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: space.md,
   },
-  calibrationTap: {
+  calibration: {
     alignItems: 'center',
-    justifyContent: 'center',
     gap: space.xl,
-    minHeight: 420,
+    justifyContent: 'flex-end',
+    minHeight: 520,
+    paddingBottom: space.lg,
+  },
+  calibrationControls: {
+    gap: space.sm,
+    width: '100%',
   },
   calibrationCopy: {
     maxWidth: 320,
     textAlign: 'center',
+  },
+  calibrationReference: {
+    alignItems: 'center',
+    gap: space.xl,
+    justifyContent: 'center',
+  },
+  slider: {
+    height: 44,
+    justifyContent: 'center',
+    width: '100%',
+  },
+  sliderFill: {
+    backgroundColor: ACCENT,
+    borderRadius: radius.pill,
+    height: '100%',
+  },
+  sliderKnob: {
+    backgroundColor: text.inverse,
+    borderColor: ACCENT_GLOW,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    height: SLIDER_KNOB_SIZE,
+    left: 0,
+    position: 'absolute',
+    shadowColor: ACCENT_GLOW,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 12,
+    width: SLIDER_KNOB_SIZE,
+  },
+  sliderLabels: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  sliderTrack: {
+    backgroundColor: surface.hairlineStrong,
+    borderRadius: radius.pill,
+    height: 8,
+    overflow: 'hidden',
+    width: '100%',
   },
   footer: {
     gap: space.sm,

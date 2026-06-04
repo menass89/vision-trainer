@@ -21,10 +21,12 @@ import { GaborCanvas, type GaborCanvasHandle } from '@/components/GaborCanvas';
 import { AmbientGradient } from '@/components/home/AmbientGradient';
 import { CompletionReward } from '@/components/session/CompletionReward';
 import { KinoEdgeArc } from '@/components/session/KinoEdgeArc';
-import { ResponseSwipe } from '@/components/session/ResponseSwipe';
+import { ResponseTap } from '@/components/session/ResponseTap';
 import { RewardBurst } from '@/components/session/RewardBurst';
 import { AppText, Bloom, FadeIn, GlassSurface, PressableScale, PrimaryButton } from '@/components/ui';
 import { useSessionController } from '@/presenters';
+import { applyBrightness, restoreSystemBrightness } from '@/services/brightness';
+import { useAppStore } from '@/store/useAppStore';
 import { haptics } from '@/theme/haptics';
 import { easings } from '@/theme/motion';
 import {
@@ -130,6 +132,14 @@ export default function SessionScreen() {
     const p = interpolate(bornProgress.value, [0.75, 1], [0, 1], Extrapolation.CLAMP);
     return { opacity: p, transform: [{ translateY: 10 * (1 - p) }] };
   });
+
+  useEffect(() => {
+    void applyBrightness(useAppStore.getState().settings.displayBrightness);
+
+    return () => {
+      void restoreSystemBrightness();
+    };
+  }, []);
 
   const isStillMounted = useCallback(async (ms: number) => {
     await delay(ms);
@@ -362,7 +372,7 @@ export default function SessionScreen() {
             </Svg>
           </Animated.View>
         </View>
-        <ResponseSwipe enabled={uiPhase === 'response'} onCommit={handleChoice} />
+        <ResponseTap enabled={uiPhase === 'response'} onCommit={handleChoice} />
         <RewardBurst big={bigBurst} trigger={burst} />
       </Animated.View>
 

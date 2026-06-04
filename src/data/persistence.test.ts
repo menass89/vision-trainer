@@ -66,6 +66,7 @@ describe('memoryPersistence', () => {
   it('clones settings on write and read', async () => {
     const settings: SettingsState = {
       dichopticEnabled: false,
+      displayBrightness: 0.85,
       monocularWeakEye: 'off',
       hapticsEnabled: true,
       soundEnabled: false,

@@ -1,6 +1,6 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
-import { DEFAULT_CALIBRATION } from '@/core/displayCalibration';
+import { buildDeviceCalibration } from '@/core/deviceCalibration';
 import { uuid } from '@/core/uuid';
 import { contrastFromLog10, QuestStaircase } from '@/psychophysics/quest';
 import {
@@ -81,6 +81,7 @@ const nextRandom = mulberry32(0x53455353);
 
 // FUTURE(free-practice): Halide drag-as-dial lives in a separate practice mode, not the guided spine.
 export function useSessionController(): SessionController {
+  const calibration = useMemo(() => buildDeviceCalibration(), []);
   const [state, setState] = useState(INITIAL_STATE);
   const stateRef = useRef(state);
   const trialRef = useRef<TrialPlan | null>(null);
@@ -109,10 +110,10 @@ export function useSessionController(): SessionController {
       contrast: contrastFromLog10(intensityLog10),
       phaseRad: nextRandom() * Math.PI * 2,
       durationMs: GUIDED_STIM_DURATION_MS,
-      backgroundLuminanceCdM2: DEFAULT_CALIBRATION.backgroundLuminanceCdM2,
+      backgroundLuminanceCdM2: calibration.backgroundLuminanceCdM2,
     };
     return { intervals: targetInterval === 1 ? [stimulus, null] : [null, stimulus], targetInterval };
-  }, []);
+  }, [calibration.backgroundLuminanceCdM2]);
 
   const currentTrial = useCallback(() => {
     if (!trialRef.current) {
@@ -183,7 +184,7 @@ export function useSessionController(): SessionController {
           id: sessionIdRef.current,
           startedAtIso: startedAtRef.current,
           completedAtIso: now().toISOString(),
-          calibrationId: DEFAULT_CALIBRATION.id,
+          calibrationId: calibration.id,
           plannedBlocks: plannedBlocksRef.current,
           completedTrials,
         });
@@ -203,7 +204,7 @@ export function useSessionController(): SessionController {
 
       return { correct };
     },
-    [buildTrial, updateState]
+    [buildTrial, calibration.id, updateState]
   );
 
   const advanceBlock = useCallback(() => {
@@ -223,7 +224,7 @@ export function useSessionController(): SessionController {
   }, [buildTrial, updateState]);
 
   return {
-    calibration: DEFAULT_CALIBRATION,
+    calibration,
     status: state.status,
     blockIndex: state.blockIndex,
     totalBlocks: TOTAL_BLOCKS,

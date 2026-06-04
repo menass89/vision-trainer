@@ -1,5 +1,11 @@
-import { useId } from 'react';
-import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { useId, useState } from 'react';
+import {
+  StyleSheet,
+  View,
+  type LayoutChangeEvent,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 import { accent } from '@/theme/tokens';
@@ -14,38 +20,56 @@ export type BloomProps = {
   style?: StyleProp<ViewStyle>;
 };
 
+const RADIUS_FACTOR = 1.05;
+
 export function Bloom({
   color = accent.glow,
   core,
   edge,
   opacity = 1,
-  rx = '55%',
-  ry = '60%',
   style,
 }: BloomProps) {
   const rawId = useId();
+  const [size, setSize] = useState({ height: 0, width: 0 });
   const gradientId = `bloom-${rawId.replace(/:/g, '')}`;
+  const radius = (Math.max(size.height, size.width) / 2) * RADIUS_FACTOR;
+  const hasSize = size.height > 0 && size.width > 0;
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    const { height, width } = event.nativeEvent.layout;
+
+    setSize((current) =>
+      current.height === height && current.width === width ? current : { height, width }
+    );
+  };
 
   return (
-    <View pointerEvents="none" style={[styles.bloom, { opacity }, style]}>
-      <Svg height="100%" width="100%">
-        <Defs>
-          <RadialGradient cx="50%" cy="50%" id={gradientId} rx={rx} ry={ry}>
-            {core
-              ? [
-                  <Stop key="core" offset="0%" stopColor={core} stopOpacity={1} />,
-                  <Stop key="color" offset="38%" stopColor={color} stopOpacity={0.55} />,
-                  <Stop key="edge" offset="100%" stopColor={edge ?? color} stopOpacity={0} />,
-                ]
-              : [
-                  <Stop key="core" offset="0%" stopColor={color} stopOpacity={1} />,
-                  <Stop key="color" offset="55%" stopColor={color} stopOpacity={0.5} />,
-                  <Stop key="edge" offset="100%" stopColor={color} stopOpacity={0} />,
-                ]}
-          </RadialGradient>
-        </Defs>
-        <Rect fill={`url(#${gradientId})`} height="100%" width="100%" />
-      </Svg>
+    <View onLayout={handleLayout} pointerEvents="none" style={[styles.bloom, { opacity }, style]}>
+      {hasSize ? (
+        <Svg height="100%" width="100%">
+          <Defs>
+            <RadialGradient
+              cx={size.width / 2}
+              cy={size.height / 2}
+              gradientUnits="userSpaceOnUse"
+              id={gradientId}
+              r={radius}>
+              {core
+                ? [
+                    <Stop key="core" offset="0%" stopColor={core} stopOpacity={1} />,
+                    <Stop key="color" offset="38%" stopColor={color} stopOpacity={0.55} />,
+                    <Stop key="edge" offset="100%" stopColor={edge ?? color} stopOpacity={0} />,
+                  ]
+                : [
+                    <Stop key="core" offset="0%" stopColor={color} stopOpacity={1} />,
+                    <Stop key="color" offset="55%" stopColor={color} stopOpacity={0.5} />,
+                    <Stop key="edge" offset="100%" stopColor={color} stopOpacity={0} />,
+                  ]}
+            </RadialGradient>
+          </Defs>
+          <Rect fill={`url(#${gradientId})`} height="100%" width="100%" />
+        </Svg>
+      ) : null}
     </View>
   );
 }

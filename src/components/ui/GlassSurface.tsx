@@ -1,7 +1,7 @@
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactNode } from 'react';
-import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
+import { Platform, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 
 import { material, surface } from '@/theme/tokens';
 
@@ -12,10 +12,13 @@ export type GlassSurfaceProps = {
 };
 
 export function GlassSurface({ style, children, radius = material.radius }: GlassSurfaceProps) {
+  const blurIntensity =
+    Platform.OS === 'ios' ? Math.max(material.blurIntensity, 50) : material.blurIntensity;
+
   return (
     <BlurView
-      experimentalBlurMethod="dimezisBlurView"
-      intensity={material.blurIntensity}
+      experimentalBlurMethod={Platform.OS === 'android' ? 'dimezisBlurView' : undefined}
+      intensity={blurIntensity}
       style={[styles.surface, { borderRadius: radius }, style]}
       tint={material.blurTint}>
       <LinearGradient
@@ -30,6 +33,7 @@ export function GlassSurface({ style, children, radius = material.radius }: Glas
 
 const styles = StyleSheet.create({
   surface: {
+    backgroundColor: 'rgba(18, 24, 28, 0.55)',
     borderColor: material.hairlineOnGlass,
     borderWidth: 1,
     overflow: 'hidden',

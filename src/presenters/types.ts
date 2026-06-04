@@ -34,6 +34,7 @@ export type ProgressView = {
 
 export type SettingsState = {
   dichopticEnabled: boolean;
+  displayBrightness: number;
   monocularWeakEye: 'left' | 'right' | 'off';
   hapticsEnabled: boolean;
   soundEnabled: boolean;

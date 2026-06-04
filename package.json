@@ -8,6 +8,7 @@
     "@react-navigation/bottom-tabs": "^7.16.2",
     "expo": "55.0.26",
     "expo-blur": "~55.0.14",
+    "expo-brightness": "~55.0.13",
     "expo-constants": "~55.0.16",
     "expo-crypto": "~55.0.15",
     "expo-device": "~55.0.17",

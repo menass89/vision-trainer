@@ -7,6 +7,7 @@ import { DEFAULT_SETTINGS } from '../store/defaults';
 vi.mock('@/store/defaults', () => ({
   DEFAULT_SETTINGS: {
     dichopticEnabled: false,
+    displayBrightness: 0.85,
     monocularWeakEye: 'off',
     hapticsEnabled: true,
     soundEnabled: false,
@@ -101,6 +102,7 @@ describe('data mappers', () => {
   it('round-trips full settings', () => {
     const settings: SettingsState = {
       dichopticEnabled: true,
+      displayBrightness: 0.72,
       monocularWeakEye: 'left',
       hapticsEnabled: false,
       soundEnabled: true,

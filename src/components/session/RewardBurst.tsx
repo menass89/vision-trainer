@@ -10,7 +10,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { ACCENT, ACCENT_GLOW, motion, radius } from '@/theme/tokens';
+import { ACCENT_GLOW, motion, radius } from '@/theme/tokens';
 
 export type RewardBurstProps = {
   trigger: number;
@@ -29,7 +29,7 @@ type SparkProps = {
 
 function Spark({ angle, expansion, opacity, radiusPx, visible }: SparkProps) {
   const animatedStyle = useAnimatedStyle(() => ({
-    opacity: visible ? opacity.value : 0,
+    opacity: visible ? opacity.value * 0.7 : 0,
     transform: [
       { translateX: Math.cos(angle) * radiusPx * expansion.value },
       { translateY: Math.sin(angle) * radiusPx * expansion.value },
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     top: 0,
   },
   spark: {
-    backgroundColor: ACCENT,
+    backgroundColor: ACCENT_GLOW,
     borderRadius: radius.pill,
     height: 6,
     position: 'absolute',
@@ -102,9 +102,9 @@ const styles = StyleSheet.create({
   },
   center: {
     backgroundColor: ACCENT_GLOW,
-    borderColor: ACCENT,
+    borderColor: ACCENT_GLOW,
     borderRadius: radius.pill,
-    borderWidth: 2,
+    borderWidth: 1,
     height: 38,
     position: 'absolute',
     width: 38,

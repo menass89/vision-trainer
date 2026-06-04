@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import type { SettingsState } from '@/presenters/types';
 import type { SessionLog, ThresholdEstimate } from '@/types';
 import { activePersistence as persistence } from '@/data/persistence';
+import { setHapticsEnabled } from '@/theme/haptics';
 
 import { DEFAULT_SETTINGS } from './defaults';
 
@@ -37,7 +38,10 @@ export const useAppStore = create<AppState>((set, get) => ({
           persistence.loadThresholds(),
           persistence.loadSettings(),
         ]);
-        set({ sessions, thresholds, settings: settings ?? DEFAULT_SETTINGS, hydrated: true });
+        const finalSettings = { ...DEFAULT_SETTINGS, ...(settings ?? {}) };
+
+        setHapticsEnabled(finalSettings.hapticsEnabled);
+        set({ sessions, thresholds, settings: finalSettings, hydrated: true });
       } catch {
         // Degraded boot (e.g. sqlite unavailable on web): render with defaults/empty state.
         set({ hydrated: true });
@@ -48,7 +52,9 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   updateSetting: (key, value) => {
     const settings = { ...get().settings, [key]: value };
+
     set({ settings });
+    if (key === 'hapticsEnabled') setHapticsEnabled(value as boolean);
     void persistence.saveSettings(settings).catch(() => {});
   },
 
