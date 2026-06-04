@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="Vision Trainer icon">
-  <rect width="192" height="192" rx="32" fill="#101820"/>
-  <circle cx="96" cy="96" r="62" fill="#f2f6f8"/>
-  <path d="M38 96c18-31 37-46 58-46s40 15 58 46c-18 31-37 46-58 46s-40-15-58-46Z" fill="#2d8cff"/>
-  <circle cx="96" cy="96" r="27" fill="#101820"/>
-  <path d="M72 96c0-31 48-31 48 0s-48 31-48 0Z" fill="#f2f6f8" opacity=".75"/>
-</svg>
