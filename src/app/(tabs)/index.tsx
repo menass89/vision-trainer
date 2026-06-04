@@ -67,8 +67,7 @@ export default function TodayScreen() {
   const { data, isLoading } = useTodayData();
 
   return (
-    <Screen padded>
-      <AmbientGradient constellation reduceMotion={reduceMotion} />
+    <Screen padded background={<AmbientGradient constellation reduceMotion={reduceMotion} />}>
       {isLoading ? (
         <LoadingToday />
       ) : (
@@ -185,7 +184,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingTop: space.lg,
   },
   streakChip: {
     backgroundColor: surface.raised,

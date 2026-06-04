@@ -70,8 +70,7 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <Screen padded warm>
-      <AmbientGradient constellation reduceMotion={reduceMotion} />
+    <Screen padded warm background={<AmbientGradient constellation reduceMotion={reduceMotion} />}>
       <View style={styles.screen}>
         {step === 4 ? (
           <FadeIn key="calibration" duration={420} style={styles.page}>

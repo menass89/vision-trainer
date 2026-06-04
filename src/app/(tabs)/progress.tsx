@@ -30,8 +30,10 @@ export default function ProgressScreen() {
   }, []);
 
   return (
-    <Screen scroll style={styles.screen}>
-      <AmbientGradient constellation reduceMotion={reduceMotion} />
+    <Screen
+      scroll
+      background={<AmbientGradient constellation reduceMotion={reduceMotion} />}
+      style={styles.screen}>
       {isLoading ? (
         <LoadingProgress />
       ) : isEmpty ? (
@@ -191,6 +193,5 @@ const styles = StyleSheet.create({
   screen: {
     gap: space.md,
     paddingBottom: space.lg,
-    paddingTop: space.lg,
   },
 });

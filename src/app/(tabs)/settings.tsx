@@ -52,8 +52,11 @@ export default function SettingsScreen() {
   };
 
   return (
-    <Screen scroll warm style={styles.screen}>
-      <AmbientGradient constellation reduceMotion={reduceMotion} />
+    <Screen
+      scroll
+      warm
+      background={<AmbientGradient constellation reduceMotion={reduceMotion} />}
+      style={styles.screen}>
       <FadeIn style={styles.title}>
         <AppText variant="hero">Settings</AppText>
       </FadeIn>
@@ -173,7 +176,6 @@ function Chevron() {
 const styles = StyleSheet.create({
   screen: {
     paddingBottom: space.lg,
-    paddingTop: space.lg,
   },
   title: {
     marginBottom: space.lg,

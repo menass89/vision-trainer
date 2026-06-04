@@ -93,7 +93,6 @@ const styles = StyleSheet.create({
   screen: {
     gap: space.md,
     paddingBottom: space.xxl,
-    paddingTop: space.sm,
   },
   title: {
     maxWidth: 320,
