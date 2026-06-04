@@ -35,11 +35,11 @@ export function Card({ children, style, raised = false }: CardProps) {
 const styles = StyleSheet.create({
   shadow: {
     borderRadius: radius.lg,
-    shadowColor: '#02080A',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.5,
-    shadowRadius: 14,
-    elevation: 8,
+    elevation: 2,
+    shadowColor: '#071114',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
   },
   card: {
     backgroundColor: surface.raised,

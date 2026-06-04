@@ -2,12 +2,10 @@ language: en-US
 reviews:
   # Don't burn review cycles on archived, generated, or binary-adjacent paths.
   path_filters:
-    - "!docs/**"          # gh-pages support/privacy site
     - "!store/**"         # app-store metadata copy
     - "!assets/**"        # fonts, icons, images
     - "!ios/**"           # native build shell (generated)
     - "!package-lock.json"
-    - "!**/*.md"          # plans/notes, not shipping code
   auto_review:
     enabled: true
     drafts: false

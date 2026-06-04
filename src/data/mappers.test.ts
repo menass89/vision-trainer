@@ -63,6 +63,23 @@ describe('data mappers', () => {
     expect(rowToSession(row)).toEqual(session);
   });
 
+  it('returns null for corrupt session rows', () => {
+    expect(rowToSession({
+      completed_at: null,
+      id: 'session-corrupt',
+      payload: '{bad json',
+      started_at: '2026-05-31T08:00:00.000Z',
+      status: 'completed',
+    })).toBeNull();
+    expect(rowToSession({
+      completed_at: null,
+      id: 'session-invalid',
+      payload: JSON.stringify({ id: 'session-invalid' }),
+      started_at: '2026-05-31T08:00:00.000Z',
+      status: 'completed',
+    })).toBeNull();
+  });
+
   it('round-trips a full threshold and populates its indexed columns', () => {
     const threshold: ThresholdEstimate = {
       id: 'threshold-1',
@@ -88,6 +105,25 @@ describe('data mappers', () => {
     expect(rowToThreshold(row)).toEqual(threshold);
   });
 
+  it('returns null for corrupt threshold rows', () => {
+    expect(rowToThreshold({
+      condition_key: 'contrast-detection:6:90',
+      created_at: '2026-05-31T08:12:00.000Z',
+      id: 'threshold-corrupt',
+      payload: '{bad json',
+      session_id: 'session-1',
+      spatial_frequency: 6,
+    })).toBeNull();
+    expect(rowToThreshold({
+      condition_key: 'contrast-detection:6:90',
+      created_at: '2026-05-31T08:12:00.000Z',
+      id: 'threshold-invalid',
+      payload: JSON.stringify({ id: 'threshold-invalid' }),
+      session_id: 'session-1',
+      spatial_frequency: 6,
+    })).toBeNull();
+  });
+
   it('returns defaults for malformed settings JSON', () => {
     expect(payloadToSettings('{bad json')).toEqual(DEFAULT_SETTINGS);
   });
@@ -97,6 +133,34 @@ describe('data mappers', () => {
       ...DEFAULT_SETTINGS,
       soundEnabled: true,
     });
+  });
+
+  it('sanitizes settings fields before merging over defaults', () => {
+    expect(payloadToSettings(JSON.stringify({
+      dichopticEnabled: 1,
+      displayBrightness: 2,
+      hapticsEnabled: 0,
+      monocularWeakEye: 'center',
+      onboardingComplete: 'yes',
+      reduceMotion: '',
+      remindersEnabled: null,
+      soundEnabled: 'enabled',
+      unknown: true,
+    }))).toEqual({
+      ...DEFAULT_SETTINGS,
+      dichopticEnabled: true,
+      displayBrightness: 1,
+      hapticsEnabled: false,
+      onboardingComplete: true,
+      remindersEnabled: false,
+      soundEnabled: true,
+    });
+    expect(payloadToSettings('{"displayBrightness":-1,"monocularWeakEye":"right"}')).toEqual({
+      ...DEFAULT_SETTINGS,
+      displayBrightness: 0,
+      monocularWeakEye: 'right',
+    });
+    expect(payloadToSettings('{"displayBrightness":"bright"}')).toEqual(DEFAULT_SETTINGS);
   });
 
   it('round-trips full settings', () => {

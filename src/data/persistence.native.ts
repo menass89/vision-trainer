@@ -24,7 +24,7 @@ export const sqlitePersistence: Persistence = {
     const rows = await db.getAllAsync<SessionRow>(
       'SELECT id, started_at, completed_at, status, payload FROM sessions ORDER BY started_at ASC'
     );
-    return rows.map(rowToSession);
+    return rows.map(rowToSession).filter((session): session is SessionLog => session !== null);
   },
 
   async loadThresholds() {
@@ -32,7 +32,7 @@ export const sqlitePersistence: Persistence = {
     const rows = await db.getAllAsync<ThresholdRow>(
       'SELECT id, session_id, condition_key, spatial_frequency, created_at, payload FROM thresholds ORDER BY created_at ASC'
     );
-    return rows.map(rowToThreshold);
+    return rows.map(rowToThreshold).filter((threshold): threshold is ThresholdEstimate => threshold !== null);
   },
 
   async loadSettings() {

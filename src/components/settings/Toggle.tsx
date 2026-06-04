@@ -13,9 +13,10 @@ import { haptics } from '@/theme/haptics';
 import { ACCENT, ACCENT_GLOW, motion, radius, surface, text } from '@/theme/tokens';
 
 export type ToggleProps = {
-  value: boolean;
-  onChange: (value: boolean) => void;
+  accessibilityLabel?: string;
   disabled?: boolean;
+  onChange: (value: boolean) => void;
+  value: boolean;
 };
 
 const TRACK_WIDTH = 48;
@@ -24,7 +25,7 @@ const KNOB_SIZE = 22;
 const KNOB_INSET = 3;
 const KNOB_TRAVEL = TRACK_WIDTH - KNOB_SIZE - KNOB_INSET * 2;
 
-export function Toggle({ value, onChange, disabled = false }: ToggleProps) {
+export function Toggle({ accessibilityLabel, disabled = false, onChange, value }: ToggleProps) {
   const progress = useSharedValue(value ? 1 : 0);
   const reduceMotion = useReducedMotion();
 
@@ -56,6 +57,9 @@ export function Toggle({ value, onChange, disabled = false }: ToggleProps) {
 
   return (
     <PressableScale
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="switch"
+      accessibilityState={{ checked: value, disabled }}
       disabled={disabled}
       haptic="none"
       onPress={handleChange}

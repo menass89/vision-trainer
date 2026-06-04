@@ -100,12 +100,28 @@ const moveDirectories = async (userInput) => {
   }
 };
 
+const confirmDelete = () => {
+  rl.question(
+    "This will permanently delete /src and /scripts. Type RESET to continue: ",
+    (confirmation) => {
+      if (confirmation.trim() === "RESET") {
+        moveDirectories("n").finally(() => rl.close());
+      } else {
+        console.log("❌ Reset cancelled.");
+        rl.close();
+      }
+    }
+  );
+};
+
 rl.question(
   "Do you want to move existing files to /example instead of deleting them? (Y/n): ",
   (answer) => {
     const userInput = answer.trim().toLowerCase() || "y";
-    if (userInput === "y" || userInput === "n") {
+    if (userInput === "y") {
       moveDirectories(userInput).finally(() => rl.close());
+    } else if (userInput === "n") {
+      confirmDelete();
     } else {
       console.log("❌ Invalid input. Please enter 'Y' or 'N'.");
       rl.close();

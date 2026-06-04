@@ -188,7 +188,12 @@ export function useSessionController(): SessionController {
           plannedBlocks: plannedBlocksRef.current,
           completedTrials,
         });
-        void useAppStore.getState().recordSessionResult(session, [...thresholdsRef.current]).catch(() => {});
+        void useAppStore
+          .getState()
+          .recordSessionResult(session, [...thresholdsRef.current])
+          .catch((error: unknown) => {
+            console.warn('[session] failed to persist result', error);
+          });
       }
 
       trialRef.current = finishedBlock ? null : buildTrial(currentState.blockIndex);

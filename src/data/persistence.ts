@@ -42,17 +42,21 @@ function upsertById<T extends { id: string }>(list: T[], item: T): void {
   }
 }
 
+function sortByTimestamp<T>(list: T[], getTimestamp: (item: T) => string): T[] {
+  return [...list].sort((a, b) => getTimestamp(a).localeCompare(getTimestamp(b)));
+}
+
 export const memoryPersistence: Persistence = {
   async init() {
     // No durable store to migrate.
   },
 
   async loadSessions() {
-    return store.sessions.map(clone);
+    return sortByTimestamp(store.sessions, (session) => session.startedAt).map(clone);
   },
 
   async loadThresholds() {
-    return store.thresholds.map(clone);
+    return sortByTimestamp(store.thresholds, (threshold) => threshold.createdAt).map(clone);
   },
 
   async loadSettings() {

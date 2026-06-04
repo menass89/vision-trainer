@@ -63,6 +63,9 @@ export function SegmentedControl<T extends string>({
 
         return (
           <PressableScale
+            accessibilityLabel={option.label}
+            accessibilityRole="button"
+            accessibilityState={{ selected }}
             haptic={selected ? 'none' : 'selection'}
             key={option.value}
             onPress={handleChange}

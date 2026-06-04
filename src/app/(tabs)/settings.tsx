@@ -1,4 +1,5 @@
 import { type Href, useRouter } from 'expo-router';
+import { useRef } from 'react';
 import { StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useReducedMotion } from 'react-native-reanimated';
@@ -29,8 +30,15 @@ export default function SettingsScreen() {
   const reduceMotion = useReducedMotion();
   const router = useRouter();
   const { state, set } = useSettingsState();
+  const reminderToggleInFlightRef = useRef(false);
 
   const handleRemindersChange = async (next: boolean) => {
+    if (reminderToggleInFlightRef.current) {
+      return;
+    }
+
+    reminderToggleInFlightRef.current = true;
+
     try {
       if (next) {
         const granted = await notificationService.requestRemindersPermission();
@@ -46,8 +54,10 @@ export default function SettingsScreen() {
         set('remindersEnabled', false);
       }
     } catch {
-      // Scheduling/cancellation failed - reflect the actual (off) state.
-      set('remindersEnabled', false);
+      // Enabling failed before a reminder was scheduled; failed cancellation leaves it active.
+      set('remindersEnabled', !next);
+    } finally {
+      reminderToggleInFlightRef.current = false;
     }
   };
 
@@ -69,6 +79,7 @@ export default function SettingsScreen() {
             label="Dichoptic mode"
             right={
               <Toggle
+                accessibilityLabel="Dichoptic mode"
                 onChange={(value) => set('dichopticEnabled', value)}
                 value={state.dichopticEnabled}
               />
@@ -92,6 +103,7 @@ export default function SettingsScreen() {
             label="Haptics"
             right={
               <Toggle
+                accessibilityLabel="Haptics"
                 onChange={(value) => set('hapticsEnabled', value)}
                 value={state.hapticsEnabled}
               />
@@ -101,6 +113,7 @@ export default function SettingsScreen() {
             label="Sound cues"
             right={
               <Toggle
+                accessibilityLabel="Sound cues"
                 onChange={(value) => set('soundEnabled', value)}
                 value={state.soundEnabled}
               />
@@ -111,6 +124,7 @@ export default function SettingsScreen() {
             label="Reduce motion"
             right={
               <Toggle
+                accessibilityLabel="Reduce motion"
                 onChange={(value) => set('reduceMotion', value)}
                 value={state.reduceMotion}
               />
@@ -125,6 +139,7 @@ export default function SettingsScreen() {
             label="Daily reminder"
             right={
               <Toggle
+                accessibilityLabel="Daily reminder"
                 onChange={(value) => {
                   void handleRemindersChange(value);
                 }}

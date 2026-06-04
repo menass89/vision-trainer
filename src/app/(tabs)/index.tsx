@@ -1,5 +1,5 @@
-import { type Href, useRouter } from 'expo-router';
-import { useCallback } from 'react';
+import { type Href, useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
 
@@ -85,17 +85,34 @@ type TodayContentProps = {
 
 function TodayContent({ data, reduceMotion, router }: TodayContentProps) {
   const exit = useSharedValue(0);
+  const navigatingRef = useRef(false);
   const discContrast =
     data.contrastSensitivity > 0 ? Math.min(1, 0.5 + data.contrastSensitivity * 0.22) : 0.32;
 
+  useFocusEffect(
+    useCallback(() => {
+      navigatingRef.current = false;
+
+      return () => {
+        navigatingRef.current = false;
+      };
+    }, [])
+  );
+
   const startSession = useCallback(() => {
+    if (navigatingRef.current) {
+      return;
+    }
+
+    navigatingRef.current = true;
+
     if (reduceMotion) {
       router.push('/session' as Href);
       return;
     }
     exit.value = withTiming(1, { duration: 220, easing: easings.out });
     setTimeout(() => router.push('/session' as Href), 140);
-  }, [data.sessionDoneToday, exit, reduceMotion, router]);
+  }, [exit, reduceMotion, router]);
 
   return (
     <>

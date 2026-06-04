@@ -5,10 +5,10 @@ import type { SessionLog, ThresholdEstimate } from '@/types';
 
 import { memoryPersistence } from './persistence';
 
-function session(id: string): SessionLog {
+function session(id: string, startedAt = '2026-05-31T10:00:00.000Z'): SessionLog {
   return {
     id,
-    startedAt: '2026-05-31T10:00:00.000Z',
+    startedAt,
     completedAt: '2026-05-31T10:04:00.000Z',
     status: 'completed',
     eyeMode: 'both',
@@ -21,7 +21,11 @@ function session(id: string): SessionLog {
   };
 }
 
-function threshold(id: string, sessionId: string): ThresholdEstimate {
+function threshold(
+  id: string,
+  sessionId: string,
+  createdAt = '2026-05-31T10:04:00.000Z',
+): ThresholdEstimate {
   return {
     id,
     sessionId,
@@ -36,7 +40,7 @@ function threshold(id: string, sessionId: string): ThresholdEstimate {
     ciHigh: 0.06,
     trialCount: 10,
     lapseRate: 0,
-    createdAt: '2026-05-31T10:04:00.000Z',
+    createdAt,
   };
 }
 
@@ -79,5 +83,28 @@ describe('memoryPersistence', () => {
 
     const loaded = await memoryPersistence.loadSettings();
     expect(loaded?.hapticsEnabled).toBe(true);
+  });
+
+  it('returns sessions and thresholds in native timestamp order', async () => {
+    await memoryPersistence.saveSessionResult(
+      session('session-order-late', '2026-05-31T12:00:00.000Z'),
+      [threshold('threshold-order-late', 'session-order-late', '2026-05-31T12:04:00.000Z')]
+    );
+    await memoryPersistence.saveSessionResult(
+      session('session-order-early', '2026-05-31T08:00:00.000Z'),
+      [threshold('threshold-order-early', 'session-order-early', '2026-05-31T08:04:00.000Z')]
+    );
+
+    const sessions = await memoryPersistence.loadSessions();
+    const thresholds = await memoryPersistence.loadThresholds();
+
+    expect(sessions.filter((row) => row.id.startsWith('session-order')).map((row) => row.id)).toEqual([
+      'session-order-early',
+      'session-order-late',
+    ]);
+    expect(thresholds.filter((row) => row.id.startsWith('threshold-order')).map((row) => row.id)).toEqual([
+      'threshold-order-early',
+      'threshold-order-late',
+    ]);
   });
 });

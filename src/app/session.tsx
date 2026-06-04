@@ -451,6 +451,8 @@ export default function SessionScreen() {
       ) : null}
 
       <PressableScale
+        accessibilityLabel="Close session"
+        accessibilityRole="button"
         hitSlop={12}
         onPress={handleClose}
         style={[styles.close, { top: insets.top + space.sm }]}>
