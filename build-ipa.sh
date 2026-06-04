@@ -31,8 +31,9 @@ npx expo prebuild --platform ios --clean
 echo "▸ 3/4  Building unsigned Release .app (xcodebuild)…"
 cd "$ROOT/ios"
 WS="$(ls -d ./*.xcworkspace | head -1)"
-SCHEME="$(xcodebuild -workspace "$WS" -list -json \
-  | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s).workspace.schemes[0]))')"
+# The app scheme matches the workspace name (e.g. VisionTrainer), NOT schemes[0]
+# which is an alphabetically-first CocoaPods scheme (EXApplication, …).
+SCHEME="$(basename "$WS" .xcworkspace)"
 echo "   workspace=$WS  scheme=$SCHEME"
 xcodebuild \
   -workspace "$WS" \
