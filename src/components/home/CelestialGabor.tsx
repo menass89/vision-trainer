@@ -237,12 +237,6 @@ export function CelestialGabor({
 }
 
 const styles = StyleSheet.create({
-  wrap: {
-    alignItems: 'center',
-    height: SIZE,
-    justifyContent: 'center',
-    width: SIZE,
-  },
   center: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -252,6 +246,12 @@ const styles = StyleSheet.create({
     height: SIZE,
     justifyContent: 'center',
     position: 'absolute',
+    width: SIZE,
+  },
+  wrap: {
+    alignItems: 'center',
+    height: SIZE,
+    justifyContent: 'center',
     width: SIZE,
   },
 });

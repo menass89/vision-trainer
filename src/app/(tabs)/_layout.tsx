@@ -3,7 +3,7 @@ import { Tabs } from 'expo-router';
 import { CustomTabBar } from '@/components/ui/CustomTabBar';
 import { surface } from '@/theme/tokens';
 
-export default function TabsLayout() {
+export function TabsLayout() {
   return (
     <Tabs
       screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: surface.base } }}
@@ -14,3 +14,5 @@ export default function TabsLayout() {
     </Tabs>
   );
 }
+
+export default TabsLayout;

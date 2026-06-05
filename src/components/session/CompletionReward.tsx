@@ -325,6 +325,33 @@ export function CompletionReward({
 }
 
 const styles = StyleSheet.create({
+  accuracy: {
+    alignItems: 'flex-end',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginVertical: space.md,
+  },
+  accuracyNumber: {
+    ...typeScale.display,
+    color: text.primary,
+    fontVariant: [...tabularFigures.fontVariant],
+    height: typeScale.display.lineHeight,
+    padding: 0,
+    textAlign: 'right',
+    width: 156,
+  },
+  action: {
+    alignItems: 'center',
+    backgroundColor: ACCENT,
+    borderColor: ACCENT_GLOW,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    justifyContent: 'center',
+    marginTop: space.lg,
+    minWidth: 112,
+    paddingHorizontal: space.lg,
+    paddingVertical: space.md,
+  },
   backdrop: {
     alignItems: 'center',
     bottom: 0,
@@ -348,6 +375,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 320,
   },
+  card: {
+    alignItems: 'center',
+    minWidth: 272,
+    paddingHorizontal: space.xl,
+    paddingVertical: space.lg,
+  },
   gaborLayer: {
     alignItems: 'center',
     bottom: 0,
@@ -358,11 +391,8 @@ const styles = StyleSheet.create({
     top: 0,
     transform: [{ scale: 0.9 }],
   },
-  card: {
-    alignItems: 'center',
-    minWidth: 272,
-    paddingHorizontal: space.xl,
-    paddingVertical: space.lg,
+  percent: {
+    color: text.primary,
   },
   ring: {
     alignItems: 'center',
@@ -371,29 +401,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 45,
     width: RING_SIZE,
-  },
-  accuracy: {
-    alignItems: 'flex-end',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginVertical: space.md,
-  },
-  accuracyNumber: {
-    ...typeScale.display,
-    color: text.primary,
-    fontVariant: [...tabularFigures.fontVariant],
-    height: typeScale.display.lineHeight,
-    padding: 0,
-    textAlign: 'right',
-    width: 156,
-  },
-  percent: {
-    color: text.primary,
-  },
-  streakRow: {
-    alignItems: 'baseline',
-    flexDirection: 'row',
-    marginTop: space.sm,
   },
   streakNumber: {
     ...typeScale.display,
@@ -404,20 +411,13 @@ const styles = StyleSheet.create({
     padding: 0,
     textAlign: 'right',
   },
+  streakRow: {
+    alignItems: 'baseline',
+    flexDirection: 'row',
+    marginTop: space.sm,
+  },
   subtitleWrap: {
     alignItems: 'center',
     marginTop: space.md,
-  },
-  action: {
-    alignItems: 'center',
-    backgroundColor: ACCENT,
-    borderColor: ACCENT_GLOW,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    justifyContent: 'center',
-    marginTop: space.lg,
-    minWidth: 112,
-    paddingHorizontal: space.lg,
-    paddingVertical: space.md,
   },
 });

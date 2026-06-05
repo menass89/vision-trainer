@@ -72,16 +72,16 @@ export function Toggle({ accessibilityLabel, disabled = false, onChange, value }
 }
 
 const styles = StyleSheet.create({
+  knob: {
+    borderRadius: radius.pill,
+    height: KNOB_SIZE,
+    width: KNOB_SIZE,
+  },
   track: {
     borderRadius: radius.pill,
     height: TRACK_HEIGHT,
     justifyContent: 'center',
     paddingHorizontal: KNOB_INSET,
     width: TRACK_WIDTH,
-  },
-  knob: {
-    borderRadius: radius.pill,
-    height: KNOB_SIZE,
-    width: KNOB_SIZE,
   },
 });
