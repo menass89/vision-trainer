@@ -11,7 +11,9 @@ export type BlockThresholdInput = {
   blockId: string;
   spatialFrequencyCpd: number;
   orientationDeg: Orientation;
+  durationMs?: number;
   estimate: QuestEstimate;
+  gaborSizeDeg?: number;
   trialCount: number;
   lapseRate: number;
   createdAtIso: string;
@@ -26,7 +28,8 @@ export function buildBlockThreshold(input: BlockThresholdInput): ThresholdEstima
       input.spatialFrequencyCpd,
       input.orientationDeg,
       'contrast-detection',
-      GUIDED_STIM_DURATION_MS
+      input.durationMs ?? GUIDED_STIM_DURATION_MS,
+      input.gaborSizeDeg
     ),
     paradigm: 'contrast-detection',
     spatialFrequencyCpd: input.spatialFrequencyCpd,

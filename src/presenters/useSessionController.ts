@@ -56,19 +56,37 @@ type SessionState = {
 type SessionBlock = {
   spatialFrequencyCpd: number;
   orientationDeg: Orientation;
+  durationMs?: number;
+  gaborSizeDeg?: number;
   label: string;
   role: PlannedBlock['role'];
 };
 
 const TRIALS_PER_BLOCK = 10;
+const FIRST_VISIBLE_STIM_DURATION_MS = 650;
+const SECOND_VISIBLE_STIM_DURATION_MS = 450;
 const GUIDED_BLOCKS: SessionBlock[] = [
   { spatialFrequencyCpd: 4, orientationDeg: 0 as Orientation, label: 'Warm-up · 4 cpd', role: 'warm-up' as const },
   { spatialFrequencyCpd: 6, orientationDeg: 90 as Orientation, label: 'Training · 6 cpd', role: 'training' as const },
 ];
 const MAX_VISIBLE_CONTRAST_LOG10 = Math.log10(0.9);
 const FIRST_SESSION_BLOCKS: SessionBlock[] = [
-  { spatialFrequencyCpd: 1, orientationDeg: 0 as Orientation, label: 'Calibration · 1 cpd', role: 'warm-up' as const },
-  { spatialFrequencyCpd: 2, orientationDeg: 90 as Orientation, label: 'Calibration · 2 cpd', role: 'assessment' as const },
+  {
+    spatialFrequencyCpd: 1,
+    orientationDeg: 0 as Orientation,
+    durationMs: FIRST_VISIBLE_STIM_DURATION_MS,
+    gaborSizeDeg: 8,
+    label: 'Calibration · 1 cpd',
+    role: 'warm-up' as const,
+  },
+  {
+    spatialFrequencyCpd: 2,
+    orientationDeg: 90 as Orientation,
+    durationMs: SECOND_VISIBLE_STIM_DURATION_MS,
+    gaborSizeDeg: 6,
+    label: 'Calibration · 2 cpd',
+    role: 'assessment' as const,
+  },
 ];
 const FIRST_SESSION_QUEST_PARAMS: QuestParameters[] = [
   {
@@ -147,7 +165,8 @@ export function useSessionController(): SessionController {
       orientationDeg: block.orientationDeg,
       contrast: contrastFromLog10(intensityLog10),
       phaseRad: nextRandom() * Math.PI * 2,
-      durationMs: GUIDED_STIM_DURATION_MS,
+      durationMs: block.durationMs ?? GUIDED_STIM_DURATION_MS,
+      gaborSizeDeg: block.gaborSizeDeg,
       backgroundLuminanceCdM2: calibration.backgroundLuminanceCdM2,
     };
     return { intervals: targetInterval === 1 ? [stimulus, null] : [null, stimulus], targetInterval };
@@ -183,7 +202,8 @@ export function useSessionController(): SessionController {
         spatialFrequencyCpd: b.spatialFrequencyCpd,
         orientationDeg: b.orientationDeg,
         trialsPerBlock: TRIALS_PER_BLOCK,
-        durationMs: GUIDED_STIM_DURATION_MS,
+        durationMs: b.durationMs ?? GUIDED_STIM_DURATION_MS,
+        gaborSizeDeg: b.gaborSizeDeg,
       },
       role: b.role,
     }));
@@ -217,7 +237,9 @@ export function useSessionController(): SessionController {
           blockId: blockIdsRef.current[bi],
           spatialFrequencyCpd: blocks[bi].spatialFrequencyCpd,
           orientationDeg: blocks[bi].orientationDeg,
+          durationMs: blocks[bi].durationMs ?? GUIDED_STIM_DURATION_MS,
           estimate: quest.estimate(),
+          gaborSizeDeg: blocks[bi].gaborSizeDeg,
           trialCount: quest.trialCount(),
           lapseRate: quest.lapseRate(),
           createdAtIso: now().toISOString(),
