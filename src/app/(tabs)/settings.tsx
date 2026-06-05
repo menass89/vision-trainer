@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { type Href, useRouter } from 'expo-router';
 import { useRef } from 'react';
 import { StyleSheet } from 'react-native';
@@ -31,6 +32,12 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { state, set } = useSettingsState();
   const reminderToggleInFlightRef = useRef(false);
+  const appVersion = Constants.expoConfig?.version ?? '1.0.0';
+  const extra = Constants.expoConfig?.extra as
+    | { buildNumber?: string; gitSha?: string }
+    | undefined;
+  const gitSha = extra?.gitSha ?? 'dev';
+  const buildNumber = Constants.expoConfig?.ios?.buildNumber ?? extra?.buildNumber ?? '–';
 
   const handleRemindersChange = async (next: boolean) => {
     if (reminderToggleInFlightRef.current) {
@@ -155,7 +162,7 @@ export default function SettingsScreen() {
             label="Version"
             right={
               <AppText color="muted" variant="caption">
-                1.0.0
+                v{appVersion} ({buildNumber}) · {gitSha}
               </AppText>
             }
           />
