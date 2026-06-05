@@ -79,8 +79,8 @@ GaborCanvas.displayName = 'GaborCanvas';
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#0A0B0D'
+    backgroundColor: '#808080',
+    flex: 1
   },
   canvas: {
     flex: 1

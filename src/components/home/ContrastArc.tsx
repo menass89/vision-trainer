@@ -51,7 +51,6 @@ export function ContrastArc({
   useEffect(() => {
     const boundedProgress = Math.min(Math.max(progress, 0), 1);
 
-    strokeDashoffset.value = circumference;
     strokeDashoffset.value = withTiming(circumference * (1 - boundedProgress), {
       duration: 900,
       easing: Easing.out(Easing.cubic),
