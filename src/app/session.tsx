@@ -23,7 +23,6 @@ import { CompletionReward } from '@/components/session/CompletionReward';
 import { KinoEdgeArc } from '@/components/session/KinoEdgeArc';
 import { ResponseTap } from '@/components/session/ResponseTap';
 import { RewardBurst } from '@/components/session/RewardBurst';
-import { VisibleGaborPatch } from '@/components/session/VisibleGaborPatch';
 import { AppText, Bloom, FadeIn, GlassSurface, PressableScale, PrimaryButton } from '@/components/ui';
 import { useSessionController } from '@/presenters';
 import { applyBrightness, restoreSystemBrightness } from '@/services/brightness';
@@ -79,7 +78,6 @@ export default function SessionScreen() {
   const [bigBurst, setBigBurst] = useState(false);
   const [blockCorrectCount, setBlockCorrectCount] = useState(0);
   const [canvasReady, setCanvasReady] = useState(false);
-  const [presentedStimulus, setPresentedStimulus] = useState<GaborStimulus | null>(null);
   const [showBlockSummary, setShowBlockSummary] = useState(false);
   const [showCompletion, setShowCompletion] = useState(false);
   const fieldScale = useSharedValue(1);
@@ -158,19 +156,8 @@ export default function SessionScreen() {
       if (!isMountedRef.current) return false;
 
       if (stimulus) {
-        setPresentedStimulus(stimulus);
-        try {
-          await Promise.all([
-            canvasRef.current?.present(stimulus) ?? Promise.resolve(),
-            isStillMounted(stimulus.durationMs),
-          ]);
-        } finally {
-          if (isMountedRef.current) {
-            setPresentedStimulus(null);
-          }
-        }
+        await canvasRef.current?.present(stimulus);
       } else {
-        setPresentedStimulus(null);
         canvasRef.current?.clear();
         if (!(await isStillMounted(durationMs))) return false;
       }
@@ -370,7 +357,6 @@ export default function SessionScreen() {
           onReadyChange={setCanvasReady}
           ref={canvasRef}
         />
-        <VisibleGaborPatch stimulus={presentedStimulus} />
         <KinoEdgeArc progress={controller.progress} />
         <View pointerEvents="none" style={styles.phaseLayer}>
           {uiPhase === 'fixation' ? <View style={styles.fixationDot} /> : null}
