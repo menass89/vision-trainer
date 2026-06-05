@@ -1,8 +1,8 @@
 import { Children, Fragment, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { AppText, Hairline } from '@/components/ui';
-import { hairline, radius, space, surface } from '@/theme/tokens';
+import { AppText, GlassSurface, Hairline } from '@/components/ui';
+import { radius, space } from '@/theme/tokens';
 
 export type SectionProps = {
   title: string;
@@ -18,14 +18,14 @@ export function Section({ title, children, footer }: SectionProps) {
       <AppText color="muted" uppercase variant="micro">
         {title}
       </AppText>
-      <View style={styles.group}>
+      <GlassSurface radius={radius.lg} style={styles.group}>
         {rows.map((row, index) => (
           <Fragment key={index}>
             {index > 0 ? <Hairline style={styles.hairline} /> : null}
             {row}
           </Fragment>
         ))}
-      </View>
+      </GlassSurface>
       {footer ? (
         <AppText color="muted" style={styles.footer} variant="caption">
           {footer}
@@ -36,21 +36,17 @@ export function Section({ title, children, footer }: SectionProps) {
 }
 
 const styles = StyleSheet.create({
-  section: {
-    gap: space.md,
-    marginBottom: space.xl,
-  },
-  group: {
-    backgroundColor: surface.card,
-    borderColor: surface.hairline,
-    borderRadius: radius.lg,
-    borderWidth: hairline.width,
-    overflow: 'hidden',
-  },
   footer: {
     paddingHorizontal: space.base,
   },
+  group: {
+    borderRadius: radius.lg,
+  },
   hairline: {
     marginLeft: space.base,
+  },
+  section: {
+    gap: space.md,
+    marginBottom: space.xl,
   },
 });

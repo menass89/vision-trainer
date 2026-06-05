@@ -1,9 +1,9 @@
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactNode } from 'react';
-import { Platform, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
+import { Platform, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { material, surface } from '@/theme/tokens';
+import { material } from '@/theme/tokens';
 
 export type GlassSurfaceProps = {
   style?: StyleProp<ViewStyle>;
@@ -13,7 +13,7 @@ export type GlassSurfaceProps = {
 
 export function GlassSurface({ style, children, radius = material.radius }: GlassSurfaceProps) {
   const blurIntensity =
-    Platform.OS === 'ios' ? Math.max(material.blurIntensity, 50) : material.blurIntensity;
+    Platform.OS === 'ios' ? Math.max(material.blurIntensity, 58) : material.blurIntensity;
 
   return (
     <BlurView
@@ -22,26 +22,39 @@ export function GlassSurface({ style, children, radius = material.radius }: Glas
       style={[styles.surface, { borderRadius: radius }, style]}
       tint={material.blurTint}>
       <LinearGradient
-        colors={[surface.warm, 'transparent']}
+        colors={[
+          'rgba(255,255,255,0.11)',
+          'rgba(51,210,214,0.035)',
+          'rgba(255,255,255,0.015)',
+        ]}
         pointerEvents="none"
         style={styles.overlay}
       />
+      <View pointerEvents="none" style={styles.topEdge} />
       {children}
     </BlurView>
   );
 }
 
 const styles = StyleSheet.create({
-  surface: {
-    backgroundColor: 'rgba(18, 24, 28, 0.55)',
-    borderColor: material.hairlineOnGlass,
-    borderWidth: 1,
-    overflow: 'hidden',
-  },
   overlay: {
     bottom: 0,
     left: 0,
     opacity: 0.5,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  surface: {
+    backgroundColor: 'rgba(10, 17, 20, 0.38)',
+    borderColor: material.hairlineOnGlass,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  topEdge: {
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    height: StyleSheet.hairlineWidth,
+    left: 0,
     position: 'absolute',
     right: 0,
     top: 0,

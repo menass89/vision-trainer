@@ -235,10 +235,10 @@ const styles = StyleSheet.create({
   },
   bloom: {
     position: 'absolute',
-    top: '-4%',
-    left: '2%',
-    width: '62%',
-    height: '46%',
+    top: '-16%',
+    left: '-34%',
+    width: '130%',
+    height: '72%',
   },
   star: {
     position: 'absolute',

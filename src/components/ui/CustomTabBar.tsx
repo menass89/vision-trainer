@@ -13,7 +13,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Line, Path } from 'react-native-svg';
 
-import { ACCENT, ACCENT_GLOW, material, motion, space, surface, text } from '@/theme/tokens';
+import { ACCENT, ACCENT_GLOW, material, motion, space, text } from '@/theme/tokens';
 
 import { AppText } from './AppText';
 import { PressableScale } from './PressableScale';
@@ -206,7 +206,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
 const styles = StyleSheet.create({
   outer: {
     alignItems: 'center',
-    backgroundColor: surface.base,
+    backgroundColor: 'transparent',
     paddingHorizontal: space.lg,
     paddingTop: space.sm,
   },
