@@ -77,6 +77,7 @@ export default function SessionScreen() {
   const [burst, setBurst] = useState(0);
   const [bigBurst, setBigBurst] = useState(false);
   const [blockCorrectCount, setBlockCorrectCount] = useState(0);
+  const [canvasReady, setCanvasReady] = useState(false);
   const [showBlockSummary, setShowBlockSummary] = useState(false);
   const [showCompletion, setShowCompletion] = useState(false);
   const fieldScale = useSharedValue(1);
@@ -299,9 +300,11 @@ export default function SessionScreen() {
   ]);
 
   const handleBegin = useCallback(() => {
+    if (!canvasReady) return;
+
     controller.begin();
     setPhase('idle');
-  }, [controller, setPhase]);
+  }, [canvasReady, controller, setPhase]);
 
   const handleClose = useCallback(() => {
     canvasRef.current?.clear();
@@ -349,7 +352,11 @@ export default function SessionScreen() {
   return (
     <View style={styles.screen}>
       <Animated.View style={[styles.field, fieldStyle]}>
-        <GaborCanvas calibration={controller.calibration} ref={canvasRef} />
+        <GaborCanvas
+          calibration={controller.calibration}
+          onReadyChange={setCanvasReady}
+          ref={canvasRef}
+        />
         <KinoEdgeArc progress={controller.progress} />
         <View pointerEvents="none" style={styles.phaseLayer}>
           {uiPhase === 'fixation' ? <View style={styles.fixationDot} /> : null}
@@ -374,6 +381,7 @@ export default function SessionScreen() {
         </View>
         <ResponseTap enabled={uiPhase === 'response'} onCommit={handleChoice} />
         <RewardBurst big={bigBurst} trigger={burst} />
+        <TrialPhaseGuide phase={uiPhase} />
       </Animated.View>
 
       {controller.status === 'ready' && uiPhase === 'ready' ? (
@@ -389,7 +397,7 @@ export default function SessionScreen() {
 
           {/* Existing soft top glow, fades in with the wash. */}
           <Animated.View style={[styles.readyGlow, readyWashStyle]} pointerEvents="none">
-            <Bloom color={READY_GLOW} />
+            <Bloom color={READY_GLOW} rx="70%" ry="42%" />
           </Animated.View>
 
           <View style={[styles.readyContent, { paddingBottom: insets.bottom + space.xxl }]}>
@@ -409,7 +417,12 @@ export default function SessionScreen() {
               </AppText>
             </Animated.View>
             <Animated.View style={[styles.beginWrap, beginRiseStyle]}>
-              <PrimaryButton haptic="select" label="Begin" onPress={handleBegin} />
+              <PrimaryButton
+                disabled={!canvasReady}
+                haptic="select"
+                label={canvasReady ? 'Begin' : 'Preparing'}
+                onPress={handleBegin}
+              />
             </Animated.View>
           </View>
         </View>
@@ -464,6 +477,47 @@ export default function SessionScreen() {
   );
 }
 
+function TrialPhaseGuide({ phase }: { phase: UiPhase }) {
+  const activeIndex =
+    phase === 'interval-1' ? 0 : phase === 'isi' ? 1 : phase === 'interval-2' ? 2 : null;
+  const label =
+    phase === 'fixation'
+      ? 'Ready'
+      : phase === 'interval-1'
+        ? 'Flash 1'
+        : phase === 'isi'
+          ? 'Wait'
+          : phase === 'interval-2'
+            ? 'Flash 2'
+            : phase === 'response'
+              ? 'Choose'
+              : null;
+
+  if (!label) return null;
+
+  return (
+    <View pointerEvents="none" style={styles.phaseGuide}>
+      <View style={styles.phaseRail}>
+        {['1', '·', '2'].map((item, index) => (
+          <View
+            key={`${item}-${index}`}
+            style={[
+              styles.phaseStep,
+              activeIndex === index ? styles.phaseStepActive : styles.phaseStepIdle,
+            ]}>
+            <AppText color={activeIndex === index ? 'inverse' : 'muted'} tabular variant="micro">
+              {item}
+            </AppText>
+          </View>
+        ))}
+      </View>
+      <AppText color="primary" variant="caption">
+        {label}
+      </AppText>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   screen: {
     backgroundColor: surface.base,
@@ -485,6 +539,42 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     top: 0,
+  },
+  phaseGuide: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(8, 10, 13, 0.62)',
+    borderColor: 'rgba(239, 243, 244, 0.12)',
+    borderRadius: radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    bottom: '58%',
+    gap: space.xs,
+    left: '50%',
+    marginLeft: -68,
+    paddingHorizontal: space.md,
+    paddingVertical: space.sm,
+    position: 'absolute',
+    width: 136,
+    zIndex: 5,
+  },
+  phaseRail: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: space.xs,
+  },
+  phaseStep: {
+    alignItems: 'center',
+    borderRadius: radius.pill,
+    height: 24,
+    justifyContent: 'center',
+    width: 24,
+  },
+  phaseStepActive: {
+    backgroundColor: ACCENT_CORE,
+  },
+  phaseStepIdle: {
+    backgroundColor: 'rgba(239, 243, 244, 0.08)',
+    borderColor: surface.hairline,
+    borderWidth: StyleSheet.hairlineWidth,
   },
   fixationDot: {
     backgroundColor: text.secondary,

@@ -8,7 +8,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import Svg, { Circle, Defs, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
 
 import { TrajectoryPointLight } from '@/components/progress/TrajectoryPointLight';
 import { AppText } from '@/components/ui';
@@ -90,14 +90,6 @@ export function Sparkline({ points, width, height }: SparklineProps) {
   return (
     <View style={[styles.container, { width, height: height + LABEL_HEIGHT }]}>
       <Svg height={height} width={width}>
-        <Defs>
-          <RadialGradient id="sparkBloom" cx="50%" cy="50%" r="55%">
-            <Stop offset="0%" stopColor={ACCENT_GLOW} stopOpacity={1} />
-            <Stop offset="55%" stopColor={ACCENT_GLOW} stopOpacity={0.45} />
-            <Stop offset="100%" stopColor={ACCENT_GLOW} stopOpacity={0} />
-          </RadialGradient>
-        </Defs>
-        <Rect fill="url(#sparkBloom)" height={height} opacity={0.16} width={width} x={0} y={0} />
         {areaPath ? <Path d={areaPath} fill={ACCENT} opacity={0.14} /> : null}
         {path ? (
           <>

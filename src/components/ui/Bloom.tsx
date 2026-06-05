@@ -27,6 +27,8 @@ export function Bloom({
   core,
   edge,
   opacity = 1,
+  rx,
+  ry,
   style,
 }: BloomProps) {
   const rawId = useId();
@@ -34,6 +36,8 @@ export function Bloom({
   const gradientId = `bloom-${rawId.replace(/:/g, '')}`;
   const radius = (Math.max(size.height, size.width) / 2) * RADIUS_FACTOR;
   const hasSize = size.height > 0 && size.width > 0;
+  const radiusX = resolveRadius(rx, radius, size.width);
+  const radiusY = resolveRadius(ry, radius, size.height);
 
   const handleLayout = (event: LayoutChangeEvent) => {
     const { height, width } = event.nativeEvent.layout;
@@ -53,7 +57,8 @@ export function Bloom({
               cy={size.height / 2}
               gradientUnits="userSpaceOnUse"
               id={gradientId}
-              r={radius}>
+              rx={radiusX}
+              ry={radiusY}>
               {core
                 ? [
                     <Stop key="core" offset="0%" stopColor={core} stopOpacity={1} />,
@@ -83,3 +88,18 @@ const styles = StyleSheet.create({
     top: 0,
   },
 });
+
+function resolveRadius(value: string | undefined, fallback: number, axis: number) {
+  if (!value) {
+    return fallback;
+  }
+  if (value.endsWith('%')) {
+    const percent = Number.parseFloat(value.slice(0, -1));
+
+    return Number.isFinite(percent) ? (axis * percent) / 100 : fallback;
+  }
+
+  const numeric = Number.parseFloat(value);
+
+  return Number.isFinite(numeric) ? numeric : fallback;
+}

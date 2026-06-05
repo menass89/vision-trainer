@@ -12,11 +12,12 @@ export type GaborCanvasHandle = {
 
 type GaborCanvasProps = {
   calibration: CalibrationProfile;
+  onReadyChange?: (ready: boolean) => void;
 };
 
 const now = () => (globalThis.performance?.now?.() ?? Date.now());
 
-export const GaborCanvas = forwardRef<GaborCanvasHandle, GaborCanvasProps>(({ calibration }, ref) => {
+export const GaborCanvas = forwardRef<GaborCanvasHandle, GaborCanvasProps>(({ calibration, onReadyChange }, ref) => {
   const rendererRef = useRef<GaborRenderer | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const calibrationRef = useRef(calibration);
@@ -31,10 +32,11 @@ export const GaborCanvas = forwardRef<GaborCanvasHandle, GaborCanvasProps>(({ ca
     return () => {
       controller.abort();
       abortRef.current = null;
+      onReadyChange?.(false);
       rendererRef.current?.dispose();
       rendererRef.current = null;
     };
-  }, []);
+  }, [onReadyChange]);
 
   useEffect(() => {
     rendererRef.current?.clear(calibration);
@@ -48,10 +50,12 @@ export const GaborCanvas = forwardRef<GaborCanvasHandle, GaborCanvasProps>(({ ca
       const renderer = new GaborRenderer(gl);
       renderer.resize(calibrationRef.current);
       rendererRef.current = renderer;
+      onReadyChange?.(true);
     } catch (cause) {
+      onReadyChange?.(false);
       setError(cause instanceof Error ? cause.message : 'Unable to initialize stimulus renderer');
     }
-  }, []);
+  }, [onReadyChange]);
 
   useImperativeHandle(
     ref,
