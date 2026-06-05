@@ -20,19 +20,37 @@ export type BloomProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-const RADIUS_FACTOR = 1.05;
+const RADIUS_FACTOR = 0.96;
+
+function resolveAxisRadius(value: string | undefined, axisSize: number, fallback: number) {
+  if (!value) {
+    return fallback;
+  }
+
+  if (value.endsWith('%')) {
+    const ratio = Number.parseFloat(value) / 100;
+    return Number.isFinite(ratio) ? (axisSize * ratio) / 2 : fallback;
+  }
+
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
 
 export function Bloom({
   color = accent.glow,
   core,
   edge,
   opacity = 1,
+  rx,
+  ry,
   style,
 }: BloomProps) {
   const rawId = useId();
   const [size, setSize] = useState({ height: 0, width: 0 });
   const gradientId = `bloom-${rawId.replace(/:/g, '')}`;
-  const radius = (Math.max(size.height, size.width) / 2) * RADIUS_FACTOR;
+  const radiusX = resolveAxisRadius(rx, size.width, size.width / 2);
+  const radiusY = resolveAxisRadius(ry, size.height, size.height / 2);
+  const radius = Math.min(radiusX, radiusY) * RADIUS_FACTOR;
   const hasSize = size.height > 0 && size.width > 0;
 
   const handleLayout = (event: LayoutChangeEvent) => {

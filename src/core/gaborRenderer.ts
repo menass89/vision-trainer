@@ -223,6 +223,8 @@ export class GaborRenderer {
     gl.uniform1i(this.uniforms.u_dichopticMode, dichopticModeToUniform(stimulus.dichopticMode));
     gl.uniform1i(this.uniforms.u_partnerDichopticMode, dichopticModeToUniform(stimulus.dichopticPartner?.mode));
     gl.uniform1f(this.uniforms.u_partnerContrast, stimulus.dichopticPartner?.contrast ?? 0);
+    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+    gl.bindVertexArray(this.vao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     gl.endFrameEXP();
   }

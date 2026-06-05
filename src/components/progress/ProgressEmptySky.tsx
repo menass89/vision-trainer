@@ -46,7 +46,7 @@ export function ProgressEmptySky({ reduceMotion }: ProgressEmptySkyProps) {
       <View style={styles.scene}>
         <FadeIn>
           <View style={styles.dormantBody}>
-            <CelestialGabor contrast={0.12} progress={0} reduceMotion={reduceMotion} />
+            <CelestialGabor contrast={0.32} progress={0.08} reduceMotion={reduceMotion} />
           </View>
         </FadeIn>
         <FadeIn delay={120} style={styles.arc}>
