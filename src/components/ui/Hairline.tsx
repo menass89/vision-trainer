@@ -13,8 +13,8 @@ export function Hairline({ inset = 0, style }: HairlineProps) {
 
 const styles = StyleSheet.create({
   hairline: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: surface.hairline,
     alignSelf: 'stretch',
+    backgroundColor: surface.hairline,
+    height: StyleSheet.hairlineWidth,
   },
 });
