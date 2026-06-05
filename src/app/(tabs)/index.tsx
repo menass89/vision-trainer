@@ -1,18 +1,18 @@
 import { type Href, useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
+import { useReducedMotion, useSharedValue } from 'react-native-reanimated';
 
 import { AmbientGradient } from '@/components/home/AmbientGradient';
 import { CelestialGabor } from '@/components/home/CelestialGabor';
 import { AppText, Bloom, FadeIn, PrimaryButton, Screen, Shimmer } from '@/components/ui';
 import { useTodayData } from '@/presenters';
 import type { TodayView } from '@/presenters/types';
-import { easings } from '@/theme/motion';
 import {
   ACCENT,
   ACCENT_CORE,
   ACCENT_GLOW,
+  ACCENT_HOT,
   ACCENT_MUTED,
   motion,
   radius,
@@ -105,21 +105,17 @@ function TodayContent({ data, reduceMotion, router }: TodayContentProps) {
     }
 
     navigatingRef.current = true;
-
-    if (reduceMotion) {
-      router.push('/session' as Href);
-      return;
-    }
-    exit.value = withTiming(1, { duration: 220, easing: easings.out });
-    setTimeout(() => router.push('/session' as Href), 140);
-  }, [exit, reduceMotion, router]);
+    router.push('/session' as Href);
+  }, [router]);
 
   return (
     <>
       <FadeIn duration={motion.timing.entranceMs} style={styles.eyebrow}>
-        <AppText color="muted" uppercase variant="micro">
-          Today
-        </AppText>
+        <View style={styles.screenLabelPlate}>
+          <AppText color="accent" style={styles.screenLabel} variant="caption">
+            Today
+          </AppText>
+        </View>
         {data.streakDays > 0 ? (
           <View style={styles.streakChip}>
             <AppText color="secondary" tabular variant="caption">
@@ -216,6 +212,22 @@ const styles = StyleSheet.create({
   },
   orbScale: {
     transform: [{ scale: 1.08 }],
+  },
+  screenLabel: {
+    color: ACCENT_HOT,
+    fontWeight: '800',
+    letterSpacing: 0,
+    textShadowColor: 'rgba(51, 210, 214, 0.56)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 10,
+  },
+  screenLabelPlate: {
+    backgroundColor: 'rgba(8, 14, 16, 0.52)',
+    borderColor: 'rgba(207, 250, 251, 0.16)',
+    borderRadius: radius.pill,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: space.sm,
+    paddingVertical: space.xs,
   },
   bottomBlock: {
     gap: space.lg,

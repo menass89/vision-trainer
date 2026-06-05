@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import { type Href, useRouter } from 'expo-router';
 import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 
@@ -13,13 +12,12 @@ import { VerdictBand } from '@/components/progress/VerdictBand';
 import { AppText, Bloom, Card, FadeIn, Screen, Shimmer } from '@/components/ui';
 import { useProgressData } from '@/presenters';
 import { haptics } from '@/theme/haptics';
-import { data as tokenData, motion, radius, space, surface } from '@/theme/tokens';
+import { ACCENT_HOT, data as tokenData, motion, radius, space, surface } from '@/theme/tokens';
 
 const SPARKLINE_HEIGHT = 112;
 const CSF_GRAPH_HEIGHT = 220;
 
 export default function ProgressScreen() {
-  const router = useRouter();
   const reduceMotion = useReducedMotion();
   const { data, isLoading } = useProgressData();
   const isEmpty = data.csf.length === 0;
@@ -31,22 +29,21 @@ export default function ProgressScreen() {
 
   return (
     <Screen
-      scroll
+      scroll={!isEmpty}
       background={<AmbientGradient constellation reduceMotion={reduceMotion} />}
       style={styles.screen}>
       {isLoading ? (
         <LoadingProgress />
       ) : isEmpty ? (
-        <ProgressEmptySky
-          onBegin={() => router.push('/session' as Href)}
-          reduceMotion={reduceMotion}
-        />
+        <ProgressEmptySky reduceMotion={reduceMotion} />
       ) : (
         <>
           <FadeIn>
-            <AppText color="muted" uppercase variant="micro">
-              Progress
-            </AppText>
+            <View style={styles.screenLabelPlate}>
+              <AppText color="accent" style={styles.screenLabel} variant="caption">
+                Progress
+              </AppText>
+            </View>
           </FadeIn>
           <FadeIn delay={60} style={styles.hero}>
             <AppText color="muted" uppercase variant="micro">
@@ -193,5 +190,22 @@ const styles = StyleSheet.create({
   screen: {
     gap: space.md,
     paddingBottom: space.lg,
+  },
+  screenLabel: {
+    color: ACCENT_HOT,
+    fontWeight: '800',
+    letterSpacing: 0,
+    textShadowColor: 'rgba(51, 210, 214, 0.56)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 10,
+  },
+  screenLabelPlate: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(8, 14, 16, 0.52)',
+    borderColor: 'rgba(207, 250, 251, 0.16)',
+    borderRadius: radius.pill,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: space.sm,
+    paddingVertical: space.xs,
   },
 });

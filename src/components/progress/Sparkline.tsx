@@ -97,32 +97,32 @@ export function Sparkline({ points, width, height }: SparklineProps) {
             <Stop offset="100%" stopColor={ACCENT_GLOW} stopOpacity={0} />
           </RadialGradient>
         </Defs>
-        <Rect fill="url(#sparkBloom)" height={height} opacity={0.1} width={width} x={0} y={0} />
-        {areaPath ? <Path d={areaPath} fill={ACCENT} opacity={0.08} /> : null}
+        <Rect fill="url(#sparkBloom)" height={height} opacity={0.16} width={width} x={0} y={0} />
+        {areaPath ? <Path d={areaPath} fill={ACCENT} opacity={0.14} /> : null}
         {path ? (
           <>
             {isStatic ? (
               <Path
                 d={path}
                 fill="none"
-                opacity={0.9}
+                opacity={1}
                 stroke={ACCENT_GLOW}
                 strokeDashoffset={0}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={8}
+                strokeWidth={10}
               />
             ) : (
               <AnimatedPath
                 animatedProps={animatedProps}
                 d={path}
                 fill="none"
-                opacity={0.9}
+                opacity={1}
                 stroke={ACCENT_GLOW}
                 strokeDasharray={pathLength}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={8}
+                strokeWidth={10}
               />
             )}
             {isStatic ? (
@@ -133,7 +133,7 @@ export function Sparkline({ points, width, height }: SparklineProps) {
                 strokeDashoffset={0}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
+                strokeWidth={3.2}
               />
             ) : (
               <AnimatedPath
@@ -144,7 +144,7 @@ export function Sparkline({ points, width, height }: SparklineProps) {
                 strokeDasharray={pathLength}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
+                strokeWidth={3.2}
               />
             )}
           </>
@@ -160,8 +160,8 @@ export function Sparkline({ points, width, height }: SparklineProps) {
               cy={point.y}
               fill={ACCENT}
               key={`${point.day}-${index}`}
-              opacity={0.72}
-              r={2}
+              opacity={0.92}
+              r={2.8}
             />
           );
         })}

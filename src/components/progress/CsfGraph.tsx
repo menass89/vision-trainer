@@ -17,7 +17,7 @@ import Svg, { Circle, Defs, Line, LinearGradient, Path, RadialGradient, Rect, St
 import { TrajectoryPointLight } from '@/components/progress/TrajectoryPointLight';
 import { AppText } from '@/components/ui';
 import { haptics } from '@/theme/haptics';
-import { ACCENT, ACCENT_CORE, ACCENT_GLOW, ACCENT_HOT, motion, radius, surface, text, verdict } from '@/theme/tokens';
+import { ACCENT, ACCENT_CORE, ACCENT_GLOW, ACCENT_HOT, motion, radius, surface, verdict } from '@/theme/tokens';
 
 export type CsfGraphProps = {
   points: { spatialFrequency: number; sensitivity: number }[];
@@ -228,7 +228,7 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
           {safeZone ? (
             <Rect
               fill={verdict.improving}
-              fillOpacity={0.05}
+              fillOpacity={0.09}
               height={safeZone.height}
               width={Math.max(width - CHART_INSET * 2, 0)}
               x={CHART_INSET}
@@ -241,8 +241,8 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
             return (
               <Line
                 key={offset}
-                opacity={0.72}
-                stroke={surface.hairline}
+                opacity={0.9}
+                stroke={surface.hairlineStrong}
                 strokeWidth={1}
                 x1={CHART_INSET}
                 x2={width - CHART_INSET}
@@ -254,10 +254,10 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
           {referenceLines.map((reference) => (
             <Line
               key={reference.label}
-              stroke={text.muted}
+              stroke={ACCENT_CORE}
               strokeDasharray="4 4"
-              strokeOpacity={0.6}
-              strokeWidth={1}
+              strokeOpacity={0.72}
+              strokeWidth={1.2}
               x1={CHART_INSET}
               x2={width - CHART_INSET}
               y1={reference.y}
@@ -265,8 +265,8 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
             />
           ))}
           <Line
-            stroke={surface.hairline}
-            strokeWidth={1}
+            stroke={surface.hairlineStrong}
+            strokeWidth={1.2}
             x1={CHART_INSET}
             x2={width - CHART_INSET}
             y1={baselineY}
@@ -287,7 +287,7 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
           <Defs>
             <LinearGradient gradientUnits="userSpaceOnUse" id="csfArea" x1={0} x2={0} y1={CHART_TOP} y2={baselineY}>
               <Stop offset="0" stopColor={ACCENT} stopOpacity={0.18} />
-              <Stop offset="1" stopColor={ACCENT} stopOpacity={0} />
+              <Stop offset="1" stopColor={ACCENT} stopOpacity={0.02} />
             </LinearGradient>
             <RadialGradient id="csfBloom" cx="50%" cy="50%" r="55%">
               <Stop offset="0%" stopColor={ACCENT_GLOW} stopOpacity={1} />
@@ -298,7 +298,7 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
           <Rect
             fill="url(#csfBloom)"
             height={baselineY - CHART_TOP}
-            opacity={0.1}
+            opacity={0.16}
             width={Math.max(width - CHART_INSET * 2, 0)}
             x={CHART_INSET}
             y={CHART_TOP}
@@ -310,24 +310,24 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
                 <Path
                   d={path}
                   fill="none"
-                  opacity={0.5}
+                  opacity={0.72}
                   stroke={ACCENT_GLOW}
                   strokeDashoffset={0}
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={9}
+                  strokeWidth={11}
                 />
               ) : (
                 <AnimatedPath
                   animatedProps={animatedProps}
                   d={path}
                   fill="none"
-                  opacity={0.5}
+                  opacity={0.72}
                   stroke={ACCENT_GLOW}
                   strokeDasharray={pathLength}
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={9}
+                  strokeWidth={11}
                 />
               )}
               {isStatic ? (
@@ -338,7 +338,7 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
                   strokeDashoffset={0}
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2.5}
+                  strokeWidth={3.4}
                 />
               ) : (
                 <AnimatedPath
@@ -349,7 +349,7 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
                   strokeDasharray={pathLength}
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2.5}
+                  strokeWidth={3.4}
                 />
               )}
             </>
@@ -367,15 +367,15 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
                   cx={point.x}
                   cy={point.y}
                   fill={ACCENT_GLOW}
-                  opacity={0.12 + b * 0.26}
-                  r={4 + b * 8}
+                  opacity={0.22 + b * 0.32}
+                  r={5 + b * 9}
                 />
                 <Circle
                   cx={point.x}
                   cy={point.y}
                   fill={coreColor}
                   opacity={0.55 + b * 0.45}
-                  r={1.7 + b * 1.5}
+                  r={2.3 + b * 1.8}
                 />
                 {b > 0.85 ? (
                   <Circle cx={point.x} cy={point.y} fill={ACCENT_HOT} opacity={0.95} r={1.1} />

@@ -2,8 +2,17 @@ import { StyleSheet, View } from 'react-native';
 import Svg, { Circle, Line, Path } from 'react-native-svg';
 
 import { CelestialGabor } from '@/components/home/CelestialGabor';
-import { AppText, FadeIn, PrimaryButton } from '@/components/ui';
-import { ACCENT, ACCENT_CORE, ACCENT_GLOW, ACCENT_MUTED, ACCENT_SOFT, space } from '@/theme/tokens';
+import { AppText, FadeIn } from '@/components/ui';
+import {
+  ACCENT,
+  ACCENT_CORE,
+  ACCENT_GLOW,
+  ACCENT_HOT,
+  ACCENT_MUTED,
+  ACCENT_SOFT,
+  radius,
+  space,
+} from '@/theme/tokens';
 
 const STAR_POINTS = [
   { x: 18, y: 104 },
@@ -21,17 +30,18 @@ const ARC_PATH = STAR_POINTS.map(({ x, y }, index) => `${index === 0 ? 'M' : 'L'
 );
 
 export type ProgressEmptySkyProps = {
-  onBegin: () => void;
   reduceMotion?: boolean;
 };
 
-export function ProgressEmptySky({ onBegin, reduceMotion }: ProgressEmptySkyProps) {
+export function ProgressEmptySky({ reduceMotion }: ProgressEmptySkyProps) {
   return (
     <View style={styles.root}>
       <FadeIn>
-        <AppText color="muted" uppercase variant="micro">
-          Progress
-        </AppText>
+        <View style={styles.screenLabelPlate}>
+          <AppText color="accent" style={styles.screenLabel} variant="caption">
+            Progress
+          </AppText>
+        </View>
       </FadeIn>
       <View style={styles.scene}>
         <FadeIn>
@@ -77,12 +87,6 @@ export function ProgressEmptySky({ onBegin, reduceMotion }: ProgressEmptySkyProp
         <AppText color="secondary" variant="body">
           Train once to light your first star.
         </AppText>
-        <PrimaryButton
-          accessibilityLabel="Begin first session"
-          haptic="select"
-          label="Begin first session"
-          onPress={onBegin}
-        />
       </FadeIn>
     </View>
   );
@@ -93,7 +97,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   bottomBlock: {
-    gap: space.lg,
+    gap: space.md,
     paddingBottom: space.xl,
   },
   dormantBody: {
@@ -107,5 +111,22 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: space.md,
     justifyContent: 'center',
+  },
+  screenLabel: {
+    color: ACCENT_HOT,
+    fontWeight: '800',
+    letterSpacing: 0,
+    textShadowColor: 'rgba(51, 210, 214, 0.56)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 10,
+  },
+  screenLabelPlate: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(8, 14, 16, 0.52)',
+    borderColor: 'rgba(207, 250, 251, 0.16)',
+    borderRadius: radius.pill,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: space.sm,
+    paddingVertical: space.xs,
   },
 });

@@ -2,7 +2,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { buildDeviceCalibration } from '@/core/deviceCalibration';
 import { uuid } from '@/core/uuid';
-import { contrastFromLog10, QuestStaircase } from '@/psychophysics/quest';
+import { contrastFromLog10, QuestStaircase, type QuestParameters } from '@/psychophysics/quest';
 import {
   buildBlockThreshold,
   buildGuidedSessionLog,
@@ -53,11 +53,43 @@ type SessionState = {
   lastCorrect: boolean | null;
 };
 
-const TOTAL_BLOCKS = 2;
+type SessionBlock = {
+  spatialFrequencyCpd: number;
+  orientationDeg: Orientation;
+  label: string;
+  role: PlannedBlock['role'];
+};
+
 const TRIALS_PER_BLOCK = 10;
-const BLOCKS = [
+const GUIDED_BLOCKS: SessionBlock[] = [
   { spatialFrequencyCpd: 4, orientationDeg: 0 as Orientation, label: 'Warm-up · 4 cpd', role: 'warm-up' as const },
   { spatialFrequencyCpd: 6, orientationDeg: 90 as Orientation, label: 'Training · 6 cpd', role: 'training' as const },
+];
+const FIRST_SESSION_BLOCKS: SessionBlock[] = [
+  { spatialFrequencyCpd: 2, orientationDeg: 0 as Orientation, label: 'Calibration · 2 cpd', role: 'warm-up' as const },
+  { spatialFrequencyCpd: 4, orientationDeg: 90 as Orientation, label: 'Calibration · 4 cpd', role: 'assessment' as const },
+];
+const FIRST_SESSION_QUEST_PARAMS: QuestParameters[] = [
+  {
+    tGuess: -0.2,
+    tGuessSd: 0.22,
+    pThreshold: 0.79,
+    beta: 3.5,
+    delta: 0.03,
+    gamma: 0.5,
+    grain: 0.01,
+    range: 1.1,
+  },
+  {
+    tGuess: -0.42,
+    tGuessSd: 0.32,
+    pThreshold: 0.79,
+    beta: 3.5,
+    delta: 0.03,
+    gamma: 0.5,
+    grain: 0.01,
+    range: 1.5,
+  },
 ];
 const INITIAL_STATE: SessionState = {
   status: 'ready',
@@ -79,6 +111,10 @@ function mulberry32(seed: number) {
 
 const nextRandom = mulberry32(0x53455353);
 
+function blocksForNextSession(): SessionBlock[] {
+  return useAppStore.getState().sessions.length === 0 ? FIRST_SESSION_BLOCKS : GUIDED_BLOCKS;
+}
+
 // FUTURE(free-practice): Halide drag-as-dial lives in a separate practice mode, not the guided spine.
 export function useSessionController(): SessionController {
   const calibration = useMemo(() => buildDeviceCalibration(), []);
@@ -88,6 +124,7 @@ export function useSessionController(): SessionController {
   const sessionIdRef = useRef('');
   const startedAtRef = useRef('');
   const questsRef = useRef<QuestStaircase[]>([]);
+  const blocksRef = useRef<SessionBlock[]>(blocksForNextSession());
   const blockIdsRef = useRef<string[]>([]);
   const plannedBlocksRef = useRef<PlannedBlock[]>([]);
   const thresholdsRef = useRef<ThresholdEstimate[]>([]);
@@ -100,7 +137,7 @@ export function useSessionController(): SessionController {
 
   const buildTrial = useCallback((blockIndex: number): TrialPlan => {
     const quest = questsRef.current[blockIndex];
-    const block = BLOCKS[blockIndex];
+    const block = blocksRef.current[blockIndex] ?? blocksRef.current[0];
     const intensityLog10 = quest.nextIntensity();
     currentIntensityRef.current = intensityLog10;
     const targetInterval: TrialInterval = nextRandom() < 0.5 ? 1 : 2;
@@ -126,11 +163,17 @@ export function useSessionController(): SessionController {
   const begin = useCallback(() => {
     if (stateRef.current.status !== 'ready') return;
 
+    const blocks = blocksForNextSession();
+    const isFirstSession = blocks === FIRST_SESSION_BLOCKS;
+
     sessionIdRef.current = `session-${uuid()}`;
     startedAtRef.current = now().toISOString();
-    questsRef.current = BLOCKS.map(() => new QuestStaircase());
-    blockIdsRef.current = BLOCKS.map(() => `block-${uuid()}`);
-    plannedBlocksRef.current = BLOCKS.map((b, i) => ({
+    blocksRef.current = blocks;
+    questsRef.current = blocks.map((_, i) => (
+      isFirstSession ? new QuestStaircase(FIRST_SESSION_QUEST_PARAMS[i]) : new QuestStaircase()
+    ));
+    blockIdsRef.current = blocks.map(() => `block-${uuid()}`);
+    plannedBlocksRef.current = blocks.map((b, i) => ({
       id: blockIdsRef.current[i],
       label: b.label,
       paradigm: 'contrast-detection' as const,
@@ -162,7 +205,8 @@ export function useSessionController(): SessionController {
       const completedTrials = currentState.completedTrials + 1;
       const nextTrialIndex = currentState.trialIndex + 1;
       const finishedBlock = nextTrialIndex >= TRIALS_PER_BLOCK;
-      const finishedSession = finishedBlock && currentState.blockIndex + 1 >= TOTAL_BLOCKS;
+      const blocks = blocksRef.current;
+      const finishedSession = finishedBlock && currentState.blockIndex + 1 >= blocks.length;
 
       if (finishedBlock) {
         const bi = currentState.blockIndex;
@@ -170,8 +214,8 @@ export function useSessionController(): SessionController {
         thresholdsRef.current.push(buildBlockThreshold({
           sessionId: sessionIdRef.current,
           blockId: blockIdsRef.current[bi],
-          spatialFrequencyCpd: BLOCKS[bi].spatialFrequencyCpd,
-          orientationDeg: BLOCKS[bi].orientationDeg,
+          spatialFrequencyCpd: blocks[bi].spatialFrequencyCpd,
+          orientationDeg: blocks[bi].orientationDeg,
           estimate: quest.estimate(),
           trialCount: quest.trialCount(),
           lapseRate: quest.lapseRate(),
@@ -232,13 +276,13 @@ export function useSessionController(): SessionController {
     calibration,
     status: state.status,
     blockIndex: state.blockIndex,
-    totalBlocks: TOTAL_BLOCKS,
-    blockLabel: BLOCKS[state.blockIndex].label,
+    totalBlocks: blocksRef.current.length,
+    blockLabel: blocksRef.current[state.blockIndex]?.label ?? blocksRef.current[0].label,
     trialIndex: state.trialIndex,
     trialsPerBlock: TRIALS_PER_BLOCK,
     correctCount: state.correctCount,
     lastCorrect: state.lastCorrect,
-    progress: state.completedTrials / (TOTAL_BLOCKS * TRIALS_PER_BLOCK),
+    progress: state.completedTrials / (blocksRef.current.length * TRIALS_PER_BLOCK),
     currentTrial,
     respond,
     begin,
