@@ -197,10 +197,10 @@ export function AmbientGradient({
         </Animated.View>
       )}
       <Animated.View style={[styles.deepGlow, deepStyle]}>
-        <Bloom color={data.heroGlow} rx="90%" ry="44%" />
+        <Bloom color={data.heroGlow} rx="95%" ry="85%" />
       </Animated.View>
       <Animated.View style={[styles.bloom, bloomStyle]}>
-        <Bloom color={data.heroGlowStrong} rx="62%" ry="38%" />
+        <Bloom color={data.heroGlowStrong} rx="60%" ry="56%" />
       </Animated.View>
       <Grain opacity={0.03} />
     </View>
@@ -227,18 +227,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   deepGlow: {
-    bottom: '-8%',
-    left: -80,
     position: 'absolute',
+    top: '18%',
     right: -80,
-    top: '-8%',
+    left: -80,
+    height: '64%',
   },
   bloom: {
-    bottom: '-10%',
-    left: '-34%',
     position: 'absolute',
-    top: '-30%',
+    top: '-16%',
+    left: '-34%',
     width: '130%',
+    height: '72%',
   },
   star: {
     position: 'absolute',

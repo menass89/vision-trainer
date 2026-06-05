@@ -65,30 +65,31 @@ const GUIDED_BLOCKS: SessionBlock[] = [
   { spatialFrequencyCpd: 4, orientationDeg: 0 as Orientation, label: 'Warm-up · 4 cpd', role: 'warm-up' as const },
   { spatialFrequencyCpd: 6, orientationDeg: 90 as Orientation, label: 'Training · 6 cpd', role: 'training' as const },
 ];
+const MAX_VISIBLE_CONTRAST_LOG10 = Math.log10(0.9);
 const FIRST_SESSION_BLOCKS: SessionBlock[] = [
-  { spatialFrequencyCpd: 2, orientationDeg: 0 as Orientation, label: 'Calibration · 2 cpd', role: 'warm-up' as const },
-  { spatialFrequencyCpd: 4, orientationDeg: 90 as Orientation, label: 'Calibration · 4 cpd', role: 'assessment' as const },
+  { spatialFrequencyCpd: 1, orientationDeg: 0 as Orientation, label: 'Calibration · 1 cpd', role: 'warm-up' as const },
+  { spatialFrequencyCpd: 2, orientationDeg: 90 as Orientation, label: 'Calibration · 2 cpd', role: 'assessment' as const },
 ];
 const FIRST_SESSION_QUEST_PARAMS: QuestParameters[] = [
   {
-    tGuess: -0.2,
-    tGuessSd: 0.22,
+    tGuess: MAX_VISIBLE_CONTRAST_LOG10,
+    tGuessSd: 0.035,
     pThreshold: 0.79,
     beta: 3.5,
     delta: 0.03,
     gamma: 0.5,
     grain: 0.01,
-    range: 1.1,
+    range: 0.16,
   },
   {
-    tGuess: -0.42,
-    tGuessSd: 0.32,
+    tGuess: -0.12,
+    tGuessSd: 0.09,
     pThreshold: 0.79,
     beta: 3.5,
     delta: 0.03,
     gamma: 0.5,
     grain: 0.01,
-    range: 1.5,
+    range: 0.42,
   },
 ];
 const INITIAL_STATE: SessionState = {
