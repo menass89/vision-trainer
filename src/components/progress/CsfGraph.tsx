@@ -12,18 +12,18 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import Svg, { Circle, Defs, Line, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
+import Svg, { Circle, Defs, Line, LinearGradient, Path, Stop } from 'react-native-svg';
 
 import { TrajectoryPointLight } from '@/components/progress/TrajectoryPointLight';
 import { AppText } from '@/components/ui';
 import { haptics } from '@/theme/haptics';
-import { ACCENT, ACCENT_CORE, ACCENT_GLOW, ACCENT_HOT, motion, radius, surface, verdict } from '@/theme/tokens';
+import { ACCENT, ACCENT_CORE, ACCENT_GLOW, ACCENT_HOT, motion, radius, surface } from '@/theme/tokens';
 
 export type CsfGraphProps = {
   points: { spatialFrequency: number; sensitivity: number }[];
   width: number;
   height: number;
-  references?: { label: string; sensitivity: number }[];
+  references?: { label: string; points: { spatialFrequency: number; sensitivity: number }[] }[];
 };
 
 type ChartPoint = CsfGraphProps['points'][number] & {
@@ -41,6 +41,7 @@ const CHART_BOTTOM = 12;
 const CHART_INSET = 8;
 const SELECTED_DOT_SIZE = 12;
 const EMPTY_REFERENCES: NonNullable<CsfGraphProps['references']> = [];
+const REFERENCE_DOT_SIZE = 3;
 
 function clamp(value: number, minimum: number, maximum: number) {
   return Math.min(Math.max(value, minimum), maximum);
@@ -51,7 +52,8 @@ function createSensitivityScale(
   references: NonNullable<CsfGraphProps['references']>,
   height: number
 ) {
-  const sensitivities = [...points, ...references].map((point) =>
+  const referencePoints = references.flatMap((reference) => reference.points);
+  const sensitivities = [...points, ...referencePoints].map((point) =>
     Math.log10(Math.max(point.sensitivity, 1))
   );
   const sensitivityDomain = sensitivities.length === 0 ? [0] : sensitivities;
@@ -68,24 +70,40 @@ function createSensitivityScale(
   };
 }
 
-function createChartPoints(
+function createFrequencyScale(
   points: CsfGraphProps['points'],
-  width: number,
-  sensitivityToY: (sensitivity: number) => number
+  references: NonNullable<CsfGraphProps['references']>,
+  width: number
 ) {
-  const frequencies = points.map((point) => Math.log10(Math.max(point.spatialFrequency, 0.01)));
+  const referencePoints = references.flatMap((reference) => reference.points);
+  const frequencies = [...points, ...referencePoints].map((point) =>
+    Math.log10(Math.max(point.spatialFrequency, 0.01))
+  );
   const frequencyDomain = frequencies.length === 0 ? [0] : frequencies;
   const minimumFrequency = Math.min(...frequencyDomain);
   const maximumFrequency = Math.max(...frequencyDomain);
-  const frequencyRange = maximumFrequency - minimumFrequency || 1;
+  const frequencyRange = maximumFrequency - minimumFrequency;
   const drawableWidth = Math.max(width - CHART_INSET * 2, 0);
 
+  return (spatialFrequency: number) => {
+    if (frequencyRange === 0) return CHART_INSET + drawableWidth / 2;
+
+    return (
+      CHART_INSET +
+      ((Math.log10(Math.max(spatialFrequency, 0.01)) - minimumFrequency) / frequencyRange) *
+        drawableWidth
+    );
+  };
+}
+
+function createChartPoints(
+  points: CsfGraphProps['points'],
+  frequencyToX: (spatialFrequency: number) => number,
+  sensitivityToY: (sensitivity: number) => number
+) {
   return points.map((point) => ({
     ...point,
-    x:
-      CHART_INSET +
-      ((Math.log10(Math.max(point.spatialFrequency, 0.01)) - minimumFrequency) / frequencyRange) *
-        drawableWidth,
+    x: frequencyToX(point.spatialFrequency),
     y: sensitivityToY(point.sensitivity),
   }));
 }
@@ -135,9 +153,21 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
     () => createSensitivityScale(points, references, height),
     [height, points, references]
   );
+  const frequencyToX = useMemo(
+    () => createFrequencyScale(points, references, width),
+    [points, references, width]
+  );
   const chartPoints = useMemo(
-    () => createChartPoints(points, width, sensitivityToY),
-    [points, sensitivityToY, width]
+    () => createChartPoints(points, frequencyToX, sensitivityToY),
+    [frequencyToX, points, sensitivityToY]
+  );
+  const referenceCurves = useMemo(
+    () =>
+      references.map((reference) => ({
+        ...reference,
+        chartPoints: createChartPoints(reference.points, frequencyToX, sensitivityToY),
+      })),
+    [frequencyToX, references, sensitivityToY]
   );
   const path = createPath(chartPoints);
   const pathLength = getPathLength(chartPoints);
@@ -157,19 +187,6 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
     path && firstPoint && lastPoint
       ? `${path} L ${lastPoint.x} ${baselineY} L ${firstPoint.x} ${baselineY} Z`
       : '';
-  const referenceLines = references.map((reference) => ({
-    ...reference,
-    y: sensitivityToY(reference.sensitivity),
-  }));
-  const normReference = referenceLines.find((reference) => reference.label === 'Norm');
-  const targetReference = referenceLines.find((reference) => reference.label === 'Target');
-  const safeZone =
-    normReference && targetReference
-      ? {
-          height: Math.abs(normReference.y - targetReference.y),
-          y: Math.min(normReference.y, targetReference.y),
-        }
-      : null;
 
   useEffect(() => {
     if (isStatic) {
@@ -225,16 +242,6 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
     <GestureDetector gesture={gesture}>
       <View style={{ width, height }}>
         <Svg height={height} width={width}>
-          {safeZone ? (
-            <Rect
-              fill={verdict.improving}
-              fillOpacity={0.09}
-              height={safeZone.height}
-              width={Math.max(width - CHART_INSET * 2, 0)}
-              x={CHART_INSET}
-              y={safeZone.y}
-            />
-          ) : null}
           {[0.35, 0.68].map((offset) => {
             const y = CHART_TOP + (baselineY - CHART_TOP) * offset;
 
@@ -251,19 +258,37 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
               />
             );
           })}
-          {referenceLines.map((reference) => (
-            <Line
-              key={reference.label}
-              stroke={ACCENT_CORE}
-              strokeDasharray="4 4"
-              strokeOpacity={0.72}
-              strokeWidth={1.2}
-              x1={CHART_INSET}
-              x2={width - CHART_INSET}
-              y1={reference.y}
-              y2={reference.y}
-            />
-          ))}
+          {referenceCurves.map((reference) => {
+            const referencePath = createPath(reference.chartPoints);
+            const stroke = reference.label === 'Target' ? ACCENT_CORE : surface.hairlineStrong;
+
+            return (
+              <Fragment key={reference.label}>
+                {referencePath ? (
+                  <Path
+                    d={referencePath}
+                    fill="none"
+                    stroke={stroke}
+                    strokeDasharray="4 4"
+                    strokeOpacity={reference.label === 'Target' ? 0.74 : 0.88}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.2}
+                  />
+                ) : null}
+                {reference.chartPoints.map((point) => (
+                  <Circle
+                    cx={point.x}
+                    cy={point.y}
+                    fill={stroke}
+                    key={`${reference.label}-${point.spatialFrequency}`}
+                    opacity={0.74}
+                    r={REFERENCE_DOT_SIZE}
+                  />
+                ))}
+              </Fragment>
+            );
+          })}
           <Line
             stroke={surface.hairlineStrong}
             strokeWidth={1.2}
@@ -380,15 +405,21 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
             />
           ) : null}
         </Svg>
-        {referenceLines.map((reference) => (
-          <AppText
-            color="muted"
-            key={reference.label}
-            style={[styles.referenceLabel, { top: Math.max(0, reference.y - 14) }]}
-            variant="micro">
-            {reference.label}
-          </AppText>
-        ))}
+        {referenceCurves.map((reference) => {
+          const lastPoint = reference.chartPoints.at(-1);
+          if (!lastPoint) return null;
+          const labelOffset = reference.label === 'Target' ? -34 : -8;
+
+          return (
+            <AppText
+              color={reference.label === 'Target' ? 'accent' : 'muted'}
+              key={reference.label}
+              style={[styles.referenceLabel, { top: Math.max(0, lastPoint.y + labelOffset) }]}
+              variant="micro">
+              {reference.label}
+            </AppText>
+          );
+        })}
         {selectedPoint ? (
           <>
             <SelectedDot point={selectedPoint} />

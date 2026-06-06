@@ -6,9 +6,11 @@ import { todayIndex } from '@/utils/clock';
 
 import type { ProgressView, TodayView, Verdict } from './types';
 
+const TARGET_SENSITIVITY_MULTIPLIER = 1.15;
+
 function round(value: number, dp: number): number {
   const factor = 10 ** dp;
-  return Math.round(value * factor) / factor;
+  return Math.round((value + 1e-10) * factor) / factor;
 }
 
 function formatCpd(cpd: number): string {
@@ -83,10 +85,6 @@ export function deriveProgressView(
   thresholds: ThresholdEstimate[],
   _now: Date
 ): ProgressView {
-  const references = [
-    { label: 'Target', sensitivity: 200 },
-    { label: 'Norm', sensitivity: 120 },
-  ];
   if (thresholds.length === 0) {
     return {
       headlineAcuity: 0,
@@ -95,7 +93,7 @@ export function deriveProgressView(
       delta: 0,
       sparkline: [],
       csf: [],
-      csfReferences: references,
+      csfReferences: [],
       contributors: [],
     };
   }
@@ -138,7 +136,23 @@ export function deriveProgressView(
   const contributors = latest.map((point) => ({
     label: `${formatCpd(point.spatialFrequencyCpd)} cpd`,
     sensitivity: round(point.sensitivity, 1),
-    norm: round(1 / populationNormContrast(point.spatialFrequencyCpd, 'contrast-detection'), 1),
+    norm: round(1 / populationNormContrast(point.spatialFrequencyCpd, point.paradigm), 1),
+  }));
+  const referenceBasePoints = latest.map((point) => {
+    const norm = 1 / populationNormContrast(point.spatialFrequencyCpd, point.paradigm);
+
+    return {
+      spatialFrequency: point.spatialFrequencyCpd,
+      norm,
+    };
+  });
+  const normPoints = referenceBasePoints.map((point) => ({
+    spatialFrequency: point.spatialFrequency,
+    sensitivity: round(point.norm, 1),
+  }));
+  const targetPoints = referenceBasePoints.map((point) => ({
+    spatialFrequency: point.spatialFrequency,
+    sensitivity: round(point.norm * TARGET_SENSITIVITY_MULTIPLIER, 1),
   }));
 
   return {
@@ -148,7 +162,10 @@ export function deriveProgressView(
     delta,
     sparkline,
     csf,
-    csfReferences: references,
+    csfReferences: [
+      { label: 'Target', points: targetPoints },
+      { label: 'Norm', points: normPoints },
+    ],
     contributors,
   };
 }

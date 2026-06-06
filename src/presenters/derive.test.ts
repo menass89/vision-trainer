@@ -24,15 +24,16 @@ function threshold(
   id: string,
   sessionId: string,
   thresholdContrast: number,
-  createdAt: string
+  createdAt: string,
+  spatialFrequencyCpd = 4
 ): ThresholdEstimate {
   return {
     id,
     sessionId,
     blockId: `block-${id}`,
-    conditionKey: 'contrast-detection:4:90',
+    conditionKey: `contrast-detection:${spatialFrequencyCpd}:90`,
     paradigm: 'contrast-detection',
-    spatialFrequencyCpd: 4,
+    spatialFrequencyCpd,
     orientationDeg: 90,
     thresholdContrast,
     thresholdLog10: Math.log10(thresholdContrast),
@@ -63,10 +64,7 @@ describe('presenter derivation', () => {
       delta: 0,
       sparkline: [],
       csf: [],
-      csfReferences: [
-        { label: 'Target', sensitivity: 200 },
-        { label: 'Norm', sensitivity: 120 },
-      ],
+      csfReferences: [],
       contributors: [],
     });
   });
@@ -92,5 +90,33 @@ describe('presenter derivation', () => {
     expect(progressView.csf).toEqual([{ spatialFrequency: 4, sensitivity: 50 }]);
     expect(progressView.contributors[0]?.norm).toBeGreaterThan(0);
     expect(Number.isFinite(progressView.contributors[0]?.norm)).toBe(true);
+  });
+
+  it('derives norm and target graph references from measured spatial frequencies', () => {
+    const today = fixedNow.toISOString();
+    const sessions = [session('session-1', today)];
+    const thresholds = [
+      threshold('threshold-1', 'session-1', 0.02, today, 1.5),
+      threshold('threshold-2', 'session-1', 0.05, today, 12),
+    ];
+
+    const progressView = deriveProgressView(sessions, thresholds, fixedNow);
+
+    expect(progressView.csfReferences).toEqual([
+      {
+        label: 'Target',
+        points: [
+          { spatialFrequency: 1.5, sensitivity: 63.9 },
+          { spatialFrequency: 12, sensitivity: 28.8 },
+        ],
+      },
+      {
+        label: 'Norm',
+        points: [
+          { spatialFrequency: 1.5, sensitivity: 55.6 },
+          { spatialFrequency: 12, sensitivity: 25 },
+        ],
+      },
+    ]);
   });
 });

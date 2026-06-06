@@ -1,6 +1,7 @@
-import type { ThresholdEstimate } from '../types';
+import type { ParadigmId, ThresholdEstimate } from '../types';
 
 export type CsfPoint = {
+  paradigm: ParadigmId;
   spatialFrequencyCpd: number;
   sensitivity: number;
   thresholdContrast: number;
@@ -77,6 +78,7 @@ export function improvementPercent(thresholds: ThresholdEstimate[]): number {
 
 function toPoint(threshold: ThresholdEstimate): CsfPoint {
   return {
+    paradigm: threshold.paradigm,
     spatialFrequencyCpd: threshold.spatialFrequencyCpd,
     thresholdContrast: threshold.thresholdContrast,
     sensitivity: 1 / threshold.thresholdContrast,

@@ -20,6 +20,7 @@ export type TodayView = {
 
 export type SparkPoint = { day: string; value: number };
 export type CsfPoint = { spatialFrequency: number; sensitivity: number };
+export type CsfReferenceCurve = { label: string; points: CsfPoint[] };
 
 export type ProgressView = {
   /** Cash-App oversized numeral */
@@ -30,7 +31,7 @@ export type ProgressView = {
   delta: number;
   sparkline: SparkPoint[];
   csf: CsfPoint[];
-  csfReferences: { label: string; sensitivity: number }[];
+  csfReferences: CsfReferenceCurve[];
   contributors: { label: string; sensitivity: number; norm: number }[];
 };
 
