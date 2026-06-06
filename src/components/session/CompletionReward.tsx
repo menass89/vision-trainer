@@ -404,6 +404,9 @@ const styles = StyleSheet.create({
     top: 72,
     width: RING_SIZE,
   },
+  streakLabel: {
+    marginLeft: 6,
+  },
   streakNumber: {
     color: text.secondary,
     fontFamily: typeScale.title.fontFamily,
@@ -415,9 +418,6 @@ const styles = StyleSheet.create({
     minWidth: 58,
     padding: 0,
     textAlign: 'right',
-  },
-  streakLabel: {
-    marginLeft: 6,
   },
   streakRow: {
     alignItems: 'baseline',
