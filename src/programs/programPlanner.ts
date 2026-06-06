@@ -197,6 +197,9 @@ function selectDeficitCondition(
     if (!threshold) continue;
     const sourceNorm = populationNormContrast(threshold.spatialFrequencyCpd, threshold.paradigm);
     const targetNorm = populationNormContrast(condition.spatialFrequencyCpd, condition.paradigm);
+    if (!Number.isFinite(sourceNorm) || !Number.isFinite(targetNorm) || sourceNorm <= 0 || targetNorm <= 0) {
+      continue;
+    }
     const projectedThreshold = threshold.thresholdContrast * (targetNorm / sourceNorm);
     const score = projectedThreshold / targetNorm;
     if (score > worstScore) {
