@@ -27,7 +27,9 @@ export type SessionController = {
   status: SessionStatus;
   blockIndex: number;
   totalBlocks: number;
+  totalTrials: number;
   blockLabel: string;
+  nextBlockLabel: string | null;
   trialIndex: number;
   trialsPerBlock: number;
   correctCount: number;
@@ -224,17 +226,21 @@ export function useSessionController(): SessionController {
     });
   }, [buildTrial, updateState]);
 
+  const totalTrials = blocksRef.current.reduce((sum, block) => sum + block.trialsPerBlock, 0);
+
   return {
     calibration,
     status: state.status,
     blockIndex: state.blockIndex,
     totalBlocks: blocksRef.current.length,
+    totalTrials,
     blockLabel: blocksRef.current[state.blockIndex]?.label ?? blocksRef.current[0].label,
+    nextBlockLabel: blocksRef.current[state.blockIndex + 1]?.label ?? null,
     trialIndex: state.trialIndex,
     trialsPerBlock: blocksRef.current[state.blockIndex]?.trialsPerBlock ?? blocksRef.current[0].trialsPerBlock,
     correctCount: state.correctCount,
     lastCorrect: state.lastCorrect,
-    progress: state.completedTrials / blocksRef.current.reduce((sum, block) => sum + block.trialsPerBlock, 0),
+    progress: state.completedTrials / totalTrials,
     showBlockBreak: blocksRef.current[state.blockIndex]?.showBreak,
     currentTrial,
     respond,

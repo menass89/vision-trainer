@@ -473,7 +473,10 @@ export default function SessionScreen() {
           <FadeIn duration={motion.timing.entranceMs}>
             <GlassSurface radius={material.radius} style={styles.overlayCard}>
               <AppText color="muted" uppercase variant="micro">
-                Block complete
+                {controller.blockLabel} complete
+              </AppText>
+              <AppText color="muted" tabular uppercase variant="micro">
+                Block {controller.blockIndex + 1} of {controller.totalBlocks}
               </AppText>
               <View style={styles.blockScore}>
                 <Bloom color={ACCENT_GLOW} style={styles.blockBloom} />
@@ -483,7 +486,7 @@ export default function SessionScreen() {
               </View>
               <PressableScale onPress={() => void handleContinue()} style={styles.action}>
                 <AppText color="inverse" variant="caption">
-                  Continue
+                  {controller.nextBlockLabel ? `Next · ${controller.nextBlockLabel}` : 'Continue'}
                 </AppText>
               </PressableScale>
             </GlassSurface>
@@ -494,14 +497,14 @@ export default function SessionScreen() {
       {showCompletion ? (
         <CompletionReward
           accuracyTarget={Math.round(
-            (controller.correctCount / (controller.totalBlocks * controller.trialsPerBlock)) * 100
+            (controller.correctCount / controller.totalTrials) * 100
           )}
           actionLabel="View stats"
           correctCount={controller.correctCount}
           onDone={() => void handleCompletionDone()}
           reduceMotion={reduceMotion}
           subtitle="Your calibration is ready"
-          total={controller.totalBlocks * controller.trialsPerBlock}
+          total={controller.totalTrials}
         />
       ) : null}
 
