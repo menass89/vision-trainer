@@ -3,6 +3,8 @@ import { Platform } from 'react-native';
 
 import type { NotificationService } from './notifications';
 
+const DAILY_REMINDER_KIND = 'daily-reminder';
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowBanner: true,
@@ -11,6 +13,19 @@ Notifications.setNotificationHandler({
     shouldSetBadge: false,
   }),
 });
+
+async function cancelScheduledDailyReminders() {
+  const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+  const dailyReminders = scheduled.filter(
+    (notification) => notification.content.data?.kind === DAILY_REMINDER_KIND
+  );
+
+  await Promise.all(
+    dailyReminders.map((notification) =>
+      Notifications.cancelScheduledNotificationAsync(notification.identifier)
+    )
+  );
+}
 
 export const notificationService: NotificationService = {
   async requestRemindersPermission() {
@@ -21,7 +36,7 @@ export const notificationService: NotificationService = {
     return next.granted;
   },
 
-  async scheduleDailyReminder(hour, minute) {
+  async scheduleDailyReminder(hour: number, minute: number) {
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync('daily-reminder', {
         name: 'Daily reminder',
@@ -29,11 +44,12 @@ export const notificationService: NotificationService = {
       });
     }
 
-    await Notifications.cancelAllScheduledNotificationsAsync();
+    await cancelScheduledDailyReminders();
     await Notifications.scheduleNotificationAsync({
       content: {
         title: 'Time to train your vision',
         body: 'A few quiet minutes keeps your streak and your gains alive.',
+        data: { kind: DAILY_REMINDER_KIND },
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DAILY,
@@ -45,6 +61,6 @@ export const notificationService: NotificationService = {
   },
 
   async cancelDailyReminder() {
-    await Notifications.cancelAllScheduledNotificationsAsync();
+    await cancelScheduledDailyReminders();
   },
 };

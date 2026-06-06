@@ -113,8 +113,6 @@ void main() {
   outColor = vec4(color, 1.0);
 }`;
 
-const now = () => (globalThis.performance?.now?.() ?? Date.now());
-
 function compileShader(gl: ExpoWebGLRenderingContext, type: number, source: string): WebGLShader {
   const shader = gl.createShader(type);
   if (!shader) {
@@ -291,6 +289,7 @@ export async function presentStimulus(
 ): Promise<{ onset: number; offset: number }> {
   return new Promise((resolve) => {
     let frameId = 0;
+    let lastRafTs = 0;
     let onsetTs: number | null = null;
     let settled = false;
     const finalize = (offset: number) => {
@@ -303,13 +302,14 @@ export async function presentStimulus(
       renderer.clear(profile);
       resolve({ onset: onsetTs ?? offset, offset });
     };
-    const onAbort = () => finalize(now());
+    const onAbort = () => finalize(lastRafTs);
     if (signal?.aborted) {
-      finalize(now());
+      finalize(lastRafTs);
       return;
     }
     signal?.addEventListener('abort', onAbort, { once: true });
     frameId = requestAnimationFrame((onset) => {
+      lastRafTs = onset;
       onsetTs = onset;
       if (signal?.aborted) {
         finalize(onset);
@@ -326,6 +326,7 @@ export async function presentStimulus(
       renderer.render(stimulus, profile);
       const end = onset + durationMs;
       const tick = (now: number) => {
+        lastRafTs = now;
         if (signal?.aborted || now >= end) {
           finalize(now);
         } else {
