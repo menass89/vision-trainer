@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { QuestStaircase } from '@/psychophysics/quest';
 import type { SessionLog, ThresholdEstimate } from '@/types';
 
 import { buildGuidedSessionBlocks, questParamsForCondition } from './guidedProtocol';
@@ -104,5 +105,22 @@ describe('guided protocol planning', () => {
     );
 
     expect(Number.isFinite(params.tGuess)).toBe(true);
+  });
+
+  it('clamps extreme measured thresholds into the supported QUEST bounds', () => {
+    const params = questParamsForCondition(
+      {
+        paradigm: 'contrast-detection',
+        spatialFrequencyCpd: 12,
+        orientationDeg: 135,
+        trialsPerBlock: 40,
+        durationMs: 120,
+        gaborSizeDeg: 3,
+      },
+      [threshold('bad-baseline', 12, 10)]
+    );
+
+    expect(params.tGuess).toBeLessThanOrEqual(Math.log10(0.9));
+    expect(() => new QuestStaircase(params)).not.toThrow();
   });
 });

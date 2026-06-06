@@ -32,6 +32,8 @@ export type GuidedSessionPlanInput = {
 const POST_BASELINE_FALLBACK_GOAL: GoalType = 'sports-vision';
 const THRESHOLD_LOCKED_SD = 0.18;
 const THRESHOLD_LOCKED_RANGE = 0.9;
+const QUEST_MIN_LOG10 = -3;
+const QUEST_MAX_LOG10 = Math.log10(0.9);
 
 function firstSessionBlocks(): GuidedSessionBlock[] {
   const firstBlocks: Array<{
@@ -106,12 +108,12 @@ export function questParamsForCondition(
   thresholds: ThresholdEstimate[]
 ): QuestParameters {
   const source = bestThresholdForCondition(condition, thresholds);
-  const tGuess = source
+  const rawTGuess = source
     ? projectThresholdToCondition(source, condition)
     : Math.log10(populationNormContrast(condition.spatialFrequencyCpd, condition.paradigm));
 
   return {
-    tGuess,
+    tGuess: clampQuestIntensity(rawTGuess),
     tGuessSd: THRESHOLD_LOCKED_SD,
     pThreshold: 0.79,
     beta: 3.5,
@@ -168,6 +170,11 @@ function projectThresholdToCondition(
   }
 
   return source.thresholdLog10 + Math.log10(targetNorm / sourceNorm);
+}
+
+function clampQuestIntensity(value: number): number {
+  if (!Number.isFinite(value)) return QUEST_MAX_LOG10;
+  return Math.max(QUEST_MIN_LOG10, Math.min(QUEST_MAX_LOG10, value));
 }
 
 function createPlannedBlock(
