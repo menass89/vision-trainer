@@ -40,7 +40,7 @@ export function StepReveal({
       delay,
       withTiming(1, { duration, easing: Easing.out(Easing.cubic) }),
     );
-  }, [delay, duration, progress, reduceMotion]);
+  }, [delay, duration, reduceMotion]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: progress.value,
