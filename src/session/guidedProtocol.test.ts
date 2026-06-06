@@ -72,7 +72,7 @@ describe('guided protocol planning', () => {
     );
 
     expect(params.tGuess).toBeCloseTo(Math.log10(0.08), 3);
-    expect(params.tGuessSd).toBeLessThan(0.25);
+    expect(params.tGuessSd).toBeGreaterThanOrEqual(0.4);
   });
 
   it('projects the current eyesight curve to unmeasured spatial frequencies', () => {
@@ -122,5 +122,32 @@ describe('guided protocol planning', () => {
 
     expect(params.tGuess).toBeLessThanOrEqual(Math.log10(0.9));
     expect(() => new QuestStaircase(params)).not.toThrow();
+  });
+
+  it('pushes post-baseline sessions down quickly after repeated correct responses', () => {
+    const params = questParamsForCondition(
+      {
+        paradigm: 'contrast-detection',
+        spatialFrequencyCpd: 6,
+        orientationDeg: 90,
+        trialsPerBlock: 40,
+        durationMs: 120,
+        gaborSizeDeg: 3,
+      },
+      [threshold('too-easy-baseline', 6, 0.9)]
+    );
+    const staircase = new QuestStaircase(params);
+    const firstIntensity = staircase.nextIntensity();
+    const firstContrast = 10 ** firstIntensity;
+    staircase.record(firstIntensity, true);
+
+    for (let trial = 0; trial < 8; trial += 1) {
+      const intensity = staircase.nextIntensity();
+      staircase.record(intensity, true);
+    }
+
+    const harderContrast = 10 ** staircase.nextIntensity();
+
+    expect(harderContrast).toBeLessThan(firstContrast * 0.5);
   });
 });

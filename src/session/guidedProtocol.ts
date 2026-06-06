@@ -30,8 +30,8 @@ export type GuidedSessionPlanInput = {
 };
 
 const POST_BASELINE_FALLBACK_GOAL: GoalType = 'sports-vision';
-const THRESHOLD_LOCKED_SD = 0.18;
-const THRESHOLD_LOCKED_RANGE = 0.9;
+const THRESHOLD_LOCKED_SD = 0.45;
+const THRESHOLD_LOCKED_RANGE = 1.6;
 const QUEST_MIN_LOG10 = -3;
 const QUEST_MAX_LOG10 = Math.log10(0.9);
 

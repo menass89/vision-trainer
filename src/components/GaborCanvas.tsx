@@ -58,7 +58,7 @@ function useStripeStops(stimulus: GaborStimulus | null) {
 
     const cycles = Math.max(2.5, Math.min(10, stimulus.spatialFrequencyCpd * 1.45));
     const contrast = Math.max(0, Math.min(stimulus.contrast, 1));
-    const opacity = 0.14 + contrast * 0.86;
+    const opacity = contrast;
 
     return Array.from({ length: STOP_COUNT + 1 }, (_, index) => {
       const t = index / STOP_COUNT;

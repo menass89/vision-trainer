@@ -21,7 +21,7 @@ describe('first session calibration QUEST parameters', () => {
     const recoveredContrast = contrastFromLog10(staircase.nextIntensity());
 
     expect(firstContrast).toBeGreaterThanOrEqual(0.6);
-    expect(harderContrast).toBeLessThan(0.45);
+    expect(harderContrast).toBeLessThan(firstContrast * 0.65);
     expect(recoveredContrast).toBeGreaterThan(harderContrast);
   });
 });
