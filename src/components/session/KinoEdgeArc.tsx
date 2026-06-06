@@ -8,6 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Rect } from 'react-native-svg';
 
+import { easings } from '@/theme/motion';
 import { ACCENT, ACCENT_GLOW } from '@/theme/tokens';
 
 export type KinoEdgeArcProps = {
@@ -32,7 +33,10 @@ export function KinoEdgeArc({ progress }: KinoEdgeArcProps) {
   useEffect(() => {
     const boundedProgress = Math.min(Math.max(progress, 0), 1);
 
-    strokeDashoffset.value = withTiming(perimeter * (1 - boundedProgress), { duration: 500 });
+    strokeDashoffset.value = withTiming(perimeter * (1 - boundedProgress), {
+      duration: 500,
+      easing: easings.out,
+    });
 
     return () => cancelAnimation(strokeDashoffset);
   }, [perimeter, progress, strokeDashoffset]);
