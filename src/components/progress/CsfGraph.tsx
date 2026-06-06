@@ -408,13 +408,15 @@ export function CsfGraph({ points, width, height, references = EMPTY_REFERENCES 
         {referenceCurves.map((reference) => {
           const lastPoint = reference.chartPoints.at(-1);
           if (!lastPoint) return null;
-          const labelOffset = reference.label === 'Target' ? -34 : -8;
+          const isTarget = reference.label === 'Target';
+          const labelOffset = isTarget ? -34 : -20;
+          const horizontalStyle = isTarget ? styles.referenceLabelRight : styles.referenceLabelLeft;
 
           return (
             <AppText
-              color={reference.label === 'Target' ? 'accent' : 'muted'}
+              color={isTarget ? 'accent' : 'muted'}
               key={reference.label}
-              style={[styles.referenceLabel, { top: Math.max(0, lastPoint.y + labelOffset) }]}
+              style={[styles.referenceLabel, horizontalStyle, { top: Math.max(0, lastPoint.y + labelOffset) }]}
               variant="micro">
               {reference.label}
             </AppText>
@@ -448,6 +450,11 @@ const styles = StyleSheet.create({
   },
   referenceLabel: {
     position: 'absolute',
+  },
+  referenceLabelLeft: {
+    left: CHART_INSET,
+  },
+  referenceLabelRight: {
     right: CHART_INSET,
     textAlign: 'right',
   },
