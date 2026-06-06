@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { type Href, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
@@ -10,7 +10,6 @@ import Animated, {
   useReducedMotion,
   useSharedValue,
   withDelay,
-  withSequence,
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
@@ -73,6 +72,7 @@ export default function SessionScreen() {
   const continueRunningRef = useRef(false);
   const choiceResolverRef = useRef<ChoiceResolver | null>(null);
   const blockStartCorrectCountRef = useRef(0);
+  const initialSessionCountRef = useRef(useAppStore.getState().sessions.length);
   const [uiPhase, setUiPhase] = useState<UiPhase>('ready');
   const [burst, setBurst] = useState(0);
   const [bigBurst, setBigBurst] = useState(false);
@@ -233,14 +233,9 @@ export default function SessionScreen() {
     if (!(await isStillMounted(450))) return;
 
     trialRunningRef.current = false;
-    fieldScale.value = withSequence(
-      withSpring(0.985, motion.spring.liquid),
-      withSpring(1, motion.spring.liquid)
-    );
-    fieldOpacity.value = withSequence(
-      withSpring(0.9, motion.spring.liquid),
-      withSpring(1, motion.spring.liquid)
-    );
+    fieldScale.value = 1;
+    fieldOpacity.value = 1;
+    fieldRotation.value = 0;
     setPhase('idle');
   }, [
     checkDraw,
@@ -249,6 +244,7 @@ export default function SessionScreen() {
     feedbackRingOpacity,
     feedbackRingScale,
     fieldOpacity,
+    fieldRotation,
     fieldScale,
     isStillMounted,
     presentInterval,
@@ -299,6 +295,26 @@ export default function SessionScreen() {
     showBlockSummary,
   ]);
 
+  const handleAutoAdvance = useCallback(async () => {
+    if (continueRunningRef.current || !isMountedRef.current) return;
+
+    continueRunningRef.current = true;
+    try {
+      blockStartCorrectCountRef.current = controller.correctCount;
+      controller.advanceBlock();
+      fieldScale.value = 1;
+      fieldOpacity.value = 1;
+      fieldRotation.value = 0;
+
+      if (!(await isStillMounted(80))) return;
+
+      foldRunningRef.current = false;
+      setPhase('idle');
+    } finally {
+      continueRunningRef.current = false;
+    }
+  }, [controller, fieldOpacity, fieldRotation, fieldScale, isStillMounted, setPhase]);
+
   const handleBegin = useCallback(() => {
     if (!canvasReady) return;
 
@@ -311,6 +327,18 @@ export default function SessionScreen() {
     router.back();
   }, [router]);
 
+  const handleCompletionDone = useCallback(async () => {
+    canvasRef.current?.clear();
+
+    const targetCount = initialSessionCountRef.current + 1;
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      if (useAppStore.getState().sessions.length >= targetCount) break;
+      await delay(80);
+    }
+
+    router.replace('/(tabs)/progress' as Href);
+  }, [router]);
+
   useEffect(() => {
     if (controller.status === 'running' && uiPhase === 'idle' && !trialRunningRef.current) {
       void runTrial();
@@ -319,14 +347,26 @@ export default function SessionScreen() {
       uiPhase === 'idle' &&
       !foldRunningRef.current
     ) {
-      void startBlockFold();
+      if (controller.showBlockBreak) {
+        void startBlockFold();
+      } else {
+        void handleAutoAdvance();
+      }
     } else if (controller.status === 'complete' && uiPhase === 'idle' && !showCompletion) {
       setShowCompletion(true);
       setBigBurst(true);
       setBurst((current) => current + 1);
       haptics.rewardChord();
     }
-  }, [controller.status, runTrial, showCompletion, startBlockFold, uiPhase]);
+  }, [
+    controller.showBlockBreak,
+    controller.status,
+    handleAutoAdvance,
+    runTrial,
+    showCompletion,
+    startBlockFold,
+    uiPhase,
+  ]);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -456,9 +496,11 @@ export default function SessionScreen() {
           accuracyTarget={Math.round(
             (controller.correctCount / (controller.totalBlocks * controller.trialsPerBlock)) * 100
           )}
+          actionLabel="View stats"
           correctCount={controller.correctCount}
-          onDone={handleClose}
+          onDone={() => void handleCompletionDone()}
           reduceMotion={reduceMotion}
+          subtitle="Your calibration is ready"
           total={controller.totalBlocks * controller.trialsPerBlock}
         />
       ) : null}

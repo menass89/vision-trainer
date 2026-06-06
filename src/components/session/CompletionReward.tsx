@@ -33,10 +33,12 @@ import {
 
 export type CompletionRewardProps = {
   accuracyTarget: number;
+  actionLabel?: string;
   correctCount: number;
   total: number;
   onDone: () => void;
   reduceMotion?: boolean;
+  subtitle?: string;
 };
 
 type CountUpTextInputProps = ComponentProps<typeof TextInput> & {
@@ -54,10 +56,12 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
 export function CompletionReward({
   accuracyTarget,
+  actionLabel = 'Done',
   correctCount,
   total,
   onDone,
   reduceMotion = false,
+  subtitle = 'Come back tomorrow',
 }: CompletionRewardProps) {
   const today = useTodayData();
   const streakNow = today.data.streakDays;
@@ -292,7 +296,7 @@ export function CompletionReward({
       </Animated.View>
       <Animated.View pointerEvents="none" style={[styles.subtitleWrap, subtitleStyle]}>
         <AppText color="muted" variant="caption">
-          Come back tomorrow
+          {subtitle}
         </AppText>
       </Animated.View>
       <Animated.View style={ctaStyle}>
@@ -302,7 +306,7 @@ export function CompletionReward({
           onPress={onDone}
           style={styles.action}>
           <AppText color="inverse" variant="caption">
-            Done
+            {actionLabel}
           </AppText>
         </PressableScale>
       </Animated.View>

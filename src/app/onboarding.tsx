@@ -24,6 +24,7 @@ import { notificationService } from '@/services/notifications';
 import { useAppStore } from '@/store/useAppStore';
 import { haptics } from '@/theme/haptics';
 import { ACCENT, ACCENT_GLOW, motion, radius, space, surface, text, type } from '@/theme/tokens';
+import type { GoalType } from '@/types';
 
 const BASE_ORB = 180;
 const BRIGHTNESS_MAX = 1;
@@ -36,17 +37,28 @@ const REMINDER_MINUTE = 0;
 const STEPS = [
   { id: 'welcome', buttonLabel: 'Begin' },
   { id: 'science', buttonLabel: 'Continue' },
+  { id: 'vision', buttonLabel: 'Continue' },
   { id: 'accent', buttonLabel: 'Got it' },
   { id: 'reminders', buttonLabel: 'Enable reminders' },
   { id: 'calibration', buttonLabel: '' },
   { id: 'ready', buttonLabel: 'Start training' },
 ] as const;
 
+const GOAL_OPTIONS: Array<{ value: GoalType; label: string; detail: string }> = [
+  { value: 'myopia', label: 'Distance clarity', detail: 'Sharper contrast at farther targets.' },
+  { value: 'presbyopia', label: 'Near work', detail: 'Comfort for reading and close focus.' },
+  { value: 'sports-vision', label: 'Fast reactions', detail: 'Faster visual pickup and motion decisions.' },
+];
+
 export default function OnboardingScreen() {
   const router = useRouter();
   const reduceMotion = useReducedMotion();
   const [step, setStep] = useState(0);
   const currentStep = STEPS[step];
+  const [selectedGoal, setSelectedGoal] = useState<GoalType>(() => {
+    const storedGoal = useAppStore.getState().settings.visionGoal;
+    return storedGoal === 'unspecified' ? 'myopia' : storedGoal;
+  });
 
   const advance = () => {
     setStep((current) => Math.min(current + 1, STEPS.length - 1));
@@ -71,6 +83,11 @@ export default function OnboardingScreen() {
     advance();
   };
 
+  const handleGoalContinue = () => {
+    useAppStore.getState().updateSetting('visionGoal', selectedGoal);
+    advance();
+  };
+
   const handleStart = () => {
     // Persisted so the root layout never re-onboards a returning user on cold launch.
     useAppStore.getState().updateSetting('onboardingComplete', true);
@@ -80,7 +97,7 @@ export default function OnboardingScreen() {
   return (
     <Screen padded warm background={<AmbientGradient constellation reduceMotion={reduceMotion} />}>
       <View style={styles.screen}>
-        {step === 4 ? (
+        {currentStep.id === 'calibration' ? (
           <FadeIn key="calibration" duration={420} style={styles.page}>
             <CalibrationStep onComplete={handleCalibration} />
           </FadeIn>
@@ -90,24 +107,29 @@ export default function OnboardingScreen() {
               <PersistentOrb step={step} />
               <View key={currentStep.id} style={styles.copy}>
                 <StepCopy step={step} />
+                {currentStep.id === 'vision' ? (
+                  <GoalChoices selected={selectedGoal} onSelect={setSelectedGoal} />
+                ) : null}
               </View>
             </View>
             <FadeIn key={`actions-${currentStep.id}`} delay={240} duration={motion.timing.entranceMs}>
               <View style={styles.actions}>
                 <PrimaryButton
-                  haptic={step === 5 ? 'milestone' : 'selection'}
+                  haptic={currentStep.id === 'ready' ? 'milestone' : 'selection'}
                   label={currentStep.buttonLabel}
                   onPress={
-                    step === 3
+                    currentStep.id === 'vision'
+                      ? handleGoalContinue
+                      : currentStep.id === 'reminders'
                       ? () => {
                           void handleEnableReminders();
                         }
-                      : step === 5
+                      : currentStep.id === 'ready'
                         ? handleStart
                         : advance
                   }
                 />
-                {step === 3 ? (
+                {currentStep.id === 'reminders' ? (
                   <PressableScale onPress={advance} style={styles.secondaryChoice}>
                     <AppText color="muted" variant="caption">
                       Not now
@@ -211,6 +233,18 @@ function StepCopy({ step }: StepCopyProps) {
       {step === 2 ? (
         <>
           <StepReveal delay={0}>
+            <AppText variant="title">What should training optimise for?</AppText>
+          </StepReveal>
+          <StepReveal delay={120} duration={320}>
+            <AppText color="secondary">
+              The first calibration stays broad. Your goal shapes the training plan after that.
+            </AppText>
+          </StepReveal>
+        </>
+      ) : null}
+      {step === 3 ? (
+        <>
+          <StepReveal delay={0}>
             <AppText variant="title">
               This colour means <AppText color="accent" variant="title">action.</AppText>
             </AppText>
@@ -222,7 +256,7 @@ function StepCopy({ step }: StepCopyProps) {
           </StepReveal>
         </>
       ) : null}
-      {step === 3 ? (
+      {step === 4 ? (
         <>
           <StepReveal delay={0}>
             <AppText variant="title">A gentle cue keeps the practice close.</AppText>
@@ -234,7 +268,7 @@ function StepCopy({ step }: StepCopyProps) {
           </StepReveal>
         </>
       ) : null}
-      {step === 5 ? (
+      {step === 6 ? (
         <>
           <StepReveal delay={0}>
             <AppText variant="hero">You're set</AppText>
@@ -247,6 +281,39 @@ function StepCopy({ step }: StepCopyProps) {
         </>
       ) : null}
     </>
+  );
+}
+
+type GoalChoicesProps = {
+  selected: GoalType;
+  onSelect: (goal: GoalType) => void;
+};
+
+function GoalChoices({ selected, onSelect }: GoalChoicesProps) {
+  return (
+    <View style={styles.goalList}>
+      {GOAL_OPTIONS.map((option) => {
+        const isSelected = selected === option.value;
+
+        return (
+          <PressableScale
+            accessibilityRole="button"
+            key={option.value}
+            onPress={() => onSelect(option.value)}
+            style={[styles.goalChoice, isSelected && styles.goalChoiceSelected]}>
+            <View>
+              <AppText color="primary" variant="caption">
+                {option.label}
+              </AppText>
+              <AppText color="muted" variant="micro">
+                {option.detail}
+              </AppText>
+            </View>
+            <View style={[styles.goalDot, isSelected && styles.goalDotSelected]} />
+          </PressableScale>
+        );
+      })}
+    </View>
   );
 }
 
@@ -535,6 +602,39 @@ const styles = StyleSheet.create({
   footer: {
     gap: space.sm,
     paddingTop: space.sm,
+  },
+  goalChoice: {
+    alignItems: 'center',
+    backgroundColor: surface.raised,
+    borderColor: surface.hairline,
+    borderRadius: radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    flexDirection: 'row',
+    gap: space.md,
+    justifyContent: 'space-between',
+    paddingHorizontal: space.md,
+    paddingVertical: space.sm,
+  },
+  goalChoiceSelected: {
+    backgroundColor: 'rgba(51, 210, 214, 0.12)',
+    borderColor: ACCENT_GLOW,
+  },
+  goalDot: {
+    backgroundColor: surface.hairline,
+    borderRadius: radius.pill,
+    height: 10,
+    width: 10,
+  },
+  goalDotSelected: {
+    backgroundColor: ACCENT,
+    shadowColor: ACCENT_GLOW,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.7,
+    shadowRadius: 8,
+  },
+  goalList: {
+    gap: space.sm,
+    width: '100%',
   },
   progressTrack: {
     backgroundColor: surface.hairlineStrong,

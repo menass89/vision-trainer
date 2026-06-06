@@ -62,6 +62,34 @@ export default function ProgressScreen() {
             </View>
             <VerdictBand delta={data.delta} verdict={data.verdict} />
           </FadeIn>
+          <FadeIn delay={90}>
+            <Card style={styles.card}>
+              <AppText color="secondary" variant="caption">
+                Vision profile
+              </AppText>
+              <AppText color="primary" variant="body">
+                Baseline captured. The graph can now compare future sessions against today's calibration.
+              </AppText>
+              <View style={styles.insightGrid}>
+                <View style={styles.insightRow}>
+                  <AppText color="muted" variant="micro">
+                    Bands measured
+                  </AppText>
+                  <AppText color="secondary" tabular variant="caption">
+                    {data.csf.length}
+                  </AppText>
+                </View>
+                <View style={styles.insightRow}>
+                  <AppText color="muted" variant="micro">
+                    Strongest band
+                  </AppText>
+                  <AppText color="secondary" tabular variant="caption">
+                    {strongestBandLabel(data)}
+                  </AppText>
+                </View>
+              </View>
+            </Card>
+          </FadeIn>
           <FadeIn delay={120}>
             <Card style={styles.card}>
               <AppText color="secondary" variant="caption">
@@ -150,6 +178,15 @@ function LoadingProgress() {
   );
 }
 
+function strongestBandLabel(data: NonNullable<ReturnType<typeof useProgressData>['data']>): string {
+  const strongest = data.contributors.reduce(
+    (best, candidate) => (candidate.sensitivity > best.sensitivity ? candidate : best),
+    data.contributors[0]
+  );
+
+  return strongest ? `${strongest.label} · ${strongest.sensitivity.toFixed(1)} sensitivity` : 'Captured';
+}
+
 const styles = StyleSheet.create({
   card: {
     gap: space.md,
@@ -181,6 +218,17 @@ const styles = StyleSheet.create({
     height: 160,
     justifyContent: 'center',
     width: 260,
+  },
+  insightGrid: {
+    gap: space.sm,
+  },
+  insightRow: {
+    alignItems: 'center',
+    borderTopColor: surface.hairline,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: space.sm,
   },
   loadingHero: {
     alignItems: 'center',

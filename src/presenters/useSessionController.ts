@@ -38,6 +38,7 @@ export type SessionController = {
   correctCount: number;
   lastCorrect: boolean | null;
   progress: number;
+  showBlockBreak: boolean;
   currentTrial: () => TrialPlan;
   respond: (choice: TrialInterval) => { correct: boolean };
   begin: () => void;
@@ -60,6 +61,7 @@ type SessionBlock = {
   gaborSizeDeg?: number;
   label: string;
   role: PlannedBlock['role'];
+  showBreak?: boolean;
 };
 
 const TRIALS_PER_BLOCK = 10;
@@ -78,6 +80,7 @@ const FIRST_SESSION_BLOCKS: SessionBlock[] = [
     gaborSizeDeg: 8,
     label: 'Calibration · 1 cpd',
     role: 'warm-up' as const,
+    showBreak: false,
   },
   {
     spatialFrequencyCpd: 2,
@@ -86,6 +89,7 @@ const FIRST_SESSION_BLOCKS: SessionBlock[] = [
     gaborSizeDeg: 6,
     label: 'Calibration · 2 cpd',
     role: 'assessment' as const,
+    showBreak: false,
   },
 ];
 const FIRST_SESSION_QUEST_PARAMS: QuestParameters[] = [
@@ -306,6 +310,7 @@ export function useSessionController(): SessionController {
     correctCount: state.correctCount,
     lastCorrect: state.lastCorrect,
     progress: state.completedTrials / (blocksRef.current.length * TRIALS_PER_BLOCK),
+    showBlockBreak: blocksRef.current[state.blockIndex]?.showBreak !== false,
     currentTrial,
     respond,
     begin,

@@ -45,7 +45,7 @@ export function ProgressEmptySky({ reduceMotion }: ProgressEmptySkyProps) {
       </FadeIn>
       <View style={styles.scene}>
         <FadeIn>
-          <View>
+          <View style={styles.orbScale}>
             <CelestialGabor
               contrast={0.32}
               progress={0.08}
@@ -107,6 +107,9 @@ const styles = StyleSheet.create({
   },
   root: {
     flex: 1,
+  },
+  orbScale: {
+    transform: [{ scale: 1.08 }],
   },
   scene: {
     alignItems: 'center',

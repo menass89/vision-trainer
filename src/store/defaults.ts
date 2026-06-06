@@ -9,4 +9,5 @@ export const DEFAULT_SETTINGS: SettingsState = {
   reduceMotion: false,
   remindersEnabled: false,
   onboardingComplete: false,
+  visionGoal: 'unspecified',
 };

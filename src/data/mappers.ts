@@ -76,6 +76,10 @@ function isMonocularWeakEye(value: unknown): value is SettingsState['monocularWe
   return value === 'left' || value === 'right' || value === 'off';
 }
 
+function isVisionGoal(value: unknown): value is SettingsState['visionGoal'] {
+  return value === 'myopia' || value === 'presbyopia' || value === 'sports-vision' || value === 'unspecified';
+}
+
 function clampBrightness(value: unknown): number {
   if (typeof value !== 'number' || !Number.isFinite(value)) {
     return DEFAULT_SETTINGS.displayBrightness;
@@ -139,6 +143,7 @@ export function payloadToSettings(payload: string): SettingsState {
       remindersEnabled:
         'remindersEnabled' in record ? Boolean(record.remindersEnabled) : DEFAULT_SETTINGS.remindersEnabled,
       soundEnabled: 'soundEnabled' in record ? Boolean(record.soundEnabled) : DEFAULT_SETTINGS.soundEnabled,
+      visionGoal: isVisionGoal(record.visionGoal) ? record.visionGoal : DEFAULT_SETTINGS.visionGoal,
     };
   } catch {
     return { ...DEFAULT_SETTINGS };

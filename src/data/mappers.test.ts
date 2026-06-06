@@ -145,6 +145,7 @@ describe('data mappers', () => {
       reduceMotion: '',
       remindersEnabled: null,
       soundEnabled: 'enabled',
+      visionGoal: 'sports-vision',
       unknown: true,
     }))).toEqual({
       ...DEFAULT_SETTINGS,
@@ -154,6 +155,7 @@ describe('data mappers', () => {
       onboardingComplete: true,
       remindersEnabled: false,
       soundEnabled: true,
+      visionGoal: 'sports-vision',
     });
     expect(payloadToSettings('{"displayBrightness":-1,"monocularWeakEye":"right"}')).toEqual({
       ...DEFAULT_SETTINGS,
@@ -173,6 +175,7 @@ describe('data mappers', () => {
       reduceMotion: true,
       remindersEnabled: true,
       onboardingComplete: true,
+      visionGoal: 'presbyopia',
     };
 
     expect(payloadToSettings(settingsToPayload(settings))).toEqual(settings);

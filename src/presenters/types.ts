@@ -1,3 +1,5 @@
+import type { GoalType } from '@/types';
+
 export type Verdict = 'improving' | 'holding' | 'regressing';
 
 export type TodayView = {
@@ -41,6 +43,7 @@ export type SettingsState = {
   reduceMotion: boolean;
   remindersEnabled: boolean;
   onboardingComplete: boolean;
+  visionGoal: GoalType | 'unspecified';
 };
 
 export type Loadable<T> = { data: T; isLoading: boolean };
