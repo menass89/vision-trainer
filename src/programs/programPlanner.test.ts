@@ -57,4 +57,10 @@ describe('program planner', () => {
     expect(trainingLabels.every((label) => /cpd/.test(label))).toBe(true);
     expect(trainingLabels.every((label) => !/^Training [A-Z]$/.test(label))).toBe(true);
   });
+
+  it('keeps the default daily session at 100 flashes', () => {
+    const blocks = planProgramSession('sports-vision', 2, []);
+
+    expect(blocks.reduce((sum, block) => sum + block.condition.trialsPerBlock, 0)).toBe(100);
+  });
 });

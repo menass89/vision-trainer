@@ -31,7 +31,8 @@ export function planProgramSession(
     createPlannedBlock('Warm-up', { ...warmUpCondition, trialsPerBlock: 20 }, 'warm-up')
   ];
 
-  const trainingBudget = config.trialsPerSession - 50;
+  const assessmentTrials = config.trialsPerSession >= 140 ? 30 : 0;
+  const trainingBudget = Math.max(0, config.trialsPerSession - 20 - assessmentTrials);
   const paradigmTrials = distributeTrials(phase.paradigmWeights, trainingBudget, config.trialsPerBlock);
 
   for (const [paradigmId, trials] of paradigmTrials) {
@@ -58,8 +59,10 @@ export function planProgramSession(
     }
   }
 
-  const assessCondition = selectDeficitCondition(thresholds, conditions);
-  blocks.push(createPlannedBlock('Assessment', { ...assessCondition, trialsPerBlock: 30 }, 'assessment'));
+  if (assessmentTrials > 0) {
+    const assessCondition = selectDeficitCondition(thresholds, conditions);
+    blocks.push(createPlannedBlock('Assessment', { ...assessCondition, trialsPerBlock: assessmentTrials }, 'assessment'));
+  }
 
   return blocks;
 }

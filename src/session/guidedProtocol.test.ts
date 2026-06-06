@@ -46,16 +46,16 @@ function threshold(
 }
 
 describe('guided protocol planning', () => {
-  it('uses a research-dose program after baseline instead of two short blocks', () => {
+  it('uses a sustainable daily program after baseline', () => {
     const blocks = buildGuidedSessionBlocks({
       sessionsCompleted: 1,
       thresholds: [threshold('baseline-1', 1.5, 0.03)],
       visionGoal: 'sports-vision',
     });
 
-    expect(blocks.reduce((sum, block) => sum + block.trialsPerBlock, 0)).toBe(250);
+    expect(blocks.reduce((sum, block) => sum + block.trialsPerBlock, 0)).toBe(100);
     expect(blocks[0]?.trialsPerBlock).toBe(20);
-    expect(blocks.at(-1)?.trialsPerBlock).toBe(30);
+    expect(blocks.filter((block) => block.role === 'training')).toHaveLength(2);
   });
 
   it('initializes a matching condition at the measured threshold', () => {

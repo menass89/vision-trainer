@@ -29,7 +29,7 @@ const MYOPIA_CONFIG: ProgramConfig = {
   durationFloorMs: 80,
   durationStepMs: 20,
   gaborSizeDeg: 4,
-  trialsPerSession: 250,
+  trialsPerSession: 100,
   trialsPerBlock: 40,
   phases: [
     {
@@ -64,7 +64,7 @@ const PRESBYOPIA_CONFIG: ProgramConfig = {
   durationFloorMs: 100,
   durationStepMs: 20,
   gaborSizeDeg: 4,
-  trialsPerSession: 250,
+  trialsPerSession: 100,
   trialsPerBlock: 40,
   phases: [
     {
@@ -99,7 +99,7 @@ const SPORTS_CONFIG: ProgramConfig = {
   durationFloorMs: 40,
   durationStepMs: 20,
   gaborSizeDeg: 3,
-  trialsPerSession: 250,
+  trialsPerSession: 100,
   trialsPerBlock: 40,
   phases: [
     {
