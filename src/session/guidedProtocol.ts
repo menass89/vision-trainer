@@ -161,6 +161,11 @@ function projectThresholdToCondition(
 ): number {
   const sourceNorm = populationNormContrast(source.spatialFrequencyCpd, source.paradigm);
   const targetNorm = populationNormContrast(condition.spatialFrequencyCpd, condition.paradigm);
+  if (!Number.isFinite(sourceNorm) || !Number.isFinite(targetNorm) || sourceNorm <= 0 || targetNorm <= 0) {
+    throw new Error(
+      `Population norm contrast must be positive for ${source.paradigm}:${source.spatialFrequencyCpd} -> ${condition.paradigm}:${condition.spatialFrequencyCpd}`
+    );
+  }
 
   return source.thresholdLog10 + Math.log10(targetNorm / sourceNorm);
 }

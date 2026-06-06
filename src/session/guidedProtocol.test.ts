@@ -89,4 +89,20 @@ describe('guided protocol planning', () => {
 
     expect(params.tGuess).toBeCloseTo(Math.log10(0.04), 3);
   });
+
+  it('keeps the projected threshold finite for unsupported spatial frequencies', () => {
+    const params = questParamsForCondition(
+      {
+        paradigm: 'contrast-detection',
+        spatialFrequencyCpd: 99,
+        orientationDeg: 135,
+        trialsPerBlock: 40,
+        durationMs: 120,
+        gaborSizeDeg: 3,
+      },
+      [threshold('baseline-99', 99, 0.04)]
+    );
+
+    expect(Number.isFinite(params.tGuess)).toBe(true);
+  });
 });
