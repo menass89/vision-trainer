@@ -2,12 +2,17 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { buildDeviceCalibration } from '@/core/deviceCalibration';
 import { uuid } from '@/core/uuid';
-import { contrastFromLog10, QuestStaircase, type QuestParameters } from '@/psychophysics/quest';
+import { contrastFromLog10, QuestStaircase } from '@/psychophysics/quest';
 import {
   buildBlockThreshold,
   buildGuidedSessionLog,
   GUIDED_STIM_DURATION_MS,
 } from '@/session/sessionResult';
+import {
+  FIRST_SESSION_QUEST_PARAMS,
+  FIRST_VISIBLE_STIM_DURATION_MS,
+  SECOND_VISIBLE_STIM_DURATION_MS,
+} from '@/session/calibrationQuest';
 import { useAppStore } from '@/store/useAppStore';
 import type {
   CalibrationProfile,
@@ -65,13 +70,10 @@ type SessionBlock = {
 };
 
 const TRIALS_PER_BLOCK = 10;
-const FIRST_VISIBLE_STIM_DURATION_MS = 650;
-const SECOND_VISIBLE_STIM_DURATION_MS = 450;
 const GUIDED_BLOCKS: SessionBlock[] = [
   { spatialFrequencyCpd: 4, orientationDeg: 0 as Orientation, label: 'Warm-up · 4 cpd', role: 'warm-up' as const },
   { spatialFrequencyCpd: 6, orientationDeg: 90 as Orientation, label: 'Training · 6 cpd', role: 'training' as const },
 ];
-const MAX_VISIBLE_CONTRAST_LOG10 = Math.log10(0.9);
 const FIRST_SESSION_BLOCKS: SessionBlock[] = [
   {
     spatialFrequencyCpd: 1,
@@ -90,28 +92,6 @@ const FIRST_SESSION_BLOCKS: SessionBlock[] = [
     label: 'Calibration · 2 cpd',
     role: 'assessment' as const,
     showBreak: false,
-  },
-];
-const FIRST_SESSION_QUEST_PARAMS: QuestParameters[] = [
-  {
-    tGuess: MAX_VISIBLE_CONTRAST_LOG10,
-    tGuessSd: 0.035,
-    pThreshold: 0.79,
-    beta: 3.5,
-    delta: 0.03,
-    gamma: 0.5,
-    grain: 0.01,
-    range: 0.16,
-  },
-  {
-    tGuess: -0.12,
-    tGuessSd: 0.09,
-    pThreshold: 0.79,
-    beta: 3.5,
-    delta: 0.03,
-    gamma: 0.5,
-    grain: 0.01,
-    range: 0.42,
   },
 ];
 const INITIAL_STATE: SessionState = {
