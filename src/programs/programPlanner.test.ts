@@ -46,4 +46,15 @@ describe('program planner', () => {
 
     expect(blocks.find((block) => block.role === 'training')?.condition.spatialFrequencyCpd).toBe(1.5);
   });
+
+  it('uses user-facing training labels instead of internal letters', () => {
+    const blocks = planProgramSession('sports-vision', 2, []);
+    const trainingLabels = blocks
+      .filter((block) => block.role === 'training')
+      .map((block) => block.label);
+
+    expect(trainingLabels.length).toBeGreaterThan(0);
+    expect(trainingLabels.every((label) => /cpd/.test(label))).toBe(true);
+    expect(trainingLabels.every((label) => !/^Training [A-Z]$/.test(label))).toBe(true);
+  });
 });

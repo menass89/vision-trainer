@@ -34,7 +34,6 @@ export function planProgramSession(
   const trainingBudget = config.trialsPerSession - 50;
   const paradigmTrials = distributeTrials(phase.paradigmWeights, trainingBudget, config.trialsPerBlock);
 
-  let blockIndex = 0;
   for (const [paradigmId, trials] of paradigmTrials) {
     const paradigmConditions = conditions.filter((condition) => condition.paradigm === paradigmId);
     if (paradigmConditions.length === 0) {
@@ -50,13 +49,12 @@ export function planProgramSession(
       const condition = selectDeficitCondition(thresholds, availableConditions);
       blocks.push(
         createPlannedBlock(
-          `Training ${String.fromCharCode(65 + blockIndex)}`,
+          trainingLabel(condition),
           { ...condition, trialsPerBlock: config.trialsPerBlock },
           'training'
         )
       );
       availableConditions = availableConditions.filter((candidate) => candidate !== condition);
-      blockIndex += 1;
     }
   }
 
@@ -64,6 +62,21 @@ export function planProgramSession(
   blocks.push(createPlannedBlock('Assessment', { ...assessCondition, trialsPerBlock: 30 }, 'assessment'));
 
   return blocks;
+}
+
+function trainingLabel(condition: ContrastCondition): string {
+  const frequency = Number.isInteger(condition.spatialFrequencyCpd)
+    ? String(condition.spatialFrequencyCpd)
+    : condition.spatialFrequencyCpd.toFixed(1);
+  const paradigmLabel: Record<ParadigmId, string> = {
+    'backward-masking': 'mask timing',
+    'contrast-detection': 'contrast practice',
+    'lateral-masking': 'flanker practice',
+    'pedestal-discrimination': 'fine contrast',
+    'spatial-masking': 'crowding practice',
+  };
+
+  return `${frequency} cpd ${paradigmLabel[condition.paradigm]}`;
 }
 
 function buildConditionPool(
