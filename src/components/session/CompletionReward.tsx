@@ -271,7 +271,7 @@ export function CompletionReward({
               %
             </AppText>
           </View>
-          <AppText color="secondary" tabular variant="caption">
+          <AppText color="secondary" style={styles.correctLine} tabular variant="caption">
             {correctCount}/{total} correct
           </AppText>
           {showStreak ? (
@@ -319,16 +319,21 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     flexDirection: 'row',
     justifyContent: 'center',
-    marginVertical: space.md,
+    marginBottom: 0,
+    marginTop: space.xl,
+    width: 184,
   },
   accuracyNumber: {
-    ...typeScale.display,
     color: text.primary,
+    fontFamily: typeScale.display.fontFamily,
+    fontSize: 68,
     fontVariant: [...tabularFigures.fontVariant],
-    height: typeScale.display.lineHeight,
+    height: 74,
+    letterSpacing: -1.2,
+    lineHeight: 74,
     padding: 0,
     textAlign: 'right',
-    width: 156,
+    width: 106,
   },
   action: {
     alignItems: 'center',
@@ -367,9 +372,12 @@ const styles = StyleSheet.create({
   },
   card: {
     alignItems: 'center',
-    minWidth: 272,
+    minWidth: 292,
     paddingHorizontal: space.xl,
-    paddingVertical: space.lg,
+    paddingVertical: space.xl,
+  },
+  correctLine: {
+    marginTop: -2,
   },
   gaborLayer: {
     alignItems: 'center',
@@ -383,20 +391,27 @@ const styles = StyleSheet.create({
   },
   percent: {
     color: text.primary,
+    fontFamily: typeScale.title.fontFamily,
+    fontSize: 34,
+    lineHeight: 44,
+    paddingBottom: 6,
   },
   ring: {
     alignItems: 'center',
     height: RING_SIZE,
     justifyContent: 'center',
     position: 'absolute',
-    top: 45,
+    top: 72,
     width: RING_SIZE,
   },
   streakNumber: {
-    ...typeScale.display,
     color: text.secondary,
+    fontFamily: typeScale.title.fontFamily,
+    fontSize: 34,
     fontVariant: [...tabularFigures.fontVariant],
-    height: typeScale.display.lineHeight,
+    height: 40,
+    letterSpacing: 0,
+    lineHeight: 40,
     minWidth: 18,
     padding: 0,
     textAlign: 'right',
@@ -404,7 +419,7 @@ const styles = StyleSheet.create({
   streakRow: {
     alignItems: 'baseline',
     flexDirection: 'row',
-    marginTop: space.sm,
+    marginTop: space.md,
   },
   subtitleWrap: {
     alignItems: 'center',
