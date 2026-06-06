@@ -152,7 +152,7 @@ function selectDeficitCondition(
     }
   }
 
-  const latestThresholdFor = (condition: ContrastCondition): ThresholdEstimate | undefined => {
+  const exactThresholdFor = (condition: ContrastCondition): ThresholdEstimate | undefined => {
     const fullKey = conditionKey(
       condition.spatialFrequencyCpd,
       condition.orientationDeg,
@@ -172,8 +172,20 @@ function selectDeficitCondition(
       .filter((value): value is ThresholdEstimate => Boolean(value))
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
   };
+  const nearestThresholdFor = (condition: ContrastCondition): ThresholdEstimate | undefined => {
+    const exact = exactThresholdFor(condition);
+    if (exact) return exact;
 
-  const unseen = conditions.filter((condition) => latestThresholdFor(condition) === undefined);
+    return thresholds
+      .filter((threshold) => threshold.paradigm === condition.paradigm)
+      .sort((a, b) => {
+        const distanceA = Math.abs(a.spatialFrequencyCpd - condition.spatialFrequencyCpd);
+        const distanceB = Math.abs(b.spatialFrequencyCpd - condition.spatialFrequencyCpd);
+        return distanceA - distanceB || b.createdAt.localeCompare(a.createdAt);
+      })[0];
+  };
+
+  const unseen = conditions.filter((condition) => nearestThresholdFor(condition) === undefined);
   if (unseen.length > 0) {
     return unseen[Math.floor(Math.random() * unseen.length)];
   }
@@ -181,10 +193,12 @@ function selectDeficitCondition(
   let worst: ContrastCondition | null = null;
   let worstScore = -Infinity;
   for (const condition of conditions) {
-    const threshold = latestThresholdFor(condition);
+    const threshold = nearestThresholdFor(condition);
     if (!threshold) continue;
-    const expected = populationNormContrast(condition.spatialFrequencyCpd, condition.paradigm);
-    const score = threshold.thresholdContrast / expected;
+    const sourceNorm = populationNormContrast(threshold.spatialFrequencyCpd, threshold.paradigm);
+    const targetNorm = populationNormContrast(condition.spatialFrequencyCpd, condition.paradigm);
+    const projectedThreshold = threshold.thresholdContrast * (targetNorm / sourceNorm);
+    const score = projectedThreshold / targetNorm;
     if (score > worstScore) {
       worstScore = score;
       worst = condition;
