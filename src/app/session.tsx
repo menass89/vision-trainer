@@ -475,7 +475,7 @@ export default function SessionScreen() {
               <AppText color="muted" uppercase variant="micro">
                 {controller.blockLabel} complete
               </AppText>
-              <AppText color="muted" tabular uppercase variant="micro">
+              <AppText color="muted" style={styles.blockCounter} tabular uppercase variant="micro">
                 Block {controller.blockIndex + 1} of {controller.totalBlocks}
               </AppText>
               <View style={styles.blockScore}>
@@ -718,6 +718,9 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     top: -space.lg,
+  },
+  blockCounter: {
+    marginTop: -space.xs,
   },
   action: {
     alignItems: 'center',
