@@ -68,7 +68,7 @@ export default function ProgressScreen() {
                 Vision profile
               </AppText>
               <AppText color="primary" variant="body">
-                Baseline captured. The graph can now compare future sessions against today's calibration.
+                {visionProfileSummary(data)}
               </AppText>
               <View style={styles.insightGrid}>
                 <View style={styles.insightRow}>
@@ -179,12 +179,35 @@ function LoadingProgress() {
 }
 
 function strongestBandLabel(data: NonNullable<ReturnType<typeof useProgressData>['data']>): string {
+  if (data.contributors.length === 0) return 'Captured';
+
   const strongest = data.contributors.reduce(
     (best, candidate) => (candidate.sensitivity > best.sensitivity ? candidate : best),
     data.contributors[0]
   );
 
-  return strongest ? `${strongest.label} · ${strongest.sensitivity.toFixed(1)} sensitivity` : 'Captured';
+  return `${strongest.label} · ${strongest.sensitivity.toFixed(1)} sensitivity`;
+}
+
+function visionProfileSummary(data: NonNullable<ReturnType<typeof useProgressData>['data']>): string {
+  if (data.contributors.length === 0) {
+    return 'Baseline captured. Future sessions will turn this into a trend.';
+  }
+
+  const strongest = data.contributors.reduce(
+    (best, candidate) => (candidate.sensitivity > best.sensitivity ? candidate : best),
+    data.contributors[0]
+  );
+  const weakest = data.contributors.reduce(
+    (lowest, candidate) => (candidate.sensitivity < lowest.sensitivity ? candidate : lowest),
+    data.contributors[0]
+  );
+
+  if (strongest.label === weakest.label) {
+    return `Baseline captured at ${strongest.label}. Future sessions will show whether this band is improving.`;
+  }
+
+  return `Baseline captured across ${data.csf.length} bands. Your strongest read today is ${strongest.label}; ${weakest.label} is the band to watch next.`;
 }
 
 const styles = StyleSheet.create({

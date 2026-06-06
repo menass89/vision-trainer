@@ -4,16 +4,12 @@ import Svg, { Path, Rect } from 'react-native-svg';
 import { AppText } from '@/components/ui';
 import { radius, space, verdict as verdictColors } from '@/theme/tokens';
 
+import { formatDelta } from './verdictFormatting';
+
 export type VerdictBandProps = {
   verdict: 'improving' | 'holding' | 'regressing';
   delta: number;
 };
-
-function formatDelta(delta: number) {
-  const sign = delta < 0 ? '−' : delta > 0 ? '+' : '';
-
-  return `${sign}${Math.abs(delta).toFixed(2)}`;
-}
 
 export function VerdictBand({ verdict, delta }: VerdictBandProps) {
   const verdictColor = {
