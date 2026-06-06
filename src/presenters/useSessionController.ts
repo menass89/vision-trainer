@@ -3,22 +3,12 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { buildDeviceCalibration } from '@/core/deviceCalibration';
 import { uuid } from '@/core/uuid';
 import { contrastFromLog10, QuestStaircase } from '@/psychophysics/quest';
-import {
-  buildBlockThreshold,
-  buildGuidedSessionLog,
-  GUIDED_STIM_DURATION_MS,
-} from '@/session/sessionResult';
-import {
-  FIRST_SESSION_QUEST_PARAMS,
-  FIRST_VISIBLE_STIM_DURATION_MS,
-  SECOND_VISIBLE_STIM_DURATION_MS,
-} from '@/session/calibrationQuest';
+import { buildGuidedSessionBlocks, type GuidedSessionBlock } from '@/session/guidedProtocol';
+import { buildBlockThreshold, buildGuidedSessionLog, GUIDED_STIM_DURATION_MS } from '@/session/sessionResult';
 import { useAppStore } from '@/store/useAppStore';
 import type {
   CalibrationProfile,
   GaborStimulus,
-  Orientation,
-  PlannedBlock,
   ThresholdEstimate,
   TrialInterval,
 } from '@/types';
@@ -59,41 +49,6 @@ type SessionState = {
   lastCorrect: boolean | null;
 };
 
-type SessionBlock = {
-  spatialFrequencyCpd: number;
-  orientationDeg: Orientation;
-  durationMs?: number;
-  gaborSizeDeg?: number;
-  label: string;
-  role: PlannedBlock['role'];
-  showBreak?: boolean;
-};
-
-const TRIALS_PER_BLOCK = 10;
-const GUIDED_BLOCKS: SessionBlock[] = [
-  { spatialFrequencyCpd: 4, orientationDeg: 0 as Orientation, label: 'Warm-up · 4 cpd', role: 'warm-up' as const },
-  { spatialFrequencyCpd: 6, orientationDeg: 90 as Orientation, label: 'Training · 6 cpd', role: 'training' as const },
-];
-const FIRST_SESSION_BLOCKS: SessionBlock[] = [
-  {
-    spatialFrequencyCpd: 1,
-    orientationDeg: 0 as Orientation,
-    durationMs: FIRST_VISIBLE_STIM_DURATION_MS,
-    gaborSizeDeg: 8,
-    label: 'Calibration · 1 cpd',
-    role: 'warm-up' as const,
-    showBreak: false,
-  },
-  {
-    spatialFrequencyCpd: 2,
-    orientationDeg: 90 as Orientation,
-    durationMs: SECOND_VISIBLE_STIM_DURATION_MS,
-    gaborSizeDeg: 6,
-    label: 'Calibration · 2 cpd',
-    role: 'assessment' as const,
-    showBreak: false,
-  },
-];
 const INITIAL_STATE: SessionState = {
   status: 'ready',
   blockIndex: 0,
@@ -114,8 +69,14 @@ function mulberry32(seed: number) {
 
 const nextRandom = mulberry32(0x53455353);
 
-function blocksForNextSession(): SessionBlock[] {
-  return useAppStore.getState().sessions.length === 0 ? FIRST_SESSION_BLOCKS : GUIDED_BLOCKS;
+function blocksForNextSession(): GuidedSessionBlock[] {
+  const { sessions, settings, thresholds } = useAppStore.getState();
+
+  return buildGuidedSessionBlocks({
+    sessionsCompleted: sessions.length,
+    thresholds,
+    visionGoal: settings.visionGoal,
+  });
 }
 
 // FUTURE(free-practice): Halide drag-as-dial lives in a separate practice mode, not the guided spine.
@@ -127,9 +88,7 @@ export function useSessionController(): SessionController {
   const sessionIdRef = useRef('');
   const startedAtRef = useRef('');
   const questsRef = useRef<QuestStaircase[]>([]);
-  const blocksRef = useRef<SessionBlock[]>(blocksForNextSession());
-  const blockIdsRef = useRef<string[]>([]);
-  const plannedBlocksRef = useRef<PlannedBlock[]>([]);
+  const blocksRef = useRef<GuidedSessionBlock[]>(blocksForNextSession());
   const thresholdsRef = useRef<ThresholdEstimate[]>([]);
   const currentIntensityRef = useRef(0);
 
@@ -141,16 +100,17 @@ export function useSessionController(): SessionController {
   const buildTrial = useCallback((blockIndex: number): TrialPlan => {
     const quest = questsRef.current[blockIndex];
     const block = blocksRef.current[blockIndex] ?? blocksRef.current[0];
+    const condition = block.condition;
     const intensityLog10 = quest.nextIntensity();
     currentIntensityRef.current = intensityLog10;
     const targetInterval: TrialInterval = nextRandom() < 0.5 ? 1 : 2;
     const stimulus: GaborStimulus = {
-      spatialFrequencyCpd: block.spatialFrequencyCpd,
-      orientationDeg: block.orientationDeg,
+      spatialFrequencyCpd: condition.spatialFrequencyCpd,
+      orientationDeg: condition.orientationDeg,
       contrast: contrastFromLog10(intensityLog10),
       phaseRad: nextRandom() * Math.PI * 2,
-      durationMs: block.durationMs ?? GUIDED_STIM_DURATION_MS,
-      gaborSizeDeg: block.gaborSizeDeg,
+      durationMs: condition.durationMs ?? GUIDED_STIM_DURATION_MS,
+      gaborSizeDeg: condition.gaborSizeDeg,
       backgroundLuminanceCdM2: calibration.backgroundLuminanceCdM2,
     };
     return { intervals: targetInterval === 1 ? [stimulus, null] : [null, stimulus], targetInterval };
@@ -168,29 +128,11 @@ export function useSessionController(): SessionController {
     if (stateRef.current.status !== 'ready') return;
 
     const blocks = blocksForNextSession();
-    const isFirstSession = blocks === FIRST_SESSION_BLOCKS;
 
     sessionIdRef.current = `session-${uuid()}`;
     startedAtRef.current = now().toISOString();
     blocksRef.current = blocks;
-    questsRef.current = blocks.map((_, i) => (
-      isFirstSession ? new QuestStaircase(FIRST_SESSION_QUEST_PARAMS[i]) : new QuestStaircase()
-    ));
-    blockIdsRef.current = blocks.map(() => `block-${uuid()}`);
-    plannedBlocksRef.current = blocks.map((b, i) => ({
-      id: blockIdsRef.current[i],
-      label: b.label,
-      paradigm: 'contrast-detection' as const,
-      condition: {
-        paradigm: 'contrast-detection' as const,
-        spatialFrequencyCpd: b.spatialFrequencyCpd,
-        orientationDeg: b.orientationDeg,
-        trialsPerBlock: TRIALS_PER_BLOCK,
-        durationMs: b.durationMs ?? GUIDED_STIM_DURATION_MS,
-        gaborSizeDeg: b.gaborSizeDeg,
-      },
-      role: b.role,
-    }));
+    questsRef.current = blocks.map((block) => new QuestStaircase(block.questParams));
     thresholdsRef.current = [];
     trialRef.current = buildTrial(0);
     updateState({ ...INITIAL_STATE, status: 'running' });
@@ -209,21 +151,24 @@ export function useSessionController(): SessionController {
       questsRef.current[currentState.blockIndex].record(currentIntensityRef.current, correct);
       const completedTrials = currentState.completedTrials + 1;
       const nextTrialIndex = currentState.trialIndex + 1;
-      const finishedBlock = nextTrialIndex >= TRIALS_PER_BLOCK;
       const blocks = blocksRef.current;
+      const block = blocks[currentState.blockIndex];
+      const finishedBlock = nextTrialIndex >= block.trialsPerBlock;
       const finishedSession = finishedBlock && currentState.blockIndex + 1 >= blocks.length;
 
       if (finishedBlock) {
         const bi = currentState.blockIndex;
         const quest = questsRef.current[bi];
+        const condition = blocks[bi].condition;
         thresholdsRef.current.push(buildBlockThreshold({
           sessionId: sessionIdRef.current,
-          blockId: blockIdsRef.current[bi],
-          spatialFrequencyCpd: blocks[bi].spatialFrequencyCpd,
-          orientationDeg: blocks[bi].orientationDeg,
-          durationMs: blocks[bi].durationMs ?? GUIDED_STIM_DURATION_MS,
+          blockId: blocks[bi].id,
+          spatialFrequencyCpd: condition.spatialFrequencyCpd,
+          orientationDeg: condition.orientationDeg,
+          durationMs: condition.durationMs ?? GUIDED_STIM_DURATION_MS,
           estimate: quest.estimate(),
-          gaborSizeDeg: blocks[bi].gaborSizeDeg,
+          gaborSizeDeg: condition.gaborSizeDeg,
+          paradigm: condition.paradigm,
           trialCount: quest.trialCount(),
           lapseRate: quest.lapseRate(),
           createdAtIso: now().toISOString(),
@@ -236,7 +181,7 @@ export function useSessionController(): SessionController {
           startedAtIso: startedAtRef.current,
           completedAtIso: now().toISOString(),
           calibrationId: calibration.id,
-          plannedBlocks: plannedBlocksRef.current,
+          plannedBlocks: blocks.map((block) => block.plannedBlock),
           completedTrials,
         });
         void useAppStore
@@ -286,11 +231,11 @@ export function useSessionController(): SessionController {
     totalBlocks: blocksRef.current.length,
     blockLabel: blocksRef.current[state.blockIndex]?.label ?? blocksRef.current[0].label,
     trialIndex: state.trialIndex,
-    trialsPerBlock: TRIALS_PER_BLOCK,
+    trialsPerBlock: blocksRef.current[state.blockIndex]?.trialsPerBlock ?? blocksRef.current[0].trialsPerBlock,
     correctCount: state.correctCount,
     lastCorrect: state.lastCorrect,
-    progress: state.completedTrials / (blocksRef.current.length * TRIALS_PER_BLOCK),
-    showBlockBreak: blocksRef.current[state.blockIndex]?.showBreak !== false,
+    progress: state.completedTrials / blocksRef.current.reduce((sum, block) => sum + block.trialsPerBlock, 0),
+    showBlockBreak: blocksRef.current[state.blockIndex]?.showBreak,
     currentTrial,
     respond,
     begin,

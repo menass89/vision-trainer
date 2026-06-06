@@ -286,8 +286,7 @@ export function CompletionReward({
                 style={styles.streakNumber}
                 underlineColorAndroid="transparent"
               />
-              <AppText color="secondary" variant="caption">
-                {' '}
+              <AppText color="secondary" style={styles.streakLabel} variant="caption">
                 day streak
               </AppText>
             </Animated.View>
@@ -321,19 +320,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 0,
     marginTop: space.xl,
-    width: 184,
+    width: 220,
   },
   accuracyNumber: {
     color: text.primary,
     fontFamily: typeScale.display.fontFamily,
     fontSize: 68,
     fontVariant: [...tabularFigures.fontVariant],
-    height: 74,
-    letterSpacing: -1.2,
-    lineHeight: 74,
+    height: 82,
+    letterSpacing: 0,
+    lineHeight: 82,
     padding: 0,
     textAlign: 'right',
-    width: 106,
+    width: 144,
   },
   action: {
     alignItems: 'center',
@@ -392,8 +391,9 @@ const styles = StyleSheet.create({
   percent: {
     color: text.primary,
     fontFamily: typeScale.title.fontFamily,
-    fontSize: 34,
+    fontSize: 32,
     lineHeight: 44,
+    marginLeft: 8,
     paddingBottom: 6,
   },
   ring: {
@@ -412,9 +412,12 @@ const styles = StyleSheet.create({
     height: 40,
     letterSpacing: 0,
     lineHeight: 40,
-    minWidth: 18,
+    minWidth: 58,
     padding: 0,
     textAlign: 'right',
+  },
+  streakLabel: {
+    marginLeft: 6,
   },
   streakRow: {
     alignItems: 'baseline',
@@ -423,6 +426,6 @@ const styles = StyleSheet.create({
   },
   subtitleWrap: {
     alignItems: 'center',
-    marginTop: space.md,
+    marginTop: space.lg,
   },
 });

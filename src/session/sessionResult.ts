@@ -2,7 +2,7 @@ import { conditionKey } from '@/core/displayCalibration';
 import { uuid } from '@/core/uuid';
 import { contrastFromLog10 } from '@/psychophysics/quest';
 import type { QuestEstimate } from '@/psychophysics/quest';
-import type { Orientation, PlannedBlock, SessionLog, ThresholdEstimate } from '@/types';
+import type { Orientation, ParadigmId, PlannedBlock, SessionLog, ThresholdEstimate } from '@/types';
 
 export const GUIDED_STIM_DURATION_MS = 150;
 
@@ -11,6 +11,7 @@ export type BlockThresholdInput = {
   blockId: string;
   spatialFrequencyCpd: number;
   orientationDeg: Orientation;
+  paradigm?: ParadigmId;
   durationMs?: number;
   estimate: QuestEstimate;
   gaborSizeDeg?: number;
@@ -20,6 +21,8 @@ export type BlockThresholdInput = {
 };
 
 export function buildBlockThreshold(input: BlockThresholdInput): ThresholdEstimate {
+  const paradigm = input.paradigm ?? 'contrast-detection';
+
   return {
     id: `threshold-${uuid()}`,
     sessionId: input.sessionId,
@@ -27,11 +30,11 @@ export function buildBlockThreshold(input: BlockThresholdInput): ThresholdEstima
     conditionKey: conditionKey(
       input.spatialFrequencyCpd,
       input.orientationDeg,
-      'contrast-detection',
+      paradigm,
       input.durationMs ?? GUIDED_STIM_DURATION_MS,
       input.gaborSizeDeg
     ),
-    paradigm: 'contrast-detection',
+    paradigm,
     spatialFrequencyCpd: input.spatialFrequencyCpd,
     orientationDeg: input.orientationDeg,
     thresholdContrast: contrastFromLog10(input.estimate.thresholdLog10),
