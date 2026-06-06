@@ -261,11 +261,11 @@ export default function SessionScreen() {
 
     foldRunningRef.current = true;
     setPhase('block-fold');
-    fieldScale.value = withSpring(0.86, motion.spring.input);
-    fieldOpacity.value = withTiming(0.4, { duration: 450 });
-    fieldRotation.value = withSpring(3, motion.spring.input);
+    fieldScale.value = withSpring(1, motion.spring.input);
+    fieldOpacity.value = withTiming(0, { duration: 240 });
+    fieldRotation.value = withSpring(0, motion.spring.input);
 
-    if (!(await isStillMounted(450))) return;
+    if (!(await isStillMounted(240))) return;
 
     setBlockCorrectCount(controller.correctCount - blockStartCorrectCountRef.current);
     setShowBlockSummary(true);
