@@ -486,7 +486,7 @@ export default function SessionScreen() {
               </View>
               <PressableScale onPress={() => void handleContinue()} style={styles.action}>
                 <AppText color="inverse" variant="caption">
-                  {controller.nextBlockLabel ? `Next · ${controller.nextBlockLabel}` : 'Continue'}
+                  {controller.nextBlockLabel ? `Next: ${controller.nextBlockLabel}` : 'Continue'}
                 </AppText>
               </PressableScale>
             </GlassSurface>
@@ -697,21 +697,27 @@ const styles = StyleSheet.create({
     marginTop: space.xl,
   },
   score: {
-    marginTop: space.sm,
+    lineHeight: 78,
   },
   overlayCard: {
     alignItems: 'center',
-    padding: space.lg,
+    gap: space.sm,
+    minHeight: 268,
+    paddingHorizontal: space.xl,
+    paddingVertical: space.xl,
   },
   blockScore: {
     alignItems: 'center',
+    height: 92,
     justifyContent: 'center',
+    marginVertical: space.sm,
+    width: 180,
   },
   blockBloom: {
-    bottom: -space.md,
-    left: -space.xl,
-    right: -space.xl,
-    top: -space.md,
+    bottom: -space.lg,
+    left: 0,
+    right: 0,
+    top: -space.lg,
   },
   action: {
     alignItems: 'center',
@@ -720,7 +726,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     borderWidth: 1,
     justifyContent: 'center',
-    marginTop: space.lg,
+    marginTop: space.md,
     minWidth: 112,
     paddingHorizontal: space.lg,
     paddingVertical: space.md,
