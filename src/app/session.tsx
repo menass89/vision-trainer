@@ -720,7 +720,7 @@ const styles = StyleSheet.create({
     top: -space.lg,
   },
   blockCounter: {
-    marginTop: -space.xs,
+    marginTop: -space.md,
   },
   action: {
     alignItems: 'center',
