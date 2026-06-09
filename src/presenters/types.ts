@@ -35,6 +35,20 @@ export type ProgressView = {
   contributors: { label: string; sensitivity: number; norm: number }[];
 };
 
+export type PostSessionInsightStatus = 'provisional' | 'reliable' | 'needs-retest';
+
+export type PostSessionInsightView = {
+  status: PostSessionInsightStatus;
+  title: string;
+  confidenceLabel: string;
+  measuredBandsLabel: string;
+  summary: string;
+  detail: string;
+  deltaLabel: 'Improving' | 'Steady' | 'Dropped' | 'Uncertain';
+  deltaPercent: number | null;
+  sessionsUntilReliable: number;
+};
+
 export type SettingsState = {
   dichopticEnabled: boolean;
   displayBrightness: number;

@@ -20,10 +20,11 @@ import { GaborCanvas, type GaborCanvasHandle } from '@/components/GaborCanvas';
 import { AmbientGradient } from '@/components/home/AmbientGradient';
 import { CompletionReward } from '@/components/session/CompletionReward';
 import { KinoEdgeArc } from '@/components/session/KinoEdgeArc';
+import { PostSessionInsight } from '@/components/session/PostSessionInsight';
 import { ResponseTap } from '@/components/session/ResponseTap';
 import { RewardBurst } from '@/components/session/RewardBurst';
 import { AppText, Bloom, FadeIn, GlassSurface, PressableScale, PrimaryButton } from '@/components/ui';
-import { useSessionController } from '@/presenters';
+import { usePostSessionInsight, useSessionController } from '@/presenters';
 import { applyBrightness, restoreSystemBrightness } from '@/services/brightness';
 import { useAppStore } from '@/store/useAppStore';
 import { haptics } from '@/theme/haptics';
@@ -80,6 +81,9 @@ export default function SessionScreen() {
   const [canvasReady, setCanvasReady] = useState(false);
   const [showBlockSummary, setShowBlockSummary] = useState(false);
   const [showCompletion, setShowCompletion] = useState(false);
+  const [showInsight, setShowInsight] = useState(false);
+  const [insightSessionId, setInsightSessionId] = useState<string | null>(null);
+  const { data: postSessionInsight } = usePostSessionInsight(insightSessionId);
   const fieldScale = useSharedValue(1);
   const fieldOpacity = useSharedValue(1);
   const fieldRotation = useSharedValue(0);
@@ -336,6 +340,23 @@ export default function SessionScreen() {
       await delay(80);
     }
 
+    const completedSession = useAppStore
+      .getState()
+      .sessions.filter((session) => session.status === 'completed')
+      .at(-1);
+
+    setInsightSessionId(completedSession?.id ?? null);
+    setShowCompletion(false);
+    setShowInsight(true);
+  }, []);
+
+  const handleInsightDone = useCallback(() => {
+    canvasRef.current?.clear();
+    router.replace('/(tabs)' as Href);
+  }, [router]);
+
+  const handleInsightProgress = useCallback(() => {
+    canvasRef.current?.clear();
     router.replace('/(tabs)/progress' as Href);
   }, [router]);
 
@@ -499,12 +520,20 @@ export default function SessionScreen() {
           accuracyTarget={Math.round(
             (controller.correctCount / controller.totalTrials) * 100
           )}
-          actionLabel="View stats"
+          actionLabel="Continue"
           correctCount={controller.correctCount}
           onDone={() => void handleCompletionDone()}
           reduceMotion={reduceMotion}
-          subtitle="Your calibration is ready"
+          subtitle="Your session is ready to read"
           total={controller.totalTrials}
+        />
+      ) : null}
+
+      {showInsight && postSessionInsight ? (
+        <PostSessionInsight
+          insight={postSessionInsight}
+          onDone={handleInsightDone}
+          onViewProgress={handleInsightProgress}
         />
       ) : null}
 
