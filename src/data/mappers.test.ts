@@ -14,6 +14,9 @@ vi.mock('@/store/defaults', () => ({
     reduceMotion: false,
     remindersEnabled: false,
     onboardingComplete: false,
+    subscriptionStatus: 'free',
+    trialStartedAt: null,
+    visionGoal: 'unspecified',
   },
 }));
 
@@ -145,6 +148,8 @@ describe('data mappers', () => {
       reduceMotion: '',
       remindersEnabled: null,
       soundEnabled: 'enabled',
+      subscriptionStatus: 'trialing',
+      trialStartedAt: '2026-06-09T10:00:00.000Z',
       visionGoal: 'sports-vision',
       unknown: true,
     }))).toEqual({
@@ -155,6 +160,8 @@ describe('data mappers', () => {
       onboardingComplete: true,
       remindersEnabled: false,
       soundEnabled: true,
+      subscriptionStatus: 'trialing',
+      trialStartedAt: '2026-06-09T10:00:00.000Z',
       visionGoal: 'sports-vision',
     });
     expect(payloadToSettings('{"displayBrightness":-1,"monocularWeakEye":"right"}')).toEqual({
@@ -175,6 +182,8 @@ describe('data mappers', () => {
       reduceMotion: true,
       remindersEnabled: true,
       onboardingComplete: true,
+      subscriptionStatus: 'active',
+      trialStartedAt: '2026-06-09T10:00:00.000Z',
       visionGoal: 'presbyopia',
     };
 

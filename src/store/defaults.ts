@@ -9,5 +9,7 @@ export const DEFAULT_SETTINGS: SettingsState = {
   reduceMotion: false,
   remindersEnabled: false,
   onboardingComplete: false,
+  subscriptionStatus: 'free',
+  trialStartedAt: null,
   visionGoal: 'unspecified',
 };

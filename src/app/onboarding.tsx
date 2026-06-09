@@ -91,7 +91,7 @@ export default function OnboardingScreen() {
   const handleStart = () => {
     // Persisted so the root layout never re-onboards a returning user on cold launch.
     useAppStore.getState().updateSetting('onboardingComplete', true);
-    router.replace('/(tabs)' as Href);
+    router.replace('/paywall' as Href);
   };
 
   return (

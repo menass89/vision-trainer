@@ -62,6 +62,8 @@ export type SettingsState = {
   reduceMotion: boolean;
   remindersEnabled: boolean;
   onboardingComplete: boolean;
+  subscriptionStatus: 'free' | 'trialing' | 'active';
+  trialStartedAt: string | null;
   visionGoal: GoalType | 'unspecified';
 };
 

@@ -77,6 +77,8 @@ describe('memoryPersistence', () => {
       reduceMotion: false,
       remindersEnabled: false,
       onboardingComplete: false,
+      subscriptionStatus: 'free',
+      trialStartedAt: null,
       visionGoal: 'unspecified',
     };
     await memoryPersistence.saveSettings(settings);

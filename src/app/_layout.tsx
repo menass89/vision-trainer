@@ -33,8 +33,10 @@ export default function RootLayout() {
   // `needsRedirect` is computed during render so we can withhold the tree until the
   // redirect settles — otherwise the deep-linked screen paints for one frame first.
   const inOnboarding = segments[0] === 'onboarding';
+  const inPaywall = segments[0] === 'paywall';
   const needsRedirect =
-    ready && ((!onboardingComplete && !inOnboarding) || (onboardingComplete && inOnboarding));
+    ready &&
+    ((!onboardingComplete && !inOnboarding) || (onboardingComplete && inOnboarding && !inPaywall));
 
   useEffect(() => {
     if (!needsRedirect) return;
@@ -59,6 +61,7 @@ export default function RootLayout() {
             options={{ presentation: 'fullScreenModal', gestureEnabled: true, animation: 'none' }}
           />
           <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
+          <Stack.Screen name="paywall" options={{ animation: 'fade' }} />
           <Stack.Screen
             name="science"
             options={{ presentation: 'modal', animation: 'slide_from_bottom' }}

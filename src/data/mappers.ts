@@ -80,6 +80,14 @@ function isVisionGoal(value: unknown): value is SettingsState['visionGoal'] {
   return value === 'myopia' || value === 'presbyopia' || value === 'sports-vision' || value === 'unspecified';
 }
 
+function isSubscriptionStatus(value: unknown): value is SettingsState['subscriptionStatus'] {
+  return value === 'free' || value === 'trialing' || value === 'active';
+}
+
+function isIsoStringOrNull(value: unknown): value is string | null {
+  return value === null || typeof value === 'string';
+}
+
 function clampBrightness(value: unknown): number {
   if (typeof value !== 'number' || !Number.isFinite(value)) {
     return DEFAULT_SETTINGS.displayBrightness;
@@ -143,6 +151,12 @@ export function payloadToSettings(payload: string): SettingsState {
       remindersEnabled:
         'remindersEnabled' in record ? Boolean(record.remindersEnabled) : DEFAULT_SETTINGS.remindersEnabled,
       soundEnabled: 'soundEnabled' in record ? Boolean(record.soundEnabled) : DEFAULT_SETTINGS.soundEnabled,
+      subscriptionStatus: isSubscriptionStatus(record.subscriptionStatus)
+        ? record.subscriptionStatus
+        : DEFAULT_SETTINGS.subscriptionStatus,
+      trialStartedAt: isIsoStringOrNull(record.trialStartedAt)
+        ? record.trialStartedAt
+        : DEFAULT_SETTINGS.trialStartedAt,
       visionGoal: isVisionGoal(record.visionGoal) ? record.visionGoal : DEFAULT_SETTINGS.visionGoal,
     };
   } catch {
