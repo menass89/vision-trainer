@@ -21,6 +21,7 @@ export function PostSessionInsight({ insight, onDone, onViewProgress }: PostSess
     insight.deltaPercent === null
       ? insight.deltaLabel
       : `${insight.deltaLabel} ${Math.abs(insight.deltaPercent)}%`;
+  const primaryLabel = insight.status === 'needs-retest' ? 'Review reading' : 'View progress';
 
   return (
     <View style={styles.overlay}>
@@ -64,14 +65,22 @@ export function PostSessionInsight({ insight, onDone, onViewProgress }: PostSess
                 {delta}
               </AppText>
             </View>
+            <View style={styles.metric}>
+              <AppText color="muted" uppercase variant="micro">
+                Baseline
+              </AppText>
+              <AppText color="secondary" tabular variant="caption">
+                {insight.measurementConfidence.baselineStep}/{insight.measurementConfidence.baselineTarget}
+              </AppText>
+            </View>
           </View>
 
           <AppText color="muted" style={styles.detail} variant="caption">
-            {insight.detail}
+            {`${insight.measurementConfidence.detail} ${insight.detail}`}
           </AppText>
 
           <View style={styles.actions}>
-            <PrimaryButton label="View progress" onPress={onViewProgress} style={styles.primaryAction} />
+            <PrimaryButton label={primaryLabel} onPress={onViewProgress} style={styles.primaryAction} />
             <PressableScale accessibilityRole="button" onPress={onDone} style={styles.secondaryAction}>
               <AppText color="secondary" variant="caption">
                 Done

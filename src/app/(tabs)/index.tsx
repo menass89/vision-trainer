@@ -149,17 +149,22 @@ function TodayContent({ data, reduceMotion, router }: TodayContentProps) {
                 ? 'Set your\nbaseline'
                 : 'Ready when\nyou are'}
           </AppText>
-          {data.streakDays === 0 && !data.sessionDoneToday ? null : (
-            <AppText color="muted" variant="caption">
-              {`Next · ${data.nextTargetLabel}`}
+          <View style={styles.sessionMeta}>
+            {data.streakDays === 0 && !data.sessionDoneToday ? null : (
+              <AppText color="muted" variant="caption">
+                {`Next · ${data.nextTargetLabel}`}
+              </AppText>
+            )}
+            <AppText color={data.measurementConfidence.tier === 'needs-retest' ? 'accent' : 'muted'} variant="micro">
+              {data.measurementConfidence.label}
             </AppText>
-          )}
+          </View>
         </FadeIn>
         <FadeIn delay={80}>
           <PrimaryButton
-            accessibilityLabel={data.sessionDoneToday ? 'Train again' : 'Start session'}
+            accessibilityLabel={data.sessionDoneToday ? 'Optional practice' : 'Start session'}
             haptic="select"
-            label={data.sessionDoneToday ? 'Train again' : 'Start session'}
+            label={data.sessionDoneToday ? 'Optional practice' : 'Start session'}
             onPress={startSession}
           />
         </FadeIn>
@@ -228,6 +233,9 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: space.sm,
     paddingVertical: space.xs,
+  },
+  sessionMeta: {
+    gap: space.xs,
   },
   bottomBlock: {
     gap: space.lg,

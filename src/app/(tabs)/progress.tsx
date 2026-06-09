@@ -47,7 +47,7 @@ export default function ProgressScreen() {
           </FadeIn>
           <FadeIn delay={60} style={styles.hero}>
             <AppText color="muted" uppercase variant="micro">
-              Log contrast sensitivity
+              Contrast sensitivity estimate
             </AppText>
             <View
               accessibilityLabel={data.headlineAcuity.toFixed(2)}
@@ -61,6 +61,9 @@ export default function ProgressScreen() {
               />
             </View>
             <VerdictBand delta={data.delta} verdict={data.verdict} />
+            <AppText color={data.measurementConfidence.tier === 'needs-retest' ? 'accent' : 'muted'} variant="micro">
+              {data.measurementConfidence.label}
+            </AppText>
           </FadeIn>
           <FadeIn delay={90}>
             <Card style={styles.card}>
@@ -71,6 +74,14 @@ export default function ProgressScreen() {
                 {visionProfileSummary(data)}
               </AppText>
               <View style={styles.insightGrid}>
+                <View style={styles.insightRow}>
+                  <AppText color="muted" variant="micro">
+                    Reading confidence
+                  </AppText>
+                  <AppText color="secondary" tabular variant="caption">
+                    {data.measurementConfidence.label}
+                  </AppText>
+                </View>
                 <View style={styles.insightRow}>
                   <AppText color="muted" variant="micro">
                     Bands measured
@@ -120,7 +131,7 @@ export default function ProgressScreen() {
             <Card style={styles.card}>
               <View style={styles.cardHeading}>
                 <AppText color="secondary" variant="caption">
-                  Contrast sensitivity function
+                  Contrast sensitivity estimate
                 </AppText>
                 <AppText color="muted" variant="micro">
                   Drag to inspect
@@ -186,7 +197,7 @@ function strongestBandLabel(data: NonNullable<ReturnType<typeof useProgressData>
     data.contributors[0]
   );
 
-  return `${strongest.label} · ${strongest.sensitivity.toFixed(1)} sensitivity`;
+  return `${strongest.bandLabel} · ${strongest.label} · ${strongest.sensitivity.toFixed(1)}`;
 }
 
 function visionProfileSummary(data: NonNullable<ReturnType<typeof useProgressData>['data']>): string {
@@ -204,10 +215,10 @@ function visionProfileSummary(data: NonNullable<ReturnType<typeof useProgressDat
   );
 
   if (strongest.label === weakest.label) {
-    return `Baseline captured at ${strongest.label}. Future sessions will show whether this band is improving.`;
+    return `Baseline captured at ${strongest.bandLabel.toLowerCase()} (${strongest.label}). Future sessions will show whether this band is improving.`;
   }
 
-  return `Baseline captured across ${data.csf.length} bands. Your strongest read today is ${strongest.label}; ${weakest.label} is the band to watch next.`;
+  return `Baseline captured across ${data.csf.length} bands. Your strongest read today is ${strongest.bandLabel.toLowerCase()}; ${weakest.bandLabel.toLowerCase()} is the band to watch next.`;
 }
 
 const styles = StyleSheet.create({

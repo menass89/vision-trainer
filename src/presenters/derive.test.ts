@@ -57,7 +57,7 @@ describe('presenter derivation', () => {
       nextTargetLabel: 'First session · 4 min',
       verdict: 'holding',
     });
-    expect(deriveProgressView([], [], fixedNow)).toEqual({
+    expect(deriveProgressView([], [], fixedNow)).toMatchObject({
       headlineAcuity: 0,
       previousAcuity: 0,
       verdict: 'holding',
@@ -66,6 +66,10 @@ describe('presenter derivation', () => {
       csf: [],
       csfReferences: [],
       contributors: [],
+      measurementConfidence: {
+        tier: 'provisional',
+        baselineStep: 0,
+      },
     });
   });
 
@@ -129,6 +133,11 @@ describe('presenter derivation', () => {
       status: 'provisional',
       title: 'Baseline started',
       confidenceLabel: 'Provisional',
+      measurementConfidence: {
+        tier: 'provisional',
+        baselineStep: 1,
+        baselineTarget: 3,
+      },
       sessionsUntilReliable: 2,
     });
   });
@@ -152,6 +161,10 @@ describe('presenter derivation', () => {
       status: 'reliable',
       title: 'Session insight',
       confidenceLabel: 'Reliable',
+      measurementConfidence: {
+        tier: 'reliable',
+        canDriveTrend: true,
+      },
       measuredBandsLabel: '2 cpd',
       deltaLabel: 'Improving',
       deltaPercent: 50,
@@ -183,7 +196,66 @@ describe('presenter derivation', () => {
       status: 'needs-retest',
       title: 'Retest recommended',
       confidenceLabel: 'Needs retest',
+      measurementConfidence: {
+        tier: 'needs-retest',
+        canDriveTrend: false,
+      },
       deltaLabel: 'Uncertain',
     });
+  });
+
+  it('surfaces provisional confidence on today and progress before three clean sessions', () => {
+    const today = fixedNow.toISOString();
+    const sessions = [session('session-1', today)];
+    const thresholds = [threshold('threshold-1', 'session-1', 0.04, today, 1)];
+
+    expect(deriveTodayView(sessions, thresholds, fixedNow).measurementConfidence).toMatchObject({
+      tier: 'provisional',
+      label: 'Building baseline 1/3',
+      canDriveTrend: false,
+    });
+    expect(deriveProgressView(sessions, thresholds, fixedNow)).toMatchObject({
+      verdict: 'holding',
+      delta: 0,
+      measurementConfidence: {
+        tier: 'provisional',
+      },
+    });
+  });
+
+  it('does not let suspicious latest sessions drive headline progress', () => {
+    const day1 = new globalThis.Date(2026, 4, 29).toISOString();
+    const day2 = new globalThis.Date(2026, 4, 30).toISOString();
+    const day3 = fixedNow.toISOString();
+    const sessions = [
+      session('session-1', day1),
+      session('session-2', day2),
+      session('session-3', day3),
+    ];
+    const thresholds = [
+      threshold('threshold-1', 'session-1', 0.04, day1, 2),
+      threshold('threshold-2', 'session-2', 0.04, day2, 2),
+      {
+        ...threshold('threshold-3', 'session-3', 0.01, day3, 2),
+        lapseRate: 0.2,
+      },
+    ];
+
+    const progressView = deriveProgressView(sessions, thresholds, fixedNow);
+
+    expect(progressView).toMatchObject({
+      headlineAcuity: 1.4,
+      previousAcuity: 1.4,
+      verdict: 'holding',
+      delta: 0,
+      measurementConfidence: {
+        tier: 'needs-retest',
+        canDriveTrend: false,
+      },
+    });
+    expect(progressView.sparkline).toEqual([
+      { day: 'Fri', value: 1.4 },
+      { day: 'Sat', value: 1.4 },
+    ]);
   });
 });

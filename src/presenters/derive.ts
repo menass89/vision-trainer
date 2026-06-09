@@ -4,13 +4,15 @@ import type { SessionLog, ThresholdEstimate } from '@/types';
 import { computeStreak, localDayKeyFromIso, weekCompletion, weekdayShortFromIso } from '@/utils/clock';
 import { todayIndex } from '@/utils/clock';
 
+import {
+  deriveMeasurementConfidence,
+  humanBandLabel,
+  isThresholdSuspicious,
+  usableThresholds,
+} from './reliability';
 import type { PostSessionInsightView, ProgressView, TodayView, Verdict } from './types';
 
 const TARGET_SENSITIVITY_MULTIPLIER = 1.15;
-const RELIABLE_SESSION_COUNT = 3;
-const MAX_USABLE_LAPSE_RATE = 0.15;
-const MAX_USABLE_CI_RATIO = 8;
-const MIN_USABLE_TRIALS = 10;
 
 function round(value: number, dp: number): number {
   const factor = 10 ** dp;
@@ -44,16 +46,6 @@ function latestThreshold(thresholds: ThresholdEstimate[]): ThresholdEstimate | n
   }, null);
 }
 
-function completedSessionsWithThresholds(
-  sessions: SessionLog[],
-  thresholds: ThresholdEstimate[]
-): SessionLog[] {
-  const sessionIdsWithThresholds = new Set(thresholds.map((threshold) => threshold.sessionId));
-  return sessions.filter(
-    (session) => session.status === 'completed' && sessionIdsWithThresholds.has(session.id)
-  );
-}
-
 function measuredBandsLabel(thresholds: ThresholdEstimate[]): string {
   const bands = [...new Set(thresholds.map((threshold) => threshold.spatialFrequencyCpd))]
     .sort((a, b) => a - b)
@@ -65,14 +57,7 @@ function measuredBandsLabel(thresholds: ThresholdEstimate[]): string {
 }
 
 function hasSuspiciousQuality(thresholds: ThresholdEstimate[]): boolean {
-  return thresholds.some((threshold) => {
-    const ciRatio = threshold.ciLow > 0 ? threshold.ciHigh / threshold.ciLow : Number.POSITIVE_INFINITY;
-    return (
-      threshold.trialCount < MIN_USABLE_TRIALS ||
-      threshold.lapseRate > MAX_USABLE_LAPSE_RATE ||
-      ciRatio > MAX_USABLE_CI_RATIO
-    );
-  });
+  return thresholds.some(isThresholdSuspicious);
 }
 
 function previousMatchedThreshold(
@@ -118,8 +103,11 @@ export function derivePostSessionInsight(
   sessionId: string
 ): PostSessionInsightView {
   const sessionThresholds = thresholds.filter((threshold) => threshold.sessionId === sessionId);
-  const reliableSessionCount = completedSessionsWithThresholds(sessions, thresholds).length;
-  const sessionsUntilReliable = Math.max(0, RELIABLE_SESSION_COUNT - reliableSessionCount);
+  const measurementConfidence = deriveMeasurementConfidence(sessions, thresholds, sessionId);
+  const sessionsUntilReliable = Math.max(
+    0,
+    measurementConfidence.baselineTarget - measurementConfidence.baselineStep
+  );
   const bands = measuredBandsLabel(sessionThresholds);
 
   if (sessionThresholds.length === 0 || hasSuspiciousQuality(sessionThresholds)) {
@@ -133,10 +121,11 @@ export function derivePostSessionInsight(
       deltaLabel: 'Uncertain',
       deltaPercent: null,
       sessionsUntilReliable,
+      measurementConfidence,
     };
   }
 
-  if (reliableSessionCount < RELIABLE_SESSION_COUNT) {
+  if (measurementConfidence.tier === 'provisional') {
     return {
       status: 'provisional',
       title: 'Baseline started',
@@ -147,6 +136,7 @@ export function derivePostSessionInsight(
       deltaLabel: 'Uncertain',
       deltaPercent: null,
       sessionsUntilReliable,
+      measurementConfidence,
     };
   }
 
@@ -166,6 +156,7 @@ export function derivePostSessionInsight(
     deltaLabel: label,
     deltaPercent,
     sessionsUntilReliable: 0,
+    measurementConfidence,
   };
 }
 
@@ -174,6 +165,7 @@ export function deriveTodayView(
   thresholds: ThresholdEstimate[],
   now: Date
 ): TodayView {
+  const measurementConfidence = deriveMeasurementConfidence(sessions, thresholds);
   const dayKeys = completedSessionDayKeys(sessions);
   const todayKey = localDayKeyFromIso(now.toISOString());
   const streakDays = computeStreak(dayKeys, now);
@@ -192,10 +184,13 @@ export function deriveTodayView(
       weekDays,
       nextTargetLabel: 'First session · 4 min',
       verdict: 'holding',
+      measurementConfidence,
     };
   }
 
-  const peak = peakSensitivity(latest);
+  const usable = usableThresholds(thresholds);
+  const usableLatest = buildLatestCsf(usable);
+  const peak = peakSensitivity(usableLatest.length > 0 ? usableLatest : latest);
   const recent = latestThreshold(thresholds);
   return {
     contrastSensitivity: round(Math.log10(Math.max(peak, 1)), 2),
@@ -205,7 +200,8 @@ export function deriveTodayView(
     todayIndex: index,
     weekDays,
     nextTargetLabel: recent ? `${formatCpd(recent.spatialFrequencyCpd)} cpd · 4 min` : '6 cpd · 4 min',
-    verdict: verdictFromPercent(improvementPercent(thresholds)),
+    verdict: measurementConfidence.canDriveTrend ? verdictFromPercent(improvementPercent(usable)) : 'holding',
+    measurementConfidence,
   };
 }
 
@@ -214,6 +210,7 @@ export function deriveProgressView(
   thresholds: ThresholdEstimate[],
   _now: Date
 ): ProgressView {
+  const measurementConfidence = deriveMeasurementConfidence(sessions, thresholds);
   if (thresholds.length === 0) {
     return {
       headlineAcuity: 0,
@@ -224,23 +221,32 @@ export function deriveProgressView(
       csf: [],
       csfReferences: [],
       contributors: [],
+      measurementConfidence,
     };
   }
 
-  const latest = buildLatestCsf(thresholds);
+  const usable = usableThresholds(thresholds);
+  const sourceThresholds = usable.length > 0 ? usable : thresholds;
+  const latest = buildLatestCsf(sourceThresholds);
   const peak = peakSensitivity(latest);
   const headlineAcuity = round(Math.log10(Math.max(peak, 1)), 2);
 
-  const beforeAfter = buildBeforeAfterCsf(thresholds);
+  const beforeAfter = buildBeforeAfterCsf(sourceThresholds);
   const firstPoints = beforeAfter[0]?.points ?? [];
   const previousPeak = firstPoints.length > 0 ? peakSensitivity(firstPoints) : peak;
   const previousAcuity = round(Math.log10(Math.max(previousPeak, 1)), 2);
-  const delta = round(headlineAcuity - previousAcuity, 2);
-  const verdict: Verdict = delta > 0.01 ? 'improving' : delta < -0.01 ? 'regressing' : 'holding';
+  const rawDelta = round(headlineAcuity - previousAcuity, 2);
+  const delta = measurementConfidence.canDriveTrend ? rawDelta : 0;
+  const verdict: Verdict =
+    measurementConfidence.canDriveTrend && delta > 0.01
+      ? 'improving'
+      : measurementConfidence.canDriveTrend && delta < -0.01
+        ? 'regressing'
+        : 'holding';
 
   // Per-session hero metric over time → sparkline.
   const thresholdsBySession = new Map<string, ThresholdEstimate[]>();
-  for (const threshold of thresholds) {
+  for (const threshold of sourceThresholds) {
     const bucket = thresholdsBySession.get(threshold.sessionId) ?? [];
     bucket.push(threshold);
     thresholdsBySession.set(threshold.sessionId, bucket);
@@ -264,6 +270,7 @@ export function deriveProgressView(
 
   const contributors = latest.map((point) => ({
     label: `${formatCpd(point.spatialFrequencyCpd)} cpd`,
+    bandLabel: humanBandLabel(point.spatialFrequencyCpd),
     sensitivity: round(point.sensitivity, 1),
     norm: round(1 / populationNormContrast(point.spatialFrequencyCpd, point.paradigm), 1),
   }));
@@ -296,5 +303,6 @@ export function deriveProgressView(
       { label: 'Norm', points: normPoints },
     ],
     contributors,
+    measurementConfidence,
   };
 }

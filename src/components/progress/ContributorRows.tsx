@@ -14,7 +14,7 @@ import { easings } from '@/theme/motion';
 import { data, radius, space, surface, verdict } from '@/theme/tokens';
 
 export type ContributorRowsProps = {
-  rows: { label: string; sensitivity: number; norm: number }[];
+  rows: { label: string; bandLabel: string; sensitivity: number; norm: number }[];
 };
 
 type ContributorRowProps = ContributorRowsProps['rows'][number] & {
@@ -34,6 +34,7 @@ function getDivergingColor(sensitivity: number, norm: number) {
 
 function ContributorRow({
   label,
+  bandLabel,
   sensitivity,
   norm,
   delay,
@@ -66,9 +67,14 @@ function ContributorRow({
   return (
     <View style={styles.row}>
       <View style={styles.topRow}>
-        <AppText color="muted" tabular uppercase variant="micro">
-          {label}
-        </AppText>
+        <View>
+          <AppText color="secondary" variant="caption">
+            {bandLabel}
+          </AppText>
+          <AppText color="muted" tabular uppercase variant="micro">
+            {label}
+          </AppText>
+        </View>
         <View style={styles.leader} />
         <AppText style={[styles.value, { color: fillColor }]} tabular variant="caption">
           {sensitivity}

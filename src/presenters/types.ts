@@ -1,4 +1,5 @@
 import type { GoalType } from '@/types';
+import type { MeasurementConfidenceView } from './reliability';
 
 export type Verdict = 'improving' | 'holding' | 'regressing';
 
@@ -16,6 +17,7 @@ export type TodayView = {
   /** e.g. "6 cpd · 4 min" */
   nextTargetLabel: string;
   verdict: Verdict;
+  measurementConfidence: MeasurementConfidenceView;
 };
 
 export type SparkPoint = { day: string; value: number };
@@ -32,7 +34,8 @@ export type ProgressView = {
   sparkline: SparkPoint[];
   csf: CsfPoint[];
   csfReferences: CsfReferenceCurve[];
-  contributors: { label: string; sensitivity: number; norm: number }[];
+  contributors: { label: string; bandLabel: string; sensitivity: number; norm: number }[];
+  measurementConfidence: MeasurementConfidenceView;
 };
 
 export type PostSessionInsightStatus = 'provisional' | 'reliable' | 'needs-retest';
@@ -47,6 +50,7 @@ export type PostSessionInsightView = {
   deltaLabel: 'Improving' | 'Steady' | 'Dropped' | 'Uncertain';
   deltaPercent: number | null;
   sessionsUntilReliable: number;
+  measurementConfidence: MeasurementConfidenceView;
 };
 
 export type SettingsState = {
