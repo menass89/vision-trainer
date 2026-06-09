@@ -197,23 +197,61 @@ function LoadingToday() {
   );
 }
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
+  bottomBlock: {
+    gap: space.lg,
+    paddingBottom: space.xl,
+  },
+  dayBloom: {
+    height: 28,
+    width: 28,
+  },
+  dayBloomSoft: {
+    height: 18,
+    width: 18,
+  },
+  dayCell: {
+    alignItems: 'center',
+    gap: space.xs,
+  },
+  dayDot: {
+    borderRadius: radius.pill,
+    height: 6,
+    width: 6,
+  },
+  dayDotDone: {
+    backgroundColor: ACCENT,
+    borderRadius: radius.pill,
+    height: 6,
+    width: 6,
+  },
+  dayDotFuture: {
+    backgroundColor: ACCENT_MUTED,
+    opacity: 0.32,
+  },
+  dayDotToday: {
+    backgroundColor: ACCENT_CORE,
+    borderWidth: 0,
+    height: 8,
+    width: 8,
+  },
+  dayDotFrame: {
+    alignItems: 'center',
+    height: 28,
+    justifyContent: 'center',
+    width: 28,
+  },
   eyebrow: {
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  streakChip: {
-    backgroundColor: surface.raised,
-    borderRadius: radius.pill,
-    paddingHorizontal: space.md,
-    paddingVertical: space.xs,
+  loadingTitle: {
+    gap: space.sm,
+    width: '60%',
   },
-  spacer: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'flex-end',
-    paddingBottom: space.base,
+  loadingTitleShort: {
+    width: '75%',
   },
   orbScale: {
     transform: [{ scale: 1.08 }],
@@ -237,62 +275,24 @@ const styles = StyleSheet.create({
   sessionMeta: {
     gap: space.xs,
   },
-  bottomBlock: {
-    gap: space.lg,
-    paddingBottom: space.xl,
+  spacer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingBottom: space.base,
+  },
+  streakChip: {
+    backgroundColor: surface.raised,
+    borderRadius: radius.pill,
+    paddingHorizontal: space.md,
+    paddingVertical: space.xs,
+  },
+  titleBlock: {
+    gap: space.sm,
   },
   weekRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
-  },
-  dayCell: {
-    alignItems: 'center',
-    gap: space.xs,
-  },
-  dayDotFrame: {
-    alignItems: 'center',
-    height: 28,
-    justifyContent: 'center',
-    width: 28,
-  },
-  dayBloom: {
-    height: 28,
-    width: 28,
-  },
-  dayBloomSoft: {
-    height: 18,
-    width: 18,
-  },
-  dayDot: {
-    borderRadius: radius.pill,
-    height: 6,
-    width: 6,
-  },
-  dayDotDone: {
-    backgroundColor: ACCENT,
-    borderRadius: radius.pill,
-    height: 6,
-    width: 6,
-  },
-  dayDotFuture: {
-    backgroundColor: ACCENT_MUTED,
-    opacity: 0.32,
-  },
-  dayDotToday: {
-    backgroundColor: ACCENT_CORE,
-    borderWidth: 0,
-    height: 8,
-    width: 8,
-  },
-  titleBlock: {
-    gap: space.sm,
-  },
-  loadingTitle: {
-    gap: space.sm,
-    width: '60%',
-  },
-  loadingTitleShort: {
-    width: '75%',
   },
 });

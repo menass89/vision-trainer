@@ -512,37 +512,16 @@ function ProgressBar({ step }: ProgressBarProps) {
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    paddingBottom: space.lg,
-    paddingHorizontal: 0,
-  },
-  page: {
-    flex: 1,
-  },
-  hero: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    gap: space.xl,
-    paddingVertical: space.xxl,
-  },
-  copy: {
-    gap: space.base,
-    maxWidth: 340,
-  },
-  focusHero: {
-    color: text.primary,
-    fontFamily: type.hero.fontFamily,
-    fontSize: type.hero.fontSize,
-    lineHeight: type.hero.lineHeight,
-  },
   actions: {
     gap: space.xs,
     paddingBottom: space.lg,
   },
-  secondaryChoice: {
-    alignItems: 'center',
-    paddingVertical: space.md,
+  backButton: {
+    alignSelf: 'flex-start',
+    paddingVertical: space.xs,
+  },
+  backPlaceholder: {
+    height: 26,
   },
   calibration: {
     alignItems: 'center',
@@ -563,6 +542,86 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: space.xl,
     justifyContent: 'center',
+  },
+  copy: {
+    gap: space.base,
+    maxWidth: 340,
+  },
+  focusHero: {
+    color: text.primary,
+    fontFamily: type.hero.fontFamily,
+    fontSize: type.hero.fontSize,
+    lineHeight: type.hero.lineHeight,
+  },
+  footer: {
+    gap: space.sm,
+    paddingTop: space.sm,
+  },
+  footerNav: {
+    minHeight: 28,
+  },
+  goalChoice: {
+    alignItems: 'center',
+    backgroundColor: surface.raised,
+    borderColor: surface.hairline,
+    borderRadius: radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    flexDirection: 'row',
+    gap: space.md,
+    justifyContent: 'space-between',
+    paddingHorizontal: space.md,
+    paddingVertical: space.sm,
+  },
+  goalChoiceSelected: {
+    backgroundColor: 'rgba(51, 210, 214, 0.12)',
+    borderColor: ACCENT_GLOW,
+  },
+  goalDot: {
+    backgroundColor: surface.hairline,
+    borderRadius: radius.pill,
+    height: 10,
+    width: 10,
+  },
+  goalDotSelected: {
+    backgroundColor: ACCENT,
+    shadowColor: ACCENT_GLOW,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.7,
+    shadowRadius: 8,
+  },
+  goalList: {
+    gap: space.sm,
+    width: '100%',
+  },
+  hero: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    gap: space.xl,
+    paddingVertical: space.xxl,
+  },
+  page: {
+    flex: 1,
+  },
+  progressFill: {
+    backgroundColor: ACCENT,
+    borderRadius: radius.pill,
+    height: 3,
+  },
+  progressTrack: {
+    backgroundColor: surface.hairlineStrong,
+    borderRadius: radius.pill,
+    height: 3,
+    overflow: 'hidden',
+    width: '100%',
+  },
+  screen: {
+    flex: 1,
+    paddingBottom: space.lg,
+    paddingHorizontal: 0,
+  },
+  secondaryChoice: {
+    alignItems: 'center',
+    paddingVertical: space.md,
   },
   slider: {
     height: 44,
@@ -598,64 +657,5 @@ const styles = StyleSheet.create({
     height: 8,
     overflow: 'hidden',
     width: '100%',
-  },
-  footer: {
-    gap: space.sm,
-    paddingTop: space.sm,
-  },
-  goalChoice: {
-    alignItems: 'center',
-    backgroundColor: surface.raised,
-    borderColor: surface.hairline,
-    borderRadius: radius.md,
-    borderWidth: StyleSheet.hairlineWidth,
-    flexDirection: 'row',
-    gap: space.md,
-    justifyContent: 'space-between',
-    paddingHorizontal: space.md,
-    paddingVertical: space.sm,
-  },
-  goalChoiceSelected: {
-    backgroundColor: 'rgba(51, 210, 214, 0.12)',
-    borderColor: ACCENT_GLOW,
-  },
-  goalDot: {
-    backgroundColor: surface.hairline,
-    borderRadius: radius.pill,
-    height: 10,
-    width: 10,
-  },
-  goalDotSelected: {
-    backgroundColor: ACCENT,
-    shadowColor: ACCENT_GLOW,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.7,
-    shadowRadius: 8,
-  },
-  goalList: {
-    gap: space.sm,
-    width: '100%',
-  },
-  progressTrack: {
-    backgroundColor: surface.hairlineStrong,
-    borderRadius: radius.pill,
-    height: 3,
-    overflow: 'hidden',
-    width: '100%',
-  },
-  progressFill: {
-    backgroundColor: ACCENT,
-    borderRadius: radius.pill,
-    height: 3,
-  },
-  footerNav: {
-    minHeight: 28,
-  },
-  backButton: {
-    alignSelf: 'flex-start',
-    paddingVertical: space.xs,
-  },
-  backPlaceholder: {
-    height: 26,
   },
 });
