@@ -53,6 +53,10 @@ export function ResponseTap({ enabled, onCommit }: ResponseTapProps) {
 
   useEffect(() => {
     if (enabled) {
+      if (commitTimerRef.current) {
+        clearTimeout(commitTimerRef.current);
+        commitTimerRef.current = null;
+      }
       committedRef.current = false;
       leftFeedback.value = 0;
       rightFeedback.value = 0;
@@ -79,6 +83,7 @@ export function ResponseTap({ enabled, onCommit }: ResponseTapProps) {
       haptics.select();
 
       commitTimerRef.current = setTimeout(() => {
+        commitTimerRef.current = null;
         onCommit(choice);
       }, COMMIT_DWELL_MS);
     },
