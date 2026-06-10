@@ -1,6 +1,11 @@
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
-import { GlassView, isGlassEffectAPIAvailable, isLiquidGlassAvailable } from 'expo-glass-effect';
+import {
+  GlassContainer,
+  GlassView,
+  isGlassEffectAPIAvailable,
+  isLiquidGlassAvailable,
+} from 'expo-glass-effect';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -74,11 +79,12 @@ function TabIcon({ color, routeName }: TabIconProps) {
 type TabButtonProps = {
   focused: boolean;
   label: string;
+  liquidGlass: boolean;
   onPress: () => void;
   routeName: string;
 };
 
-function TabButton({ focused, label, onPress, routeName }: TabButtonProps) {
+function TabButton({ focused, label, liquidGlass, onPress, routeName }: TabButtonProps) {
   const reduceMotion = useReducedMotion();
   const progress = useSharedValue(focused ? 1 : 0);
 
@@ -103,6 +109,16 @@ function TabButton({ focused, label, onPress, routeName }: TabButtonProps) {
       haptic="selection"
       onPress={onPress}
       style={styles.tab}>
+      {liquidGlass && focused ? (
+        <GlassView
+          colorScheme="dark"
+          glassEffectStyle={{ style: 'regular', animate: true, animationDuration: 0.22 }}
+          isInteractive
+          pointerEvents="none"
+          style={styles.activeGlass}
+          tintColor="rgba(255,255,255,0.20)"
+        />
+      ) : null}
       <Animated.View style={[styles.iconWrap, liftStyle]}>
         <TabIcon color={text.muted} routeName={routeName} />
         <Animated.View style={[styles.iconOverlay, accentLayerStyle]}>
@@ -158,6 +174,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
             focused={focused}
             key={route.key}
             label={label}
+            liquidGlass={liquidGlass}
             onPress={handlePress}
             routeName={route.name}
           />
@@ -180,15 +197,30 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
     <View style={[styles.outer, { paddingBottom: insets.bottom + space.sm }]}>
       <View style={styles.pillShadow}>
         {liquidGlass ? (
-          <GlassView
-            colorScheme="dark"
-            glassEffectStyle={{ style: 'regular', animate: true, animationDuration: 0.2 }}
-            isInteractive
-            style={styles.pill}
-            tintColor="rgba(12,20,23,0.55)">
-            {sheen}
-            {row}
-          </GlassView>
+          <GlassContainer spacing={18} style={styles.glassContainer}>
+            <View pointerEvents="none" style={styles.liquidBackdrop}>
+              <LinearGradient
+                colors={[
+                  'rgba(91,233,236,0.34)',
+                  'rgba(255,255,255,0.08)',
+                  'rgba(91,233,236,0.16)',
+                ]}
+                end={{ x: 1, y: 1 }}
+                start={{ x: 0, y: 0 }}
+                style={StyleSheet.absoluteFill}
+              />
+            </View>
+            <GlassView
+              colorScheme="dark"
+              glassEffectStyle={{ style: 'regular', animate: true, animationDuration: 0.2 }}
+              isInteractive
+              style={[styles.pill, styles.pillLiquid]}
+              tintColor="rgba(255,255,255,0.08)">
+              {sheen}
+              <View pointerEvents="none" style={styles.liquidRim} />
+              {row}
+            </GlassView>
+          </GlassContainer>
         ) : (
           <BlurView
             experimentalBlurMethod="dimezisBlurView"
@@ -219,12 +251,40 @@ const styles = StyleSheet.create({
     shadowRadius: 24,
     width: '100%',
   },
+  glassContainer: {
+    borderRadius: 28,
+    overflow: 'hidden',
+    width: '100%',
+  },
+  liquidBackdrop: {
+    borderRadius: 28,
+    bottom: 0,
+    left: 0,
+    opacity: 0.9,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  liquidRim: {
+    borderColor: 'rgba(255,255,255,0.32)',
+    borderRadius: 28,
+    borderWidth: 1,
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
   pill: {
     borderColor: material.hairlineOnGlass,
     borderRadius: 28,
     borderWidth: 1,
     flexDirection: 'row',
     overflow: 'hidden',
+  },
+  pillLiquid: {
+    backgroundColor: 'transparent',
+    borderColor: 'rgba(255,255,255,0.24)',
   },
   pillFallback: {
     backgroundColor: 'rgba(12,20,23,0.55)',
@@ -270,7 +330,22 @@ const styles = StyleSheet.create({
   },
   tab: {
     alignItems: 'center',
+    borderRadius: 22,
     flex: 1,
     gap: space.sm,
+    minHeight: 58,
+    overflow: 'hidden',
+    paddingVertical: space.sm,
+    position: 'relative',
+  },
+  activeGlass: {
+    borderColor: 'rgba(255,255,255,0.28)',
+    borderRadius: 22,
+    borderWidth: 1,
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
   },
 });
