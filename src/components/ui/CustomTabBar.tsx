@@ -1,6 +1,6 @@
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
-import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
+import { GlassView, isGlassEffectAPIAvailable, isLiquidGlassAvailable } from 'expo-glass-effect';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -135,7 +135,7 @@ function TabButton({ focused, label, onPress, routeName }: TabButtonProps) {
 
 export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
-  const liquidGlass = isLiquidGlassAvailable();
+  const liquidGlass = isLiquidGlassAvailable() && isGlassEffectAPIAvailable();
 
   const row = (
     <View style={styles.row}>
@@ -182,7 +182,8 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
         {liquidGlass ? (
           <GlassView
             colorScheme="dark"
-            glassEffectStyle="regular"
+            glassEffectStyle={{ style: 'regular', animate: true, animationDuration: 0.2 }}
+            isInteractive
             style={styles.pill}
             tintColor="rgba(12,20,23,0.55)">
             {sheen}
