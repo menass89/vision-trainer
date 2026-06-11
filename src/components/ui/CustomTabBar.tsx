@@ -18,7 +18,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Line, Path } from 'react-native-svg';
 
-import { ACCENT, ACCENT_GLOW, material, motion, space, text } from '@/theme/tokens';
+import { ACCENT, material, motion, space, text } from '@/theme/tokens';
 
 import { AppText } from './AppText';
 import { PressableScale } from './PressableScale';
@@ -116,7 +116,7 @@ function TabButton({ focused, label, liquidGlass, onPress, routeName }: TabButto
           isInteractive
           pointerEvents="none"
           style={styles.activeGlass}
-          tintColor="rgba(255,255,255,0.20)"
+          tintColor="rgba(0,0,0,0.86)"
         />
       ) : null}
       <Animated.View style={[styles.iconWrap, liftStyle]}>
@@ -201,12 +201,12 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
             <View pointerEvents="none" style={styles.liquidBackdrop}>
               <LinearGradient
                 colors={[
-                  'rgba(91,233,236,0.34)',
-                  'rgba(255,255,255,0.08)',
-                  'rgba(91,233,236,0.16)',
+                  'rgba(44,47,48,0.62)',
+                  'rgba(7,8,9,0.94)',
+                  'rgba(0,0,0,0.98)',
                 ]}
-                end={{ x: 1, y: 1 }}
-                start={{ x: 0, y: 0 }}
+                end={{ x: 0.5, y: 1 }}
+                start={{ x: 0.5, y: 0 }}
                 style={StyleSheet.absoluteFill}
               />
             </View>
@@ -215,9 +215,10 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
               glassEffectStyle={{ style: 'regular', animate: true, animationDuration: 0.2 }}
               isInteractive
               style={[styles.pill, styles.pillLiquid]}
-              tintColor="rgba(255,255,255,0.08)">
+              tintColor="rgba(0,0,0,0.88)">
               {sheen}
               <View pointerEvents="none" style={styles.liquidRim} />
+              <View pointerEvents="none" style={styles.bottomShade} />
               {row}
             </GlassView>
           </GlassContainer>
@@ -245,10 +246,10 @@ const styles = StyleSheet.create({
   },
   pillShadow: {
     borderRadius: 28,
-    shadowColor: ACCENT_GLOW,
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5,
-    shadowRadius: 24,
+    shadowOpacity: 0.58,
+    shadowRadius: 28,
     width: '100%',
   },
   glassContainer: {
@@ -260,13 +261,13 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     bottom: 0,
     left: 0,
-    opacity: 0.9,
+    opacity: 1,
     position: 'absolute',
     right: 0,
     top: 0,
   },
   liquidRim: {
-    borderColor: 'rgba(255,255,255,0.32)',
+    borderColor: 'rgba(255,255,255,0.14)',
     borderRadius: 28,
     borderWidth: 1,
     bottom: 0,
@@ -284,17 +285,25 @@ const styles = StyleSheet.create({
   },
   pillLiquid: {
     backgroundColor: 'transparent',
-    borderColor: 'rgba(255,255,255,0.24)',
+    borderColor: 'rgba(255,255,255,0.12)',
   },
   pillFallback: {
     backgroundColor: 'rgba(12,20,23,0.55)',
   },
   sheen: {
-    height: '55%',
+    height: '40%',
     left: 0,
     position: 'absolute',
     right: 0,
     top: 0,
+  },
+  bottomShade: {
+    backgroundColor: 'rgba(0,0,0,0.42)',
+    bottom: 0,
+    height: '46%',
+    left: 0,
+    position: 'absolute',
+    right: 0,
   },
   row: {
     flexDirection: 'row',
@@ -339,7 +348,8 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   activeGlass: {
-    borderColor: 'rgba(255,255,255,0.28)',
+    backgroundColor: 'rgba(0,0,0,0.42)',
+    borderColor: 'rgba(255,255,255,0.12)',
     borderRadius: 22,
     borderWidth: 1,
     bottom: 0,
