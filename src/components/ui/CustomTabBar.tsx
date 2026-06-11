@@ -102,23 +102,8 @@ function TabButton({ focused, label, liquidGlass, onPress, routeName }: TabButto
   }));
   const accentLayerStyle = useAnimatedStyle(() => ({ opacity: progress.value }));
 
-  return (
-    <PressableScale
-      accessibilityRole="button"
-      accessibilityState={{ selected: focused }}
-      haptic="selection"
-      onPress={onPress}
-      style={styles.tab}>
-      {liquidGlass && focused ? (
-        <GlassView
-          colorScheme="dark"
-          glassEffectStyle={{ style: 'regular', animate: true, animationDuration: 0.22 }}
-          isInteractive
-          pointerEvents="none"
-          style={styles.activeGlass}
-          tintColor="rgba(0,0,0,0.86)"
-        />
-      ) : null}
+  const content = (
+    <>
       <Animated.View style={[styles.iconWrap, liftStyle]}>
         <TabIcon color={text.muted} routeName={routeName} />
         <Animated.View style={[styles.iconOverlay, accentLayerStyle]}>
@@ -126,12 +111,7 @@ function TabButton({ focused, label, liquidGlass, onPress, routeName }: TabButto
         </Animated.View>
       </Animated.View>
       <View style={styles.labelWrap}>
-        <AppText
-          color="muted"
-          numberOfLines={1}
-          style={styles.label}
-          uppercase
-          variant="micro">
+        <AppText color="muted" numberOfLines={1} style={styles.label} uppercase variant="micro">
           {label}
         </AppText>
         <Animated.View pointerEvents="none" style={[styles.labelOverlay, accentLayerStyle]}>
@@ -145,6 +125,48 @@ function TabButton({ focused, label, liquidGlass, onPress, routeName }: TabButto
           </AppText>
         </Animated.View>
       </View>
+    </>
+  );
+
+  if (liquidGlass) {
+    return (
+      <GlassView
+        colorScheme="dark"
+        glassEffectStyle={{ style: 'regular', animate: true, animationDuration: 0.22 }}
+        isInteractive
+        style={[styles.tabGlass, focused && styles.tabGlassFocused]}
+        tintColor={focused ? 'rgba(0,0,0,0.78)' : 'rgba(0,0,0,0.64)'}>
+        <LinearGradient
+          colors={
+            focused
+              ? ['rgba(255,255,255,0.18)', 'rgba(255,255,255,0.035)', 'rgba(0,0,0,0.18)']
+              : ['rgba(255,255,255,0.11)', 'rgba(255,255,255,0.02)', 'rgba(0,0,0,0.22)']
+          }
+          end={{ x: 0.5, y: 1 }}
+          pointerEvents="none"
+          start={{ x: 0.5, y: 0 }}
+          style={StyleSheet.absoluteFill}
+        />
+        <PressableScale
+          accessibilityRole="button"
+          accessibilityState={{ selected: focused }}
+          haptic="selection"
+          onPress={onPress}
+          style={styles.tabContent}>
+          {content}
+        </PressableScale>
+      </GlassView>
+    );
+  }
+
+  return (
+    <PressableScale
+      accessibilityRole="button"
+      accessibilityState={{ selected: focused }}
+      haptic="selection"
+      onPress={onPress}
+      style={styles.tabContent}>
+      {content}
     </PressableScale>
   );
 }
@@ -154,7 +176,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
   const liquidGlass = isLiquidGlassAvailable() && isGlassEffectAPIAvailable();
 
   const row = (
-    <View style={styles.row}>
+    <View style={[styles.row, liquidGlass && styles.rowLiquid]}>
       {state.routes.map((route, index) => {
         const focused = state.index === index;
         const label = descriptors[route.key].options.title ?? route.name;
@@ -198,29 +220,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
       <View style={styles.pillShadow}>
         {liquidGlass ? (
           <GlassContainer spacing={18} style={styles.glassContainer}>
-            <View pointerEvents="none" style={styles.liquidBackdrop}>
-              <LinearGradient
-                colors={[
-                  'rgba(44,47,48,0.62)',
-                  'rgba(7,8,9,0.94)',
-                  'rgba(0,0,0,0.98)',
-                ]}
-                end={{ x: 0.5, y: 1 }}
-                start={{ x: 0.5, y: 0 }}
-                style={StyleSheet.absoluteFill}
-              />
-            </View>
-            <GlassView
-              colorScheme="dark"
-              glassEffectStyle={{ style: 'regular', animate: true, animationDuration: 0.2 }}
-              isInteractive
-              style={[styles.pill, styles.pillLiquid]}
-              tintColor="rgba(0,0,0,0.88)">
-              {sheen}
-              <View pointerEvents="none" style={styles.liquidRim} />
-              <View pointerEvents="none" style={styles.bottomShade} />
-              {row}
-            </GlassView>
+            {row}
           </GlassContainer>
         ) : (
           <BlurView
@@ -254,27 +254,7 @@ const styles = StyleSheet.create({
   },
   glassContainer: {
     borderRadius: 28,
-    overflow: 'hidden',
     width: '100%',
-  },
-  liquidBackdrop: {
-    borderRadius: 28,
-    bottom: 0,
-    left: 0,
-    opacity: 1,
-    position: 'absolute',
-    right: 0,
-    top: 0,
-  },
-  liquidRim: {
-    borderColor: 'rgba(255,255,255,0.14)',
-    borderRadius: 28,
-    borderWidth: 1,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-    right: 0,
-    top: 0,
   },
   pill: {
     borderColor: material.hairlineOnGlass,
@@ -282,10 +262,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: 'row',
     overflow: 'hidden',
-  },
-  pillLiquid: {
-    backgroundColor: 'transparent',
-    borderColor: 'rgba(255,255,255,0.12)',
   },
   pillFallback: {
     backgroundColor: 'rgba(12,20,23,0.55)',
@@ -297,19 +273,16 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
   },
-  bottomShade: {
-    backgroundColor: 'rgba(0,0,0,0.42)',
-    bottom: 0,
-    height: '46%',
-    left: 0,
-    position: 'absolute',
-    right: 0,
-  },
   row: {
     flexDirection: 'row',
     paddingHorizontal: space.sm,
     paddingVertical: space.sm,
     width: '100%',
+  },
+  rowLiquid: {
+    gap: space.sm,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
   },
   iconOverlay: {
     bottom: 0,
@@ -337,7 +310,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tab: {
+  tabContent: {
     alignItems: 'center',
     borderRadius: 22,
     flex: 1,
@@ -347,15 +320,15 @@ const styles = StyleSheet.create({
     paddingVertical: space.sm,
     position: 'relative',
   },
-  activeGlass: {
-    backgroundColor: 'rgba(0,0,0,0.42)',
-    borderColor: 'rgba(255,255,255,0.12)',
-    borderRadius: 22,
+  tabGlass: {
+    borderColor: 'rgba(255,255,255,0.10)',
+    borderRadius: 28,
     borderWidth: 1,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-    right: 0,
-    top: 0,
+    flex: 1,
+    minHeight: 66,
+    overflow: 'hidden',
+  },
+  tabGlassFocused: {
+    borderColor: 'rgba(255,255,255,0.20)',
   },
 });
